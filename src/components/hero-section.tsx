@@ -8,6 +8,7 @@ import { ArrowDown } from "lucide-react";
 export default function HeroSection() {
     return (
         <section id="hero" className="relative w-full h-screen flex items-center overflow-hidden">
+             <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-background to-transparent z-20 pointer-events-none"></div>
             <div className="container mx-auto px-4 grid md:grid-cols-5 gap-8 items-center">
                 <div className="relative z-10 flex flex-col items-start text-left animate-fade-in-up md:col-span-2">
                     <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold tracking-tighter mb-4 text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent">
