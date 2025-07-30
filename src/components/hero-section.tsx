@@ -14,7 +14,7 @@ export default function HeroSection() {
                 <Spark3D />
             </div>
 
-            <div className="relative z-20 container mx-auto px-4 grid md:grid-cols-2 gap-8 items-center">
+            <div className="relative z-20 container mx-auto px-4 grid md:grid-cols-2 gap-8 items-center pt-20 pl-4">
                 <div className="flex flex-col items-start text-left animate-fade-in-up">
                     <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold tracking-tighter mb-4 text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent">
                         SparkLab
