@@ -98,7 +98,7 @@ const TimelineItem = ({ event, isLeft }: { event: (typeof timelineEvents)[0], is
 );
 
 const TimelineCard = ({ event }: { event: (typeof timelineEvents)[0] }) => (
-  <Card className={cn("transition-all duration-300 w-full mx-auto", {
+  <Card className={cn("transition-all duration-300 w-full mx-auto card-3d", {
     "border-primary/50 shadow-primary/10": event.status === "completed",
     "border-accent/80 shadow-accent/20 glow-shadow-accent": event.status === "ongoing",
     "border-border/50 bg-card/60": event.status === "upcoming"

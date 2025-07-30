@@ -1,7 +1,7 @@
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowDown, Code, PenTool, Users } from "lucide-react";
+import { ArrowDown, Code, PenTool, Users, ArrowRight } from "lucide-react";
 import CountdownTimer from "@/components/countdown-timer";
 import RegistrationForm from "@/components/registration-form";
 import Header from "@/components/header";
@@ -23,6 +23,28 @@ const sponsors = [
   { name: "Creative Solutions", logo: "https://placehold.co/300x150.png", hint: "creative agency" },
 ];
 
+const aboutCards = [
+  {
+    icon: PenTool,
+    title: "Design Challenges",
+    description: "Tackle intriguing design problems and create user-centric solutions that make a real impact.",
+    className: "md:col-span-2",
+  },
+  {
+    icon: Code,
+    title: "Prototype & Build",
+    description: "Bring your ideas to life by building functional prototypes and demos with cutting-edge tools.",
+    className: "md:row-span-2",
+  },
+  {
+    icon: Users,
+    title: "Collaborate & Network",
+    description: "Work with talented peers and connect with industry mentors who can guide your journey.",
+    className: "md:col-span-2",
+  },
+];
+
+
 export default function Home() {
   return (
     <div className="flex flex-col min-h-screen bg-background">
@@ -31,45 +53,37 @@ export default function Home() {
         <HeroSection />
 
         <section id="about" className="py-20 lg:py-32 container mx-auto px-4">
-          <div className="max-w-4xl mx-auto text-center">
-            <h2 className="text-4xl md:text-5xl font-bold mb-6">About The Event</h2>
-            <p className="text-lg text-foreground/80 mb-12">
-              SparkLab is where creativity meets innovation in a high-energy, 30-hour design marathon. We bring together the brightest minds from across the nation to tackle real-world challenges, pushing the boundaries of design and technology. Whether you're a designer, developer, or dreamer, this is your platform to shine.
-            </p>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              <Card className="bg-card/50 border-border/50 text-center animate-fade-in-up" style={{animationDelay: '0.2s'}}>
-                <CardHeader>
-                  <div className="mx-auto bg-primary/10 p-4 rounded-full w-fit">
-                    <PenTool className="h-8 w-8 glowing-icon" />
-                  </div>
-                  <CardTitle className="mt-4">Design Challenges</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-foreground/70">Tackle intriguing design problems and create user-centric solutions.</p>
-                </CardContent>
-              </Card>
-              <Card className="bg-card/50 border-border/50 text-center animate-fade-in-up" style={{animationDelay: '0.4s'}}>
-                <CardHeader>
-                  <div className="mx-auto bg-primary/10 p-4 rounded-full w-fit">
-                    <Code className="h-8 w-8 glowing-icon" />
-                  </div>
-                  <CardTitle className="mt-4">Prototype & Build</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-foreground/70">Bring your ideas to life by building functional prototypes and demos.</p>
-                </CardContent>
-              </Card>
-              <Card className="bg-card/50 border-border/50 text-center animate-fade-in-up" style={{animationDelay: '0.6s'}}>
-                <CardHeader>
-                  <div className="mx-auto bg-primary/10 p-4 rounded-full w-fit">
-                    <Users className="h-8 w-8 glowing-icon" />
-                  </div>
-                  <CardTitle className="mt-4">Collaborate & Network</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-foreground/70">Work with talented peers and connect with industry mentors.</p>
-                </CardContent>
-              </Card>
+          <div className="max-w-5xl mx-auto">
+            <div className="text-center mb-16">
+              <h2 className="text-4xl md:text-5xl font-bold mb-6">What is SparkLab?</h2>
+              <p className="text-lg text-foreground/80 max-w-3xl mx-auto">
+                SparkLab is where creativity meets innovation in a high-energy, 30-hour design marathon. We bring together the brightest minds to tackle real-world challenges, pushing the boundaries of design and technology.
+              </p>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 md:grid-rows-2 gap-8">
+              {aboutCards.map((card, index) => (
+                <Card key={card.title} className={`card-3d bg-card/50 border-border/50 text-left animate-fade-in-up flex flex-col ${card.className}`} style={{animationDelay: `${index * 0.2}s`}}>
+                  <CardHeader className="flex-shrink-0">
+                    <div className="flex items-center gap-4">
+                      <div className="bg-primary/10 p-4 rounded-full w-fit">
+                        <card.icon className="h-8 w-8 glowing-icon" />
+                      </div>
+                      <CardTitle className="text-2xl">{card.title}</CardTitle>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="flex-grow">
+                    <p className="text-foreground/70">{card.description}</p>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+             <div className="text-center mt-16">
+                <Button variant="ghost" size="lg" asChild>
+                    <a href="#timeline">
+                        See the full schedule <ArrowRight className="ml-2 h-5 w-5" />
+                    </a>
+                </Button>
             </div>
           </div>
         </section>
@@ -91,7 +105,7 @@ export default function Home() {
             <h2 className="text-4xl md:text-5xl font-bold mb-12">Meet the Team</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
               {teamMembers.map((member, index) => (
-                <div key={member.name} className="flex flex-col items-center animate-fade-in-up" style={{animationDelay: `${index * 0.2}s`}}>
+                <div key={member.name} className="flex flex-col items-center animate-fade-in-up card-3d" style={{animationDelay: `${index * 0.2}s`}}>
                   <Image
                     src={member.avatar}
                     alt={member.name}
@@ -111,7 +125,7 @@ export default function Home() {
         <section id="register" className="py-20 lg:py-32 bg-card/20">
           <div className="container mx-auto px-4">
             <div className="max-w-2xl mx-auto">
-              <Card className="border-2 border-primary/50 glow-shadow-primary">
+              <Card className="border-2 border-primary/50 glow-shadow-primary card-3d">
                 <CardHeader className="text-center">
                   <CardTitle className="text-4xl">Join the Spark</CardTitle>
                   <CardDescription>Register now to secure your spot in the most exciting designathon of the year.</CardDescription>
