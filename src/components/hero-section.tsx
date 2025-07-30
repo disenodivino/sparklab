@@ -1,3 +1,4 @@
+
 "use client";
 
 import { Button } from "@/components/ui/button";
@@ -13,7 +14,7 @@ export default function HeroSection() {
              <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-background to-transparent z-10 pointer-events-none"></div>
             
             <Snowfall />
-            <div className="absolute inset-0">
+            <div className="absolute inset-0 z-[2]">
                 <Spark3D />
             </div>
 
