@@ -51,13 +51,13 @@ export default function Home() {
         </section>
 
         <section id="about" className="py-20 lg:py-32 container mx-auto px-4">
-          <div className="max-w-4xl mx-auto text-center animate-fade-in">
+          <div className="max-w-4xl mx-auto text-center">
             <h2 className="text-4xl md:text-5xl font-bold mb-6">About The Event</h2>
             <p className="text-lg text-foreground/80 mb-12">
               SparkLab is where creativity meets innovation in a high-energy, 30-hour design marathon. We bring together the brightest minds from across the nation to tackle real-world challenges, pushing the boundaries of design and technology. Whether you're a designer, developer, or dreamer, this is your platform to shine.
             </p>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              <Card className="bg-card/50 border-border/50 text-center">
+              <Card className="bg-card/50 border-border/50 text-center animate-fade-in-up" style={{animationDelay: '0.2s'}}>
                 <CardHeader>
                   <div className="mx-auto bg-primary/10 p-4 rounded-full w-fit">
                     <PenTool className="h-8 w-8 glowing-icon" />
@@ -68,7 +68,7 @@ export default function Home() {
                   <p className="text-foreground/70">Tackle intriguing design problems and create user-centric solutions.</p>
                 </CardContent>
               </Card>
-              <Card className="bg-card/50 border-border/50 text-center">
+              <Card className="bg-card/50 border-border/50 text-center animate-fade-in-up" style={{animationDelay: '0.4s'}}>
                 <CardHeader>
                   <div className="mx-auto bg-primary/10 p-4 rounded-full w-fit">
                     <Code className="h-8 w-8 glowing-icon" />
@@ -79,7 +79,7 @@ export default function Home() {
                   <p className="text-foreground/70">Bring your ideas to life by building functional prototypes and demos.</p>
                 </CardContent>
               </Card>
-              <Card className="bg-card/50 border-border/50 text-center">
+              <Card className="bg-card/50 border-border/50 text-center animate-fade-in-up" style={{animationDelay: '0.6s'}}>
                 <CardHeader>
                   <div className="mx-auto bg-primary/10 p-4 rounded-full w-fit">
                     <Users className="h-8 w-8 glowing-icon" />
@@ -98,8 +98,8 @@ export default function Home() {
           <div className="container mx-auto px-4 text-center">
             <h2 className="text-4xl md:text-5xl font-bold mb-12">Meet the Team</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
-              {teamMembers.map((member) => (
-                <div key={member.name} className="flex flex-col items-center">
+              {teamMembers.map((member, index) => (
+                <div key={member.name} className="flex flex-col items-center animate-fade-in-up" style={{animationDelay: `${index * 0.2}s`}}>
                   <Image
                     src={member.avatar}
                     alt={member.name}

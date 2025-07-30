@@ -13,21 +13,46 @@ const CustomCursor = () => {
 
     if (!cursorOuter || !cursorInner) return;
 
+    let animationFrameId: number;
+    const mouse = { x: 0, y: 0 };
+    const previousMouse = { x: 0, y: 0 };
+    const outerCursor = { x: 0, y: 0 };
+    const lerpAmount = 0.2; // Linear interpolation amount
+
     const handleMouseMove = (e: MouseEvent) => {
-      const { clientX, clientY } = e;
-      cursorOuter.style.transform = `translate(${clientX}px, ${clientY}px)`;
-      cursorInner.style.transform = `translate(${clientX}px, ${clientY}px)`;
+      mouse.x = e.clientX;
+      mouse.y = e.clientY;
     };
+    
+    const animate = () => {
+      // Lerp for smoothing
+      outerCursor.x = lerp(outerCursor.x, mouse.x, lerpAmount);
+      outerCursor.y = lerp(outerCursor.y, mouse.y, lerpAmount);
+      
+      if(cursorOuter) {
+          cursorOuter.style.transform = `translate(${outerCursor.x}px, ${outerCursor.y}px)`;
+      }
+      if(cursorInner) {
+          cursorInner.style.transform = `translate(${mouse.x}px, ${mouse.y}px)`;
+      }
+
+      previousMouse.x = outerCursor.x;
+      previousMouse.y = outerCursor.y;
+
+      animationFrameId = requestAnimationFrame(animate);
+    }
+    
+    animationFrameId = requestAnimationFrame(animate);
 
     const handleMouseOver = (e: MouseEvent) => {
       if ((e.target as HTMLElement).closest('a, button')) {
-        cursorInner.classList.add('is-hover');
+        cursorInner?.classList.add('is-hover');
       }
     };
 
     const handleMouseOut = (e: MouseEvent) => {
       if ((e.target as HTMLElement).closest('a, button')) {
-        cursorInner.classList.remove('is-hover');
+        cursorInner?.classList.remove('is-hover');
       }
     };
 
@@ -36,12 +61,17 @@ const CustomCursor = () => {
     document.addEventListener('mouseout', handleMouseOut);
 
     return () => {
+      cancelAnimationFrame(animationFrameId);
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseover', handleMouseOver);
       document.removeEventListener('mouseout', handleMouseOut);
       document.documentElement.classList.remove('has-cursor');
     };
   }, []);
+
+  const lerp = (start: number, end: number, amount: number) => {
+    return (1 - amount) * start + amount * end;
+  };
 
   return (
     <div className="custom-cursor">
