@@ -5,6 +5,7 @@ import * as THREE from 'three';
 
 const Spark3D = () => {
     const mountRef = useRef<HTMLDivElement>(null);
+    const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
     const mousePos = useRef({ x: 0, y: 0 });
 
     useEffect(() => {
@@ -23,6 +24,7 @@ const Spark3D = () => {
         const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
         renderer.setSize(currentMount.clientWidth, currentMount.clientHeight);
         renderer.setPixelRatio(window.devicePixelRatio);
+        rendererRef.current = renderer;
         currentMount.appendChild(renderer.domElement);
         
         // Lighting
@@ -94,8 +96,10 @@ const Spark3D = () => {
             particleSystem.rotation.x = elapsedTime * 0.1 + mousePos.current.y * 0.3;
 
             // Make camera slowly look at the direction of the mouse
-            const target = new THREE.Vector3(mousePos.current.x * 2, mousePos.current.y * 2, 20);
-            camera.lookAt(target);
+            camera.position.x += (mousePos.current.x * 2 - camera.position.x) * 0.02;
+            camera.position.y += (-mousePos.current.y * 2 - camera.position.y) * 0.02;
+            camera.lookAt(scene.position);
+
 
             renderer.render(scene, camera);
             requestAnimationFrame(animate);
@@ -114,8 +118,9 @@ const Spark3D = () => {
         return () => {
             window.removeEventListener('resize', onResize);
             window.removeEventListener('mousemove', onMouseMove);
-            if(currentMount && renderer.domElement){
-                currentMount.removeChild(renderer.domElement);
+            // Check if rendererRef.current and its domElement exist before trying to remove
+            if (rendererRef.current && rendererRef.current.domElement && currentMount.contains(rendererRef.current.domElement)) {
+                currentMount.removeChild(rendererRef.current.domElement);
             }
         };
     }, []);
