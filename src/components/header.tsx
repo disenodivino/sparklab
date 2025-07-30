@@ -29,7 +29,7 @@ const Header = () => {
           <Link href="/" className="flex items-center gap-2">
             <div className="relative w-36 md:w-44 h-12">
               <Image 
-                src="/2 (1).png" 
+                src="/Di - Rounded.png" 
                 alt="SparkLab Logo" 
                 layout="fill"
                 objectFit="contain"
