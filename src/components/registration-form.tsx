@@ -3,7 +3,7 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { useFormState } from "react-dom";
+import { useActionState, useEffect, useRef } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -16,7 +16,6 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { registerForEvent } from "@/app/actions";
-import { useEffect, useRef } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Textarea } from "./ui/textarea";
 
@@ -35,7 +34,7 @@ const initialState = {
 };
 
 export default function RegistrationForm() {
-  const [state, formAction] = useFormState(registerForEvent, initialState);
+  const [state, formAction] = useActionState(registerForEvent, initialState);
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
