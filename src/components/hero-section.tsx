@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import CountdownTimer from "@/components/countdown-timer";
 import Spark3D from "@/components/spark-3d";
 import { ArrowDown } from "lucide-react";
+import Image from "next/image";
 
 export default function HeroSection() {
     return (
@@ -16,9 +17,9 @@ export default function HeroSection() {
 
             <div className="relative z-20 container mx-auto px-4 grid md:grid-cols-2 gap-8 items-center text-center md:text-left">
                 <div className="flex flex-col items-center md:items-start animate-fade-in-up">
-                    <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold tracking-tighter mb-4 text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent">
-                        SparkLab
-                    </h1>
+                    <div className="w-[300px] md:w-[500px] mb-4">
+                        <Image src="/sparklab logo.png" alt="SparkLab Logo" width={500} height={150} />
+                    </div>
                     <p className="max-w-xl text-lg md:text-xl text-foreground/80 mb-6">
                         A 30-Hour National Level Designathon by <span className="font-bold text-accent">Diseño Divino</span>
                     </p>
