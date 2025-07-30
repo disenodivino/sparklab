@@ -7,6 +7,7 @@ import CountdownTimer from "@/components/countdown-timer";
 import RegistrationForm from "@/components/registration-form";
 import Header from "@/components/header";
 import Footer from "@/components/footer";
+import Timeline from "@/components/timeline";
 
 const teamMembers = [
   { name: "Alex Johnson", role: "Lead Organizer", avatar: "https://placehold.co/128x128.png", hint: "person portrait" },
@@ -93,7 +94,19 @@ export default function Home() {
           </div>
         </section>
 
-        <section id="team" className="py-20 lg:py-32 bg-card/20">
+        <section id="timeline" className="py-20 lg:py-32 bg-card/20">
+          <div className="container mx-auto px-4">
+            <div className="max-w-4xl mx-auto text-center mb-12">
+              <h2 className="text-4xl md:text-5xl font-bold mb-6">Event Timeline</h2>
+              <p className="text-lg text-foreground/80">
+                Follow the 30-hour journey of creation and innovation.
+              </p>
+            </div>
+            <Timeline />
+          </div>
+        </section>
+
+        <section id="team" className="py-20 lg:py-32">
           <div className="container mx-auto px-4 text-center">
             <h2 className="text-4xl md:text-5xl font-bold mb-12">Meet the Team</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
@@ -115,7 +128,7 @@ export default function Home() {
           </div>
         </section>
 
-        <section id="register" className="py-20 lg:py-32">
+        <section id="register" className="py-20 lg:py-32 bg-card/20">
           <div className="container mx-auto px-4">
             <div className="max-w-2xl mx-auto">
               <Card className="border-2 border-primary/50 glow-shadow-primary">
@@ -131,7 +144,7 @@ export default function Home() {
           </div>
         </section>
 
-        <section id="sponsors" className="py-20 lg:py-32 bg-card/20">
+        <section id="sponsors" className="py-20 lg:py-32">
           <div className="container mx-auto px-4 text-center">
             <h2 className="text-4xl md:text-5xl font-bold mb-12">Our Sponsors</h2>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-8 items-center">
