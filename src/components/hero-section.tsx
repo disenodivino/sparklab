@@ -10,7 +10,7 @@ import Snowfall from "./snowfall";
 
 export default function HeroSection() {
     return (
-        <section id="hero" className="relative w-full h-screen flex items-center justify-center overflow-hidden pt-20">
+        <section id="hero" className="relative w-full h-screen flex items-center justify-center pt-20">
              <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-background to-transparent z-10 pointer-events-none"></div>
             
             <Snowfall />
