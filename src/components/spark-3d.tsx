@@ -1,17 +1,23 @@
 "use client";
 
-import dynamic from 'next/dynamic';
-
-const Spline = dynamic(() => import('@splinetool/react-spline'), {
-  ssr: false,
-});
+import React, { useEffect, useRef } from 'react';
+import { Application } from '@splinetool/runtime';
 
 const Spark3D = () => {
-    return (
-        <div className="absolute top-0 left-0 w-full h-full">
-            <Spline scene="https://prod.spline.design/NeOtOPUTsNojinFh/scene.splinecode" />
-        </div>
-    );
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    if (canvasRef.current) {
+      const app = new Application(canvasRef.current);
+      app.load('https://prod.spline.design/NeOtOPUTsNojinFh/scene.splinecode');
+    }
+  }, []);
+
+  return (
+    <div className="absolute top-0 left-0 w-full h-full">
+      <canvas ref={canvasRef} id="canvas3d" />
+    </div>
+  );
 };
 
 export default Spark3D;
