@@ -17,7 +17,7 @@ const Spark3D = () => {
 
         // Camera
         const camera = new THREE.PerspectiveCamera(75, currentMount.clientWidth / currentMount.clientHeight, 0.1, 1000);
-        camera.position.z = 10;
+        camera.position.z = 50;
 
         // Renderer
         const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
@@ -25,57 +25,61 @@ const Spark3D = () => {
         renderer.setPixelRatio(window.devicePixelRatio);
         currentMount.appendChild(renderer.domElement);
         
-        const particleGroup = new THREE.Group();
-        scene.add(particleGroup);
-
-        const colorPrimary = new THREE.Color('hsl(var(--primary))');
-        const colorAccent = new THREE.Color('hsl(var(--accent))');
-
-        const createRing = (radius: number, particleCount: number, particleSize: number) => {
-            const geometry = new THREE.BufferGeometry();
-            const positions = new Float32Array(particleCount * 3);
-            const colors = new Float32Array(particleCount * 3);
-
-            for (let i = 0; i < particleCount; i++) {
-                const i3 = i * 3;
-                const angle = (i / particleCount) * Math.PI * 2;
-                positions[i3] = radius * Math.cos(angle);
-                positions[i3 + 1] = 0;
-                positions[i3 + 2] = radius * Math.sin(angle);
-                
-                const mixedColor = colorPrimary.clone().lerp(colorAccent, Math.random());
-                colors[i3] = mixedColor.r;
-                colors[i3 + 1] = mixedColor.g;
-                colors[i3 + 2] = mixedColor.b;
-            }
-
-            geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-            geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
-
-            const material = new THREE.PointsMaterial({
-                size: particleSize,
-                vertexColors: true,
-                blending: THREE.AdditiveBlending,
-                transparent: true,
-                depthWrite: false,
-            });
-
-            return new THREE.Points(geometry, material);
-        };
+        // Lighting
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.1);
+        scene.add(ambientLight);
         
-        const ring1 = createRing(3.5, 2000, 0.03);
-        ring1.rotation.x = Math.PI / 3;
-        ring1.rotation.y = Math.PI / 4;
-        
-        const ring2 = createRing(4.5, 3000, 0.025);
-        ring2.rotation.x = -Math.PI / 3;
-        ring2.rotation.y = -Math.PI / 4;
+        const pointLight = new THREE.PointLight(new THREE.Color('hsl(262.1, 83.3%, 57.8%)').getHex(), 2, 100);
+        scene.add(pointLight);
 
-        const ring3 = createRing(5.5, 4000, 0.02);
-        ring3.rotation.x = Math.PI / 2;
-        ring3.rotation.y = 0;
+        // Starfield
+        const starGeometry = new THREE.BufferGeometry();
+        const starVertices = [];
+        for (let i = 0; i < 10000; i++) {
+            const x = (Math.random() - 0.5) * 2000;
+            const y = (Math.random() - 0.5) * 2000;
+            const z = (Math.random() - 0.5) * 2000;
+            starVertices.push(x, y, z);
+        }
+        starGeometry.setAttribute('position', new THREE.Float32BufferAttribute(starVertices, 3));
+        const starMaterial = new THREE.PointsMaterial({
+            color: 0xffffff,
+            size: 0.7,
+            transparent: true,
+            opacity: 0.7
+        });
+        const starfield = new THREE.Points(starGeometry, starMaterial);
+        scene.add(starfield);
 
-        particleGroup.add(ring1, ring2, ring3);
+        // Asteroids
+        const asteroidGroup = new THREE.Group();
+        scene.add(asteroidGroup);
+        const asteroidGeometry = new THREE.IcosahedronGeometry(1, 0);
+        const asteroidMaterial = new THREE.MeshStandardMaterial({ 
+            color: new THREE.Color('hsl(var(--primary))').getHex(), 
+            flatShading: true,
+            metalness: 0.5,
+            roughness: 0.8
+        });
+
+        for (let i = 0; i < 200; i++) {
+            const asteroid = new THREE.Mesh(asteroidGeometry, asteroidMaterial);
+
+            const [x, y, z] = [
+              (Math.random() - 0.5) * 150,
+              (Math.random() - 0.5) * 150,
+              (Math.random() - 0.5) * 150
+            ];
+            if(Math.sqrt(x*x + y*y + z*z) < 20) continue; // Keep clear of the center
+
+            asteroid.position.set(x,y,z);
+
+            const scale = Math.random() * 0.5 + 0.5;
+            asteroid.scale.set(scale, scale, scale);
+            asteroid.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI);
+            
+            asteroidGroup.add(asteroid);
+        }
 
         // Mouse move listener
         const onMouseMove = (event: MouseEvent) => {
@@ -89,13 +93,13 @@ const Spark3D = () => {
         const animate = () => {
             const elapsedTime = clock.getElapsedTime();
             
-            particleGroup.rotation.y = elapsedTime * 0.05 + mousePos.current.x * 0.2;
-            particleGroup.rotation.x = elapsedTime * 0.05 + mousePos.current.y * 0.2;
+            camera.position.y += (-mousePos.current.y * 10 - camera.position.y) * .05;
+            camera.position.x += (mousePos.current.x * 10 - camera.position.x) * .05;
+            camera.lookAt(scene.position);
 
-            ring1.rotation.z = elapsedTime * 0.1;
-            ring2.rotation.z = -elapsedTime * 0.15;
-            ring3.rotation.z = elapsedTime * 0.08;
-
+            asteroidGroup.rotation.y = elapsedTime * 0.05;
+            starfield.rotation.y = elapsedTime * 0.01;
+            
             renderer.render(scene, camera);
             requestAnimationFrame(animate);
         };
@@ -116,12 +120,10 @@ const Spark3D = () => {
             if(currentMount && renderer.domElement){
                 currentMount.removeChild(renderer.domElement);
             }
-            ring1.geometry.dispose();
-            ring1.material.dispose();
-            ring2.geometry.dispose();
-            ring2.material.dispose();
-            ring3.geometry.dispose();
-            ring3.material.dispose();
+            starGeometry.dispose();
+            starMaterial.dispose();
+            asteroidGeometry.dispose();
+            asteroidMaterial.dispose();
         };
     }, []);
 
