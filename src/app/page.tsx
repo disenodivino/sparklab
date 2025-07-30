@@ -8,6 +8,13 @@ import RegistrationForm from "@/components/registration-form";
 import Header from "@/components/header";
 import Footer from "@/components/footer";
 
+const teamMembers = [
+  { name: "Alex Johnson", role: "Lead Organizer", avatar: "https://placehold.co/128x128.png", hint: "person portrait" },
+  { name: "Maria Garcia", role: "Design Lead", avatar: "https://placehold.co/128x128.png", hint: "person portrait" },
+  { name: "Sam Lee", role: "Tech Lead", avatar: "https://placehold.co/128x128.png", hint: "person portrait" },
+  { name: "Jessica Chen", role: "Sponsorship Coordinator", avatar: "https://placehold.co/128x128.png", hint: "person portrait" },
+];
+
 const sponsors = [
   { name: "TechCorp", logo: "https://placehold.co/300x150.png", hint: "tech company" },
   { name: "DesignMinds", logo: "https://placehold.co/300x150.png", hint: "design agency" },
@@ -87,7 +94,29 @@ export default function Home() {
           </div>
         </section>
 
-        <section id="register" className="py-20 lg:py-32 bg-card/20">
+        <section id="team" className="py-20 lg:py-32 bg-card/20">
+          <div className="container mx-auto px-4 text-center">
+            <h2 className="text-4xl md:text-5xl font-bold mb-12">Meet the Team</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
+              {teamMembers.map((member) => (
+                <div key={member.name} className="flex flex-col items-center">
+                  <Image
+                    src={member.avatar}
+                    alt={member.name}
+                    width={128}
+                    height={128}
+                    data-ai-hint={member.hint}
+                    className="rounded-full mb-4 border-2 border-primary/50"
+                  />
+                  <h3 className="text-xl font-bold">{member.name}</h3>
+                  <p className="text-accent">{member.role}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section id="register" className="py-20 lg:py-32">
           <div className="container mx-auto px-4">
             <div className="max-w-2xl mx-auto">
               <Card className="border-2 border-primary/50 glow-shadow-primary">
@@ -103,7 +132,7 @@ export default function Home() {
           </div>
         </section>
 
-        <section id="sponsors" className="py-20 lg:py-32">
+        <section id="sponsors" className="py-20 lg:py-32 bg-card/20">
           <div className="container mx-auto px-4 text-center">
             <h2 className="text-4xl md:text-5xl font-bold mb-12">Our Sponsors</h2>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-8 items-center">

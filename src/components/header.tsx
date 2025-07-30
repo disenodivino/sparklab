@@ -32,6 +32,7 @@ const Header = () => {
           </Link>
           <nav className="hidden md:flex items-center gap-6">
             <a href="#about" className="text-sm font-medium text-foreground/80 hover:text-primary transition-colors">About</a>
+            <a href="#team" className="text-sm font-medium text-foreground/80 hover:text-primary transition-colors">Team</a>
             <a href="#register" className="text-sm font-medium text-foreground/80 hover:text-primary transition-colors">Register</a>
             <a href="#sponsors" className="text-sm font-medium text-foreground/80 hover:text-primary transition-colors">Sponsors</a>
           </nav>

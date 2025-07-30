@@ -30,7 +30,7 @@ const Spark3D = () => {
 
         // Material
         const material = new THREE.MeshStandardMaterial({
-            color: 0x8855ff,
+            color: 0x4f46e5, // A nice indigo color that will work with the new theme
             wireframe: true,
             roughness: 0.5,
             metalness: 0.5,
@@ -41,11 +41,11 @@ const Spark3D = () => {
         scene.add(torus);
         
         // Lights
-        const pointLight1 = new THREE.PointLight(0x8855ff, 500);
+        const pointLight1 = new THREE.PointLight(0x4f46e5, 500); // primary
         pointLight1.position.set(5, 5, 5);
         scene.add(pointLight1);
 
-        const pointLight2 = new THREE.PointLight(0x3399ff, 500);
+        const pointLight2 = new THREE.PointLight(0xdb2777, 500); // accent
         pointLight2.position.set(-5, -5, 5);
         scene.add(pointLight2);
         
