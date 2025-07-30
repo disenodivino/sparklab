@@ -14,7 +14,7 @@ export default function HeroSection() {
              <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-background to-transparent z-10 pointer-events-none"></div>
             
             <Snowfall />
-            <div className="absolute inset-0 z-[1]">
+            <div className="absolute inset-0 z-[2]">
                 <Spark3D />
             </div>
 
@@ -24,7 +24,7 @@ export default function HeroSection() {
                         <Image src="/sparklab logo.png" alt="SparkLab Logo" width={500} height={150} />
                     </div>
                     <p className="max-w-xl text-lg md:text-xl text-foreground/80 mb-6">
-                        A 30-Hour National Level Designathon by <span className="font-nimbus font-bold text-accent">Diseño Divino</span>
+                        A 30-Hour National Level Designathon by <span className="font-nimbus font-bold"><span className="text-foreground">Diseño</span> <span className="text-accent">Divino</span></span>
                     </p>
                     <p className="font-headline text-2xl md:text-3xl font-medium mb-8">Ignite. Innovate. Inspire.</p>
                     <div className="mb-12">
