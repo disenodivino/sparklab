@@ -14,8 +14,8 @@ const Spark3D = () => {
   }, []);
 
   return (
-    <div className="absolute top-0 left-0 w-full h-full flex items-center justify-end md:justify-center">
-        <div className="w-[200%] md:w-[120%] h-[120%] md:ml-[50%]">
+    <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center overflow-hidden">
+        <div className="w-[200%] md:w-[150%] h-[120%] -translate-x-1/4 md:translate-x-1/4 lg:translate-x-1/3">
             <canvas ref={canvasRef} id="canvas3d" className="w-full h-full" />
         </div>
     </div>
