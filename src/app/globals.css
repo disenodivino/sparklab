@@ -109,11 +109,8 @@
     display: none !important;
 }
 
-.card-3d {
+.card-3d-interactive {
   transform-style: preserve-3d;
-  transition: transform 0.4s ease-out;
+  transition: transform 0.1s linear;
 }
 
-.card-3d:hover {
-  transform: perspective(1000px) rotateY(8deg) rotateX(4deg) scale3d(1.05, 1.05, 1.05);
-}

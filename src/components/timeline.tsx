@@ -3,6 +3,8 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
 import { CheckCircle, Clock, Coffee, Flag, Award, Zap } from "lucide-react"
+import { useInteractiveCard } from "@/hooks/use-interactive-card"
+import React from "react"
 
 const timelineEvents = [
   {
@@ -97,21 +99,29 @@ const TimelineItem = ({ event, isLeft }: { event: (typeof timelineEvents)[0], is
   </div>
 );
 
-const TimelineCard = ({ event }: { event: (typeof timelineEvents)[0] }) => (
-  <Card className={cn("transition-all duration-300 w-full mx-auto card-3d", {
-    "border-primary/50 shadow-primary/10": event.status === "completed",
-    "border-accent/80 shadow-accent/20 glow-shadow-accent": event.status === "ongoing",
-    "border-border/50 bg-card/60": event.status === "upcoming"
-  })}>
-    <CardHeader>
-      <p className="text-sm text-muted-foreground">{event.time}</p>
-      <CardTitle>{event.title}</CardTitle>
-    </CardHeader>
-    <CardContent>
-      <p className="text-foreground/80">{event.description}</p>
-    </CardContent>
-  </Card>
-);
+const TimelineCard = ({ event }: { event: (typeof timelineEvents)[0] }) => {
+  const { ref, style } = useInteractiveCard();
+  
+  return (
+    <Card 
+      ref={ref as React.RefObject<HTMLDivElement>} 
+      style={style} 
+      className={cn("transition-all duration-300 w-full mx-auto card-3d-interactive", {
+        "border-primary/50 shadow-primary/10": event.status === "completed",
+        "border-accent/80 shadow-accent/20 glow-shadow-accent": event.status === "ongoing",
+        "border-border/50 bg-card/60": event.status === "upcoming"
+      })}
+    >
+      <CardHeader>
+        <p className="text-sm text-muted-foreground">{event.time}</p>
+        <CardTitle>{event.title}</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <p className="text-foreground/80">{event.description}</p>
+      </CardContent>
+    </Card>
+  );
+};
 
 
 export default function Timeline() {

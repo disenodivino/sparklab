@@ -8,6 +8,9 @@ import Header from "@/components/header";
 import Footer from "@/components/footer";
 import Timeline from "@/components/timeline";
 import HeroSection from "@/components/hero-section";
+import InteractiveCard from "@/components/interactive-card";
+import TeamMemberCard from "@/components/team-member-card";
+import RegistrationCard from "@/components/registration-card";
 
 const teamMembers = [
   { name: "Alex Johnson", role: "Lead Organizer", avatar: "https://placehold.co/128x128.png", hint: "person portrait" },
@@ -63,7 +66,11 @@ export default function Home() {
             
             <div className="grid grid-cols-1 md:grid-cols-3 md:grid-rows-2 gap-8">
               {aboutCards.map((card, index) => (
-                <Card key={card.title} className={`card-3d bg-card/50 border-border/50 text-left animate-fade-in-up flex flex-col ${card.className}`} style={{animationDelay: `${index * 0.2}s`}}>
+                <InteractiveCard 
+                    key={card.title} 
+                    className={`bg-card/50 border-border/50 text-left animate-fade-in-up flex flex-col ${card.className}`} 
+                    style={{animationDelay: `${index * 0.2}s`}}
+                >
                   <CardHeader className="flex-shrink-0">
                     <div className="flex items-center gap-4">
                       <div className="bg-primary/10 p-4 rounded-full w-fit">
@@ -75,7 +82,7 @@ export default function Home() {
                   <CardContent className="flex-grow">
                     <p className="text-foreground/70">{card.description}</p>
                   </CardContent>
-                </Card>
+                </InteractiveCard>
               ))}
             </div>
              <div className="text-center mt-16">
@@ -105,18 +112,7 @@ export default function Home() {
             <h2 className="text-4xl md:text-5xl font-bold mb-12">Meet the Team</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
               {teamMembers.map((member, index) => (
-                <div key={member.name} className="flex flex-col items-center animate-fade-in-up card-3d" style={{animationDelay: `${index * 0.2}s`}}>
-                  <Image
-                    src={member.avatar}
-                    alt={member.name}
-                    width={128}
-                    height={128}
-                    data-ai-hint={member.hint}
-                    className="rounded-full mb-4 border-2 border-primary/50"
-                  />
-                  <h3 className="text-xl font-bold">{member.name}</h3>
-                  <p className="text-accent">{member.role}</p>
-                </div>
+                <TeamMemberCard key={member.name} member={member} style={{animationDelay: `${index * 0.2}s`}} />
               ))}
             </div>
           </div>
@@ -125,15 +121,7 @@ export default function Home() {
         <section id="register" className="py-20 lg:py-32 bg-card/20">
           <div className="container mx-auto px-4">
             <div className="max-w-2xl mx-auto">
-              <Card className="border-2 border-primary/50 glow-shadow-primary card-3d">
-                <CardHeader className="text-center">
-                  <CardTitle className="text-4xl">Join the Spark</CardTitle>
-                  <CardDescription>Register now to secure your spot in the most exciting designathon of the year.</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <RegistrationForm />
-                </CardContent>
-              </Card>
+              <RegistrationCard />
             </div>
           </div>
         </section>
