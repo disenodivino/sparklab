@@ -30,8 +30,8 @@ const Spark3D = () => {
         const positions = new Float32Array(particlesCount * 3);
         const colors = new Float32Array(particlesCount * 3);
 
-        const colorPrimary = new THREE.Color('hsl(217, 91%, 60%)');
-        const colorAccent = new THREE.Color('hsl(330, 80%, 60%)');
+        const colorPrimary = new THREE.Color('hsl(var(--primary))');
+        const colorAccent = new THREE.Color('hsl(var(--accent))');
 
         for (let i = 0; i < particlesCount; i++) {
             const i3 = i * 3;
@@ -39,9 +39,9 @@ const Spark3D = () => {
             const phi = Math.acos(-1 + (2 * i) / particlesCount);
             const theta = Math.sqrt(particlesCount * Math.PI) * phi;
             
-            const x = 2.5 * Math.cos(theta) * Math.sin(phi);
-            const y = 2.5 * Math.sin(theta) * Math.sin(phi);
-            const z = 2.5 * Math.cos(phi);
+            const x = 3.5 * Math.cos(theta) * Math.sin(phi);
+            const y = 3.5 * Math.sin(theta) * Math.sin(phi);
+            const z = 3.5 * Math.cos(phi);
 
             positions[i3] = x;
             positions[i3 + 1] = y;
@@ -58,7 +58,7 @@ const Spark3D = () => {
         particlesGeometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
 
         const particlesMaterial = new THREE.PointsMaterial({
-            size: 0.02,
+            size: 0.025,
             vertexColors: true,
             blending: THREE.AdditiveBlending,
             transparent: true,
@@ -84,8 +84,8 @@ const Spark3D = () => {
         const animate = () => {
             const elapsedTime = clock.getElapsedTime();
             
-            particleSystem.rotation.y = elapsedTime * 0.1 + mousePos.current.x * 0.3;
-            particleSystem.rotation.x = elapsedTime * 0.05 + mousePos.current.y * 0.3;
+            particleSystem.rotation.y = elapsedTime * 0.1 + mousePos.current.x * 0.5;
+            particleSystem.rotation.x = elapsedTime * 0.05 + mousePos.current.y * 0.5;
             
             renderer.render(scene, camera);
             requestAnimationFrame(animate);
