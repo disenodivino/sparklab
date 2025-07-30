@@ -1,82 +1,60 @@
 "use client";
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import { cn } from '@/lib/utils';
 
 const CustomCursor = () => {
-  const cursorOuterRef = useRef<HTMLDivElement>(null);
-  const cursorInnerRef = useRef<HTMLDivElement>(null);
+  const dotRef = useRef<HTMLDivElement>(null);
+  const [comets, setComets] = useState<{ x: number; y: number; id: number }[]>([]);
+  const animationFrameRef = useRef<number>();
+  const lastMousePos = useRef({ x: 0, y: 0 });
+  const cometCounter = useRef(0);
+
 
   useEffect(() => {
-    document.documentElement.classList.add('has-cursor');
-    const cursorOuter = cursorOuterRef.current;
-    const cursorInner = cursorInnerRef.current;
-
-    if (!cursorOuter || !cursorInner) return;
-
-    let animationFrameId: number;
-    const mouse = { x: 0, y: 0 };
-    const previousMouse = { x: 0, y: 0 };
-    const outerCursor = { x: 0, y: 0 };
-    const lerpAmount = 0.2; // Linear interpolation amount
-
     const handleMouseMove = (e: MouseEvent) => {
-      mouse.x = e.clientX;
-      mouse.y = e.clientY;
+      lastMousePos.current = { x: e.clientX, y: e.clientY };
     };
-    
+
     const animate = () => {
-      // Lerp for smoothing
-      outerCursor.x = lerp(outerCursor.x, mouse.x, lerpAmount);
-      outerCursor.y = lerp(outerCursor.y, mouse.y, lerpAmount);
+      if (dotRef.current) {
+        dotRef.current.style.transform = `translate(${lastMousePos.current.x - 3}px, ${lastMousePos.current.y - 3}px)`;
+      }
       
-      if(cursorOuter) {
-          cursorOuter.style.transform = `translate(${outerCursor.x}px, ${outerCursor.y}px)`;
-      }
-      if(cursorInner) {
-          cursorInner.style.transform = `translate(${mouse.x}px, ${mouse.y}px)`;
-      }
+      setComets(prev => [
+        ...prev.slice(-10), 
+        { x: lastMousePos.current.x, y: lastMousePos.current.y, id: cometCounter.current++ }
+      ]);
 
-      previousMouse.x = outerCursor.x;
-      previousMouse.y = outerCursor.y;
-
-      animationFrameId = requestAnimationFrame(animate);
-    }
-    
-    animationFrameId = requestAnimationFrame(animate);
-
-    const handleMouseOver = (e: MouseEvent) => {
-      if ((e.target as HTMLElement).closest('a, button')) {
-        cursorInner?.classList.add('is-hover');
-      }
+      animationFrameRef.current = requestAnimationFrame(animate);
     };
 
-    const handleMouseOut = (e: MouseEvent) => {
-      if ((e.target as HTMLElement).closest('a, button')) {
-        cursorInner?.classList.remove('is-hover');
-      }
-    };
-
+    document.documentElement.classList.add('has-cursor');
     document.addEventListener('mousemove', handleMouseMove);
-    document.addEventListener('mouseover', handleMouseOver);
-    document.addEventListener('mouseout', handleMouseOut);
+    animationFrameRef.current = requestAnimationFrame(animate);
 
     return () => {
-      cancelAnimationFrame(animationFrameId);
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
       document.removeEventListener('mousemove', handleMouseMove);
-      document.removeEventListener('mouseover', handleMouseOver);
-      document.removeEventListener('mouseout', handleMouseOut);
       document.documentElement.classList.remove('has-cursor');
     };
   }, []);
 
-  const lerp = (start: number, end: number, amount: number) => {
-    return (1 - amount) * start + amount * end;
-  };
-
   return (
     <div className="custom-cursor">
-      <div ref={cursorOuterRef} className="cursor cursor--outer"></div>
-      <div ref={cursorInnerRef} className="cursor cursor--inner"></div>
+      <div ref={dotRef} className="cursor cursor-dot"></div>
+      {comets.map((comet, index) => (
+        <div
+          key={comet.id}
+          className="cursor cursor-comet"
+          style={{
+            transform: `translate(${comet.x - 1.5}px, ${comet.y - 1.5}px)`,
+            opacity: (index + 1) / (comets.length + 1) * 0.5
+          }}
+        />
+      ))}
     </div>
   );
 };

@@ -73,28 +73,20 @@
   pointer-events: none;
   z-index: 9999;
 }
-.cursor--outer {
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
-  border: 1px solid hsl(var(--primary));
-  transition: all 0.1s ease-out;
-}
-.cursor--inner {
+.cursor-dot {
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background-color: hsl(var(--accent));
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  transition: width 0.2s, height 0.2s;
+  background-color: hsl(var(--primary));
+  transition: transform 0.2s ease-out;
 }
-
-.cursor--inner.is-hover {
-  width: 30px;
-  height: 30px;
-  background-color: hsl(var(--accent) / 0.5);
+.cursor-comet {
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background-color: hsl(var(--accent));
+  box-shadow: 0 0 10px hsl(var(--accent)), 0 0 20px hsl(var(--accent));
+  transition: opacity 0.3s ease-out;
 }
 
 
