@@ -2,12 +2,12 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowDown, Code, PenTool, Users } from "lucide-react";
-import Spark3D from "@/components/spark-3d";
 import CountdownTimer from "@/components/countdown-timer";
 import RegistrationForm from "@/components/registration-form";
 import Header from "@/components/header";
 import Footer from "@/components/footer";
 import Timeline from "@/components/timeline";
+import HeroSection from "@/components/hero-section";
 
 const teamMembers = [
   { name: "Alex Johnson", role: "Lead Organizer", avatar: "https://placehold.co/128x128.png", hint: "person portrait" },
@@ -28,27 +28,7 @@ export default function Home() {
     <div className="flex flex-col min-h-screen bg-background">
       <Header />
       <main className="flex-grow">
-        <section id="hero" className="relative w-full h-screen flex flex-col justify-center items-center text-center overflow-hidden">
-          <Spark3D />
-          <div className="relative z-10 flex flex-col items-center px-4 animate-fade-in-up">
-            <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold tracking-tighter mb-4 text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent">
-              SparkLab
-            </h1>
-            <p className="max-w-2xl text-lg md:text-xl text-foreground/80 mb-6">
-              A 30-Hour National Level Designathon by <span className="font-bold text-accent">Diseño Divino</span>
-            </p>
-            <p className="font-headline text-2xl md:text-3xl font-medium mb-8">Ignite. Innovate. Inspire.</p>
-            <div className="mb-12">
-              <CountdownTimer />
-            </div>
-            <Button size="lg" className="bg-accent text-accent-foreground hover:bg-accent/90 glow-shadow-accent transition-all duration-300" asChild>
-              <a href="#register">Register Now</a>
-            </Button>
-          </div>
-          <a href="#about" aria-label="Scroll down" className="absolute bottom-10 z-10 animate-bounce">
-            <ArrowDown className="h-8 w-8 text-foreground/50" />
-          </a>
-        </section>
+        <HeroSection />
 
         <section id="about" className="py-20 lg:py-32 container mx-auto px-4">
           <div className="max-w-4xl mx-auto text-center">
