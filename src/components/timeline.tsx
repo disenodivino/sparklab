@@ -77,56 +77,94 @@ const timelineEvents = [
   },
 ]
 
+const TimelineItem = ({ event, isLeft }: { event: (typeof timelineEvents)[0], isLeft: boolean }) => (
+  <div className="flex items-center w-full">
+    {isLeft ? (
+      <>
+        <div className="w-1/2 pr-8 text-right">
+          <TimelineCard event={event} />
+        </div>
+        <div className="w-1/2 pl-8"></div>
+      </>
+    ) : (
+      <>
+        <div className="w-1/2 pr-8"></div>
+        <div className="w-1/2 pl-8 text-left">
+          <TimelineCard event={event} />
+        </div>
+      </>
+    )}
+  </div>
+);
+
+const TimelineCard = ({ event }: { event: (typeof timelineEvents)[0] }) => (
+  <Card className={cn("transition-all duration-300 w-full mx-auto", {
+    "border-primary/50 shadow-primary/10": event.status === "completed",
+    "border-accent/80 shadow-accent/20 glow-shadow-accent": event.status === "ongoing",
+    "border-border/50 bg-card/60": event.status === "upcoming"
+  })}>
+    <CardHeader>
+      <p className="text-sm text-muted-foreground">{event.time}</p>
+      <CardTitle>{event.title}</CardTitle>
+    </CardHeader>
+    <CardContent>
+      <p className="text-foreground/80">{event.description}</p>
+    </CardContent>
+  </Card>
+);
+
+
 export default function Timeline() {
   return (
-    <div className="relative">
-      <div
-        className="absolute left-1/2 -translate-x-1/2 h-full w-0.5 bg-border"
-        aria-hidden="true"
-      />
-      <div className="space-y-12">
-        {timelineEvents.map((event, index) => (
-          <div
-            key={event.title}
-            className="relative flex items-center"
-          >
-            <div
-              className={cn(
-                "w-1/2",
-                index % 2 === 0 ? "pr-8 text-right" : "pl-8 text-left"
-              )}
-            />
-            <div className="absolute left-1/2 -translate-x-1/2 z-10">
+    <div className="relative container mx-auto px-4">
+      {/* Desktop Timeline */}
+      <div className="hidden md:block">
+        <div
+          className="absolute left-1/2 -translate-x-1/2 h-full w-0.5 bg-border/50"
+          aria-hidden="true"
+        />
+        <div className="space-y-12">
+          {timelineEvents.map((event, index) => (
+            <div key={event.title} className="relative flex justify-center">
+              <div className="absolute left-1/2 -translate-x-1/2 z-10">
                 <div className={cn("h-8 w-8 rounded-full flex items-center justify-center ring-8 ring-background", {
+                  "bg-primary text-primary-foreground": event.status === "completed",
+                  "bg-accent text-accent-foreground animate-pulse": event.status === "ongoing",
+                  "bg-muted text-muted-foreground": event.status === "upcoming"
+                })}>
+                  <event.icon className="h-5 w-5" />
+                </div>
+              </div>
+              <TimelineItem event={event} isLeft={index % 2 === 0} />
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Mobile Timeline */}
+      <div className="md:hidden relative">
+        <div
+          className="absolute left-6 -translate-x-1/2 h-full w-0.5 bg-border/50"
+          aria-hidden="true"
+        />
+        <div className="space-y-8">
+          {timelineEvents.map((event) => (
+            <div key={event.title} className="relative flex items-start">
+              <div className="absolute left-6 -translate-x-1/2 z-10">
+                <div className={cn("h-8 w-8 rounded-full flex items-center justify-center ring-4 ring-background", {
                     "bg-primary text-primary-foreground": event.status === "completed",
                     "bg-accent text-accent-foreground animate-pulse": event.status === "ongoing",
                     "bg-muted text-muted-foreground": event.status === "upcoming"
                 })}>
                     <event.icon className="h-5 w-5" />
                 </div>
+              </div>
+              <div className="w-full pl-12">
+                 <TimelineCard event={event} />
+              </div>
             </div>
-            <div
-              className={cn(
-                "w-1/2",
-                index % 2 === 0 ? "pl-8" : "pr-8"
-              )}
-            >
-              <Card className={cn("transition-all duration-300", {
-                  "border-primary/50 shadow-primary/10": event.status === "completed",
-                  "border-accent/80 shadow-accent/20 glow-shadow-accent": event.status === "ongoing",
-                  "border-border/50": event.status === "upcoming"
-              })}>
-                <CardHeader>
-                  <p className="text-sm text-muted-foreground">{event.time}</p>
-                  <CardTitle>{event.title}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-foreground/80">{event.description}</p>
-                </CardContent>
-              </Card>
-            </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
     </div>
   )
