@@ -27,13 +27,14 @@ const Header = () => {
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-20">
           <Link href="/" className="flex items-center gap-2">
-            <Image 
-              src="/2 (1).png" 
-              alt="SparkLab Logo" 
-              width={180} 
-              height={50} 
-              className="w-36 md:w-44"
-            />
+            <div className="relative w-36 md:w-44 h-12">
+              <Image 
+                src="/2 (1).png" 
+                alt="SparkLab Logo" 
+                layout="fill"
+                objectFit="contain"
+              />
+            </div>
           </Link>
           <nav className="hidden md:flex items-center gap-6">
             <a href="/#about" className="text-sm font-medium text-foreground/80 hover:text-primary transition-colors">About</a>
