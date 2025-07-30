@@ -29,7 +29,6 @@ export default function Home() {
       <main className="flex-grow">
         <section id="hero" className="relative w-full h-screen flex flex-col justify-center items-center text-center overflow-hidden">
           <Spark3D />
-          <div className="absolute inset-0 bg-background/60 backdrop-blur-sm"></div>
           <div className="relative z-10 flex flex-col items-center px-4 animate-fade-in-up">
             <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold tracking-tighter mb-4 text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent">
               SparkLab

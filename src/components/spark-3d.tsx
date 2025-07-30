@@ -30,6 +30,7 @@ const Spark3D = () => {
         scene.add(ambientLight);
         
         const pointLight = new THREE.PointLight(new THREE.Color('hsl(262.1, 83.3%, 57.8%)').getHex(), 1.5, 200);
+        pointLight.position.set(0, 0, 25);
         scene.add(pointLight);
 
         // Starfield
@@ -51,12 +52,14 @@ const Spark3D = () => {
         const starfield = new THREE.Points(starGeometry, starMaterial);
         scene.add(starfield);
 
-        // Central Star
-        const starCoreGeometry = new THREE.IcosahedronGeometry(10, 5);
-        const starCoreMaterial = new THREE.MeshBasicMaterial({
+        // Central Star Core
+        const starCoreGeometry = new THREE.IcosahedronGeometry(10, 15);
+        const starCoreMaterial = new THREE.MeshPhongMaterial({
              color: new THREE.Color('hsl(var(--primary))').getHex(),
-             transparent: true,
-             opacity: 0.9,
+             emissive: new THREE.Color('hsl(var(--primary))').getHex(),
+             emissiveIntensity: 0.8,
+             shininess: 100,
+             specular: 0xffffff,
         });
         const starCore = new THREE.Mesh(starCoreGeometry, starCoreMaterial);
         scene.add(starCore);
@@ -72,18 +75,22 @@ const Spark3D = () => {
             `,
             fragmentShader: `
                 varying vec3 vNormal;
+                uniform vec3 glowColor;
                 void main() {
-                    float intensity = pow(0.6 - dot(vNormal, vec3(0.0, 0.0, 1.0)), 2.0);
-                    gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0) * intensity;
+                    float intensity = pow(0.5 - dot(vNormal, vec3(0.0, 0.0, 1.0)), 2.0);
+                    gl_FragColor = vec4(glowColor, 1.0) * intensity;
                 }
             `,
+             uniforms: {
+                glowColor: { value: new THREE.Color('hsl(var(--accent))') }
+            },
             side: THREE.BackSide,
             blending: THREE.AdditiveBlending,
             transparent: true
         });
 
         const starAtmosphere = new THREE.Mesh(
-            new THREE.IcosahedronGeometry(12, 5),
+            new THREE.IcosahedronGeometry(10, 15),
             starAtmosphereMaterial
         );
         starAtmosphere.scale.set(1.2, 1.2, 1.2);
@@ -102,8 +109,8 @@ const Spark3D = () => {
         const animate = () => {
             const elapsedTime = clock.getElapsedTime();
             
-            camera.position.y += (-mousePos.current.y * 5 - camera.position.y) * .05;
-            camera.position.x += (mousePos.current.x * 5 - camera.position.x) * .05;
+            camera.position.y += (-mousePos.current.y * 10 - camera.position.y) * 0.05;
+            camera.position.x += (mousePos.current.x * 10 - camera.position.x) * 0.05;
             camera.lookAt(scene.position);
 
             starCore.rotation.y = elapsedTime * 0.1;
@@ -130,11 +137,6 @@ const Spark3D = () => {
             if(currentMount && renderer.domElement){
                 currentMount.removeChild(renderer.domElement);
             }
-            starGeometry.dispose();
-            starMaterial.dispose();
-            starCoreGeometry.dispose();
-            starCoreMaterial.dispose();
-            starAtmosphereMaterial.dispose();
         };
     }, []);
 
