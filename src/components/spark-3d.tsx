@@ -25,31 +25,51 @@ const Spark3D = () => {
         renderer.setPixelRatio(window.devicePixelRatio);
         currentMount.appendChild(renderer.domElement);
 
-        // Geometry
-        const geometry = new THREE.TorusGeometry(2.5, 1, 32, 100);
+        // Particles
+        const particlesCount = 5000;
+        const positions = new Float32Array(particlesCount * 3);
+        const colors = new Float32Array(particlesCount * 3);
 
-        // Material
-        const material = new THREE.MeshStandardMaterial({
-            color: 0x4f46e5, // A nice indigo color that will work with the new theme
-            wireframe: true,
-            roughness: 0.5,
-            metalness: 0.5,
+        const colorPrimary = new THREE.Color('hsl(217, 91%, 60%)');
+        const colorAccent = new THREE.Color('hsl(330, 80%, 60%)');
+
+        for (let i = 0; i < particlesCount; i++) {
+            const i3 = i * 3;
+            // Position particles in a sphere
+            const phi = Math.acos(-1 + (2 * i) / particlesCount);
+            const theta = Math.sqrt(particlesCount * Math.PI) * phi;
+            
+            const x = 2.5 * Math.cos(theta) * Math.sin(phi);
+            const y = 2.5 * Math.sin(theta) * Math.sin(phi);
+            const z = 2.5 * Math.cos(phi);
+
+            positions[i3] = x;
+            positions[i3 + 1] = y;
+            positions[i3 + 2] = z;
+
+            const mixedColor = colorPrimary.clone().lerp(colorAccent, Math.random());
+            colors[i3] = mixedColor.r;
+            colors[i3 + 1] = mixedColor.g;
+            colors[i3 + 2] = mixedColor.b;
+        }
+
+        const particlesGeometry = new THREE.BufferGeometry();
+        particlesGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+        particlesGeometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+
+        const particlesMaterial = new THREE.PointsMaterial({
+            size: 0.02,
+            vertexColors: true,
+            blending: THREE.AdditiveBlending,
+            transparent: true,
+            depthWrite: false,
         });
 
-        // Mesh
-        const torus = new THREE.Mesh(geometry, material);
-        scene.add(torus);
+        const particleSystem = new THREE.Points(particlesGeometry, particlesMaterial);
+        scene.add(particleSystem);
         
-        // Lights
-        const pointLight1 = new THREE.PointLight(0x4f46e5, 500); // primary
-        pointLight1.position.set(5, 5, 5);
-        scene.add(pointLight1);
-
-        const pointLight2 = new THREE.PointLight(0xdb2777, 500); // accent
-        pointLight2.position.set(-5, -5, 5);
-        scene.add(pointLight2);
-        
-        const ambientLight = new THREE.AmbientLight(0x404040, 2);
+        // Lights (can be simplified if not using MeshStandardMaterial)
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
         scene.add(ambientLight);
 
         // Mouse move listener
@@ -64,8 +84,8 @@ const Spark3D = () => {
         const animate = () => {
             const elapsedTime = clock.getElapsedTime();
             
-            torus.rotation.y = elapsedTime * 0.1 + mousePos.current.x * 0.5;
-            torus.rotation.x = elapsedTime * 0.05 + mousePos.current.y * 0.5;
+            particleSystem.rotation.y = elapsedTime * 0.1 + mousePos.current.x * 0.3;
+            particleSystem.rotation.x = elapsedTime * 0.05 + mousePos.current.y * 0.3;
             
             renderer.render(scene, camera);
             requestAnimationFrame(animate);
@@ -87,8 +107,8 @@ const Spark3D = () => {
             if(currentMount && renderer.domElement){
                 currentMount.removeChild(renderer.domElement);
             }
-            geometry.dispose();
-            material.dispose();
+            particlesGeometry.dispose();
+            particlesMaterial.dispose();
         };
     }, []);
 

@@ -59,7 +59,46 @@
   h1, h2, h3, h4, h5, h6 {
     @apply font-headline;
   }
+  .custom-cursor .cursor--inner {
+    transform: translate(-50%, -50%);
+  }
+  html.has-cursor,
+  html.has-cursor *,
+  html.has-cursor *:hover {
+    cursor: none;
+  }
 }
+.cursor {
+  position: fixed;
+  left: 0;
+  top: 0;
+  pointer-events: none;
+  z-index: 9999;
+}
+.cursor--outer {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 1px solid hsl(var(--primary));
+  transition: all 0.1s ease-out;
+}
+.cursor--inner {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: hsl(var(--accent));
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  transition: width 0.2s, height 0.2s;
+}
+
+.cursor--inner.is-hover {
+  width: 30px;
+  height: 30px;
+  background-color: hsl(var(--accent) / 0.5);
+}
+
 
 .glowing-icon {
   @apply text-primary drop-shadow-[0_0_8px_hsl(var(--primary))];
