@@ -17,7 +17,7 @@ export default function HeroSection() {
 
             <div className="relative z-20 container mx-auto px-4 grid md:grid-cols-2 gap-8 items-center text-center md:text-left">
                 <div className="flex flex-col items-center md:items-start animate-fade-in-up">
-                    <div className="w-[200px] md:w-[500px] mb-4 mt-4">
+                    <div className="w-[200px] md:w-[500px] mb-4 mt-10">
                         <Image src="/sparklab logo.png" alt="SparkLab Logo" width={500} height={150} />
                     </div>
                     <p className="max-w-xl text-lg md:text-xl text-foreground/80 mb-6">
