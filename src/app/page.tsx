@@ -1,16 +1,21 @@
+
+"use client";
+
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowDown, Code, PenTool, Users, ArrowRight } from "lucide-react";
+import { ArrowDown, Code, PenTool, Users, ArrowRight, LucideIcon } from "lucide-react";
 import CountdownTimer from "@/components/countdown-timer";
 import RegistrationForm from "@/components/registration-form";
 import Header from "@/components/header";
 import Footer from "@/components/footer";
 import Timeline from "@/components/timeline";
 import HeroSection from "@/components/hero-section";
-import InteractiveCard from "@/components/interactive-card";
 import TeamMemberCard from "@/components/team-member-card";
 import RegistrationCard from "@/components/registration-card";
+import { useInteractiveCard } from "@/hooks/use-interactive-card";
+import { cn } from "@/lib/utils";
+import React from "react";
 
 const teamMembers = [
   { name: "Alex Johnson", role: "Lead Organizer", avatar: "https://placehold.co/128x128.png", hint: "person portrait" },
@@ -26,7 +31,7 @@ const sponsors = [
   { name: "Creative Solutions", logo: "https://placehold.co/300x150.png", hint: "creative agency" },
 ];
 
-const aboutCards = [
+const aboutCardsData = [
   {
     icon: PenTool,
     title: "Design Challenges",
@@ -47,6 +52,36 @@ const aboutCards = [
   },
 ];
 
+type AboutCardProps = {
+    icon: LucideIcon;
+    title: string;
+    description: string;
+    className?: string;
+    style?: React.CSSProperties;
+}
+
+const AboutCard = ({ icon: Icon, title, description, className, style }: AboutCardProps) => {
+    const { ref, style: interactiveStyle } = useInteractiveCard();
+    return (
+        <Card 
+            ref={ref as React.RefObject<HTMLDivElement>}
+            style={{...style, ...interactiveStyle}}
+            className={cn("bg-card/50 border-border/50 text-left animate-fade-in-up flex flex-col card-3d-interactive", className)}
+        >
+            <CardHeader className="flex-shrink-0">
+                <div className="flex items-center gap-4">
+                    <div className="bg-primary/10 p-4 rounded-full w-fit">
+                        <Icon className="h-8 w-8 glowing-icon" />
+                    </div>
+                    <CardTitle className="text-2xl">{title}</CardTitle>
+                </div>
+            </CardHeader>
+            <CardContent className="flex-grow">
+                <p className="text-foreground/70">{description}</p>
+            </CardContent>
+        </Card>
+    )
+}
 
 export default function Home() {
   return (
@@ -65,24 +100,15 @@ export default function Home() {
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-3 md:grid-rows-2 gap-8">
-              {aboutCards.map((card, index) => (
-                <InteractiveCard 
+              {aboutCardsData.map((card, index) => (
+                <AboutCard 
                     key={card.title} 
-                    className={`bg-card/50 border-border/50 text-left animate-fade-in-up flex flex-col ${card.className}`} 
+                    icon={card.icon}
+                    title={card.title}
+                    description={card.description}
+                    className={card.className}
                     style={{animationDelay: `${index * 0.2}s`}}
-                >
-                  <CardHeader className="flex-shrink-0">
-                    <div className="flex items-center gap-4">
-                      <div className="bg-primary/10 p-4 rounded-full w-fit">
-                        <card.icon className="h-8 w-8 glowing-icon" />
-                      </div>
-                      <CardTitle className="text-2xl">{card.title}</CardTitle>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="flex-grow">
-                    <p className="text-foreground/70">{card.description}</p>
-                  </CardContent>
-                </InteractiveCard>
+                />
               ))}
             </div>
              <div className="text-center mt-16">
