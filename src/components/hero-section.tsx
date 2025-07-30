@@ -5,12 +5,14 @@ import CountdownTimer from "@/components/countdown-timer";
 import Spark3D from "@/components/spark-3d";
 import { ArrowDown } from "lucide-react";
 import Image from "next/image";
+import Snowfall from "./snowfall";
 
 export default function HeroSection() {
     return (
         <section id="hero" className="relative w-full h-screen flex items-center justify-center overflow-hidden pt-20">
              <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-background to-transparent z-10 pointer-events-none"></div>
             
+            <Snowfall />
             <div className="absolute inset-0">
                 <Spark3D />
             </div>
