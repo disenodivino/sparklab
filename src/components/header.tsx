@@ -34,10 +34,10 @@ const Header = () => {
             <a href="/#about" className="text-sm font-medium text-foreground/80 hover:text-primary transition-colors">About</a>
             <a href="/#timeline" className="text-sm font-medium text-foreground/80 hover:text-primary transition-colors">Timeline</a>
             <a href="/#team" className="text-sm font-medium text-foreground/80 hover:text-primary transition-colors">Team</a>
-            <a href="/#register" className="text-sm font-medium text-foreground/80 hover:text-primary transition-colors">Register</a>
             <a href="/#sponsors" className="text-sm font-medium text-foreground/80 hover:text-primary transition-colors">Sponsors</a>
+            <a href="/#register" className="text-sm font-medium text-foreground/80 hover:text-primary transition-colors">Register</a>
           </nav>
-          <Button asChild className="hidden md:flex bg-primary text-primary-foreground hover:bg-primary/90">
+          <Button asChild variant="outline" className="hidden md:flex animated-border-button">
             <a href="#register">Register Now</a>
           </Button>
         </div>

@@ -143,15 +143,7 @@ export default function Home() {
             </div>
           </div>
         </section>
-
-        <section id="register" className="py-20 lg:py-32 bg-card/20">
-          <div className="container mx-auto px-4">
-            <div className="max-w-2xl mx-auto">
-              <RegistrationCard />
-            </div>
-          </div>
-        </section>
-
+        
         <section id="sponsors" className="py-20 lg:py-32">
           <div className="container mx-auto px-4 text-center">
             <h2 className="text-4xl md:text-5xl font-bold mb-12">Our Sponsors</h2>
@@ -168,6 +160,14 @@ export default function Home() {
                   />
                 </div>
               ))}
+            </div>
+          </div>
+        </section>
+
+        <section id="register" className="py-20 lg:py-32 bg-card/20">
+          <div className="container mx-auto px-4">
+            <div className="max-w-2xl mx-auto">
+              <RegistrationCard />
             </div>
           </div>
         </section>
