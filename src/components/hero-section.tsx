@@ -7,10 +7,15 @@ import { ArrowDown } from "lucide-react";
 
 export default function HeroSection() {
     return (
-        <section id="hero" className="relative w-full h-screen flex items-center overflow-hidden">
+        <section id="hero" className="relative w-full h-screen flex items-center justify-center overflow-hidden">
              <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-background to-transparent z-20 pointer-events-none"></div>
-            <div className="container mx-auto px-4 grid md:grid-cols-5 gap-8 items-center">
-                <div className="relative z-10 flex flex-col items-start text-left animate-fade-in-up md:col-span-2">
+            
+            <div className="absolute inset-0">
+                <Spark3D />
+            </div>
+
+            <div className="relative z-10 container mx-auto px-4 grid md:grid-cols-2 gap-8 items-center">
+                <div className="flex flex-col items-start text-left animate-fade-in-up">
                     <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold tracking-tighter mb-4 text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent">
                         SparkLab
                     </h1>
@@ -25,10 +30,8 @@ export default function HeroSection() {
                         <a href="#register">Register Now</a>
                     </Button>
                 </div>
-                <div className="relative w-full h-full min-h-[400px] md:min-h-[600px] md:col-span-3">
-                    <Spark3D />
-                </div>
             </div>
+            
             <a href="#about" aria-label="Scroll down" className="absolute bottom-10 left-1/2 -translate-x-1/2 z-10 animate-bounce">
                 <ArrowDown className="h-8 w-8 text-foreground/50" />
             </a>
