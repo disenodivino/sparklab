@@ -24,7 +24,7 @@ export default function HeroSection() {
                         <Image src="/sparklab logo.png" alt="SparkLab Logo" width={500} height={150} />
                     </div>
                     <p className="max-w-xl text-lg md:text-xl text-foreground/80 mb-6">
-                        A 30-Hour National Level Designathon by <span className="font-nimbus font-bold"><span className="text-foreground">Diseño</span> <span className="text-accent">Divino</span></span>
+                        A 30-Hour National Level Designathon by <span className="font-nimbus"><span className="text-foreground">Diseño</span> <span className="text-accent">Divino</span></span>
                     </p>
                     <p className="font-headline text-2xl md:text-3xl font-medium mb-8">Ignite. Innovate. Inspire.</p>
                     <div className="mb-12">
