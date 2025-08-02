@@ -1,6 +1,7 @@
 "use server";
 
 import * as z from "zod";
+import { supabase } from "@/lib/supabase";
 
 const formSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters." }),
@@ -25,9 +26,19 @@ export async function registerForEvent(prevState: any, formData: FormData) {
   }
 
   try {
-    // Here you would typically save the data to a database.
-    // For this example, we'll just log it to the console.
-    console.log("New registration:", validatedFields.data);
+    const { data, error } = await supabase
+      .from('registrations')
+      .insert([validatedFields.data]);
+
+    if (error) {
+      console.error("Supabase error:", error);
+      return {
+        message: "There was an error saving your registration. Please try again.",
+        success: false,
+      };
+    }
+
+    console.log("New registration saved to Supabase:", validatedFields.data);
 
     return {
       message: "Thank you for registering! We've received your submission and will be in touch soon.",
