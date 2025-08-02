@@ -11,9 +11,7 @@ const formSchema = z.object({
   reason: z.string().min(10, { message: "Please tell us a bit more." }).max(500),
 });
 
-type FormData = z.infer<typeof formSchema>;
-
-export async function registerForEvent(data: FormData) {
+export async function registerForEvent(formData: FormData) {
   const supabaseUrl = 'https://izahxmtcripexpgtaxdr.supabase.co';
   const supabaseServiceKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml6YWh4bXRjcmlwZXhwZ3RheGRyIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1NDE0OTkyNiwiZXhwIjoyMDY5NzI1OTI2fQ.WwgIQHDogt5yTRcUsWgC3yS5SKoBfRfsLU-Alhsr-s8';
   
@@ -24,7 +22,12 @@ export async function registerForEvent(data: FormData) {
     }
   });
 
-  const validatedFields = formSchema.safeParse(data);
+  const validatedFields = formSchema.safeParse({
+    name: formData.get("name"),
+    email: formData.get("email"),
+    university: formData.get("university"),
+    reason: formData.get("reason"),
+  });
 
   if (!validatedFields.success) {
     return {
@@ -45,8 +48,6 @@ export async function registerForEvent(data: FormData) {
         success: false,
       };
     }
-
-    console.log("New registration saved to Supabase:", validatedFields.data);
 
     return {
       message: "Thank you for registering! We've received your submission and will be in touch soon.",
