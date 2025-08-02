@@ -5,13 +5,9 @@ import React, { useEffect, useRef } from 'react';
 
 const CustomCursor = () => {
   const dotRef = useRef<HTMLDivElement>(null);
-  const cometRef = useRef<HTMLDivElement>(null);
+  const cometsContainerRef = useRef<HTMLDivElement>(null);
   const animationFrameRef = useRef<number>();
   const lastMousePos = useRef({ x: 0, y: 0 });
-  const lastCometPos = useRef({ x: 0, y: 0 });
-  
-  // Easing factor
-  const easing = 0.15;
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
@@ -19,20 +15,33 @@ const CustomCursor = () => {
     };
 
     const animate = () => {
-      // Animate dot
       if (dotRef.current) {
         dotRef.current.style.transform = `translate(${lastMousePos.current.x - 3}px, ${lastMousePos.current.y - 3}px)`;
       }
 
-      // Animate comet with easing
-      if (cometRef.current) {
-        const dx = lastMousePos.current.x - lastCometPos.current.x;
-        const dy = lastMousePos.current.y - lastCometPos.current.y;
+      if (cometsContainerRef.current) {
+        const comet = document.createElement('div');
+        comet.className = 'cursor cursor-comet';
+        comet.style.transform = `translate(${lastMousePos.current.x - 1.5}px, ${lastMousePos.current.y - 1.5}px)`;
         
-        lastCometPos.current.x += dx * easing;
-        lastCometPos.current.y += dy * easing;
+        cometsContainerRef.current.appendChild(comet);
+        
+        // Make comets fade out
+        setTimeout(() => {
+            comet.style.opacity = '0';
+        }, 100);
 
-        cometRef.current.style.transform = `translate(${lastCometPos.current.x - 1.5}px, ${lastCometPos.current.y - 1.5}px)`;
+        // Remove old comets from DOM to prevent memory leaks
+        if (cometsContainerRef.current.children.length > 20) {
+            cometsContainerRef.current.removeChild(cometsContainerRef.current.children[0]);
+        }
+        
+        // Clean up fully faded comets from the DOM
+        setTimeout(() => {
+            if (comet.parentElement) {
+                comet.parentElement.removeChild(comet);
+            }
+        }, 500);
       }
       
       animationFrameRef.current = requestAnimationFrame(animate);
@@ -52,10 +61,10 @@ const CustomCursor = () => {
   }, []);
 
   return (
-    <>
+    <div className="custom-cursor">
       <div ref={dotRef} className="cursor cursor-dot"></div>
-      <div ref={cometRef} className="cursor cursor-comet"></div>
-    </>
+      <div ref={cometsContainerRef}></div>
+    </div>
   );
 };
 
