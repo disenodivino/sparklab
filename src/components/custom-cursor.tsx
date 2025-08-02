@@ -1,15 +1,14 @@
+
 "use client";
 
-import React, { useEffect, useRef, useState } from 'react';
-import { cn } from '@/lib/utils';
+import React, { useEffect, useRef } from 'react';
 
 const CustomCursor = () => {
   const dotRef = useRef<HTMLDivElement>(null);
-  const [comets, setComets] = useState<{ x: number; y: number; id: number }[]>([]);
+  const cometsContainerRef = useRef<HTMLDivElement>(null);
   const animationFrameRef = useRef<number>();
   const lastMousePos = useRef({ x: 0, y: 0 });
   const cometCounter = useRef(0);
-
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
@@ -20,12 +19,32 @@ const CustomCursor = () => {
       if (dotRef.current) {
         dotRef.current.style.transform = `translate(${lastMousePos.current.x - 3}px, ${lastMousePos.current.y - 3}px)`;
       }
-      
-      setComets(prev => [
-        ...prev.slice(-10), 
-        { x: lastMousePos.current.x, y: lastMousePos.current.y, id: cometCounter.current++ }
-      ]);
 
+      if (cometsContainerRef.current) {
+        const comet = document.createElement('div');
+        comet.className = 'cursor cursor-comet';
+        comet.style.transform = `translate(${lastMousePos.current.x - 1.5}px, ${lastMousePos.current.y - 1.5}px)`;
+        
+        cometsContainerRef.current.appendChild(comet);
+        
+        // Make comets fade out
+        setTimeout(() => {
+            comet.style.opacity = '0';
+        }, 100);
+
+        // Remove old comets from DOM
+        if (cometsContainerRef.current.children.length > 20) {
+            cometsContainerRef.current.removeChild(cometsContainerRef.current.children[0]);
+        }
+        
+        // Clean up fully faded comets
+        setTimeout(() => {
+            if (comet.parentElement) {
+                comet.parentElement.removeChild(comet);
+            }
+        }, 500);
+      }
+      
       animationFrameRef.current = requestAnimationFrame(animate);
     };
 
@@ -45,16 +64,7 @@ const CustomCursor = () => {
   return (
     <div className="custom-cursor">
       <div ref={dotRef} className="cursor cursor-dot"></div>
-      {comets.map((comet, index) => (
-        <div
-          key={comet.id}
-          className="cursor cursor-comet"
-          style={{
-            transform: `translate(${comet.x - 1.5}px, ${comet.y - 1.5}px)`,
-            opacity: (index + 1) / (comets.length + 1) * 0.5
-          }}
-        />
-      ))}
+      <div ref={cometsContainerRef}></div>
     </div>
   );
 };
