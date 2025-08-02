@@ -4,7 +4,7 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { useActionState, useEffect, useRef } from "react";
+import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -29,13 +29,9 @@ const formSchema = z.object({
 
 type FormData = z.infer<typeof formSchema>;
 
-const initialState = {
-  message: "",
-  success: false,
-};
-
 export default function RegistrationForm() {
-  const [state, formAction, isPending] = useActionState(registerForEvent, initialState);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { toast } = useToast();
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -45,34 +41,30 @@ export default function RegistrationForm() {
       reason: "",
     },
   });
-  const { toast } = useToast();
-  const formRef = useRef<HTMLFormElement>(null);
 
-  useEffect(() => {
-    if (state.message) {
-      if (state.success) {
-        toast({
-          title: "Registration Successful!",
-          description: state.message,
-        });
-        form.reset();
-      } else {
-        toast({
-          title: "Registration Failed",
-          description: state.message,
-          variant: "destructive",
-        });
-      }
+  const onSubmit = async (data: FormData) => {
+    setIsSubmitting(true);
+    const result = await registerForEvent(data);
+    setIsSubmitting(false);
+
+    if (result.success) {
+      toast({
+        title: "Registration Successful!",
+        description: result.message,
+      });
+      form.reset();
+    } else {
+      toast({
+        title: "Registration Failed",
+        description: result.message,
+        variant: "destructive",
+      });
     }
-  }, [state, toast, form]);
+  };
 
   return (
     <Form {...form}>
-      <form
-        ref={formRef}
-        action={formAction}
-        className="space-y-6"
-      >
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
         <FormField
           control={form.control}
           name="name"
@@ -129,9 +121,9 @@ export default function RegistrationForm() {
           type="submit"
           className="w-full bg-accent text-accent-foreground hover:bg-accent/90"
           size="lg"
-          disabled={isPending}
+          disabled={isSubmitting}
         >
-          {isPending ? "Submitting..." : "Submit Registration"}
+          {isSubmitting ? "Submitting..." : "Submit Registration"}
         </Button>
       </form>
     </Form>
