@@ -154,7 +154,7 @@
   initial-value: 0turn;
 }
 
-.snowfall-container {
+.particle-flares-container {
   position: absolute;
   top: 0;
   left: 0;
@@ -165,32 +165,37 @@
   z-index: 1;
 }
 
-.snowflake {
+.flare {
   position: absolute;
   top: -10px;
-  background-color: #fff;
+  width: 5px;
+  height: 5px;
   border-radius: 50%;
-  animation: fall linear;
+  animation-name: flare-fall;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
 }
 
-.snowflake:nth-child(3n) {
-  width: 1px;
-  height: 1px;
-}
-.snowflake:nth-child(3n+1) {
-  width: 2px;
-  height: 2px;
-}
-.snowflake:nth-child(3n+2) {
-  width: 3px;
-  height: 3px;
-}
-
-@keyframes fall {
+@keyframes flare-fall {
   from {
-    transform: translateY(0);
+    transform: translateY(0) scale(1);
+    opacity: 1;
   }
   to {
-    transform: translateY(100vh);
+    transform: translateY(100vh) scale(0.5);
+    opacity: 0;
   }
+}
+
+.flare:nth-child(3n) {
+  background-color: #E040FB; /* Pink */
+  box-shadow: 0 0 10px #E040FB, 0 0 20px #E040FB;
+}
+.flare:nth-child(3n+1) {
+  background-color: #7C4DFF; /* Purple */
+  box-shadow: 0 0 12px #7C4DFF, 0 0 24px #7C4DFF;
+}
+.flare:nth-child(3n+2) {
+  background-color: #3D5AFE; /* Blue */
+  box-shadow: 0 0 15px #3D5AFE, 0 0 30px #3D5AFE;
 }
