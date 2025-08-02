@@ -70,7 +70,8 @@ export default function RegistrationForm() {
     <Form {...form}>
       <form
         ref={formRef}
-        action={form.handleSubmit(() => formAction(new FormData(formRef.current!)))}
+        action={formAction}
+        onSubmit={form.handleSubmit(() => formAction(new FormData(formRef.current!)))}
         className="space-y-6"
       >
         <FormField
