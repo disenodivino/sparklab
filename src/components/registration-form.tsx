@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useForm } from "react-hook-form";
@@ -48,27 +49,34 @@ export default function RegistrationForm() {
   const formRef = useRef<HTMLFormElement>(null);
 
   useEffect(() => {
-    if (state.message) {
-      if (state.success) {
-        toast({
-          title: "Registration Successful!",
-          description: state.message,
-        });
-        form.reset();
-        formRef.current?.reset();
-      } else {
-        toast({
-          title: "Registration Failed",
-          description: state.message,
-          variant: "destructive",
-        });
-      }
+    if (form.formState.isSubmitSuccessful && state.message) {
+        if (state.success) {
+            toast({
+                title: "Registration Successful!",
+                description: state.message,
+            });
+            form.reset();
+        } else {
+            toast({
+                title: "Registration Failed",
+                description: state.message,
+                variant: "destructive",
+            });
+        }
     }
-  }, [state, toast, form]);
+  }, [form.formState.isSubmitSuccessful, state, toast, form]);
+  
+  const onSubmit = (data: FormData) => {
+    const formData = new FormData();
+    Object.entries(data).forEach(([key, value]) => {
+        formData.append(key, value);
+    });
+    formAction(formData);
+  }
 
   return (
     <Form {...form}>
-      <form ref={formRef} action={formAction} className="space-y-6">
+      <form ref={formRef} onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
         <FormField
           control={form.control}
           name="name"
@@ -121,8 +129,8 @@ export default function RegistrationForm() {
             </FormItem>
           )}
         />
-        <Button type="submit" className="w-full bg-accent text-accent-foreground hover:bg-accent/90" size="lg">
-          Submit Registration
+        <Button type="submit" className="w-full bg-accent text-accent-foreground hover:bg-accent/90" size="lg" disabled={form.formState.isSubmitting}>
+          {form.formState.isSubmitting ? "Submitting..." : "Submit Registration"}
         </Button>
       </form>
     </Form>

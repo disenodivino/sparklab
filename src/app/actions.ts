@@ -1,3 +1,4 @@
+
 "use server";
 
 import * as z from "zod";
@@ -10,7 +11,7 @@ const formSchema = z.object({
   reason: z.string().min(10, { message: "Please tell us a bit more." }).max(500),
 });
 
-export async function registerForEvent(prevState: any, formData: FormData) {
+export async function registerForEvent(formData: FormData) {
   const supabaseUrl = 'https://izahxmtcripexpgtaxdr.supabase.co';
   const supabaseServiceKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml6YWh4bXRjcmlwZXhwZ3RheGRyIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1NDE0OTkyNiwiZXhwIjoyMDY5NzI1OTI2fQ.WwgIQHDogt5yTRcUsWgC3yS5SKoBfRfsLU-Alhsr-s8';
   
@@ -36,7 +37,7 @@ export async function registerForEvent(prevState: any, formData: FormData) {
   }
 
   try {
-    const { data, error } = await supabaseAdmin
+    const { error } = await supabaseAdmin
       .from('registrations')
       .insert([validatedFields.data]);
 
