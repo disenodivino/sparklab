@@ -1,7 +1,7 @@
 "use server";
 
 import * as z from "zod";
-import { supabase } from "@/lib/supabase";
+import { createClient } from "@supabase/supabase-js";
 
 const formSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters." }),
@@ -11,6 +11,16 @@ const formSchema = z.object({
 });
 
 export async function registerForEvent(prevState: any, formData: FormData) {
+  const supabaseUrl = 'https://izahxmtcripexpgtaxdr.supabase.co';
+  const supabaseServiceKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml6YWh4bXRjcmlwZXhwZ3RheGRyIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1NDE0OTkyNiwiZXhwIjoyMDY5NzI1OTI2fQ.WwgIQHDogt5yTRcUsWgC3yS5SKoBfRfsLU-Alhsr-s8';
+  
+  const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false
+    }
+  });
+
   const validatedFields = formSchema.safeParse({
     name: formData.get("name"),
     email: formData.get("email"),
@@ -26,7 +36,7 @@ export async function registerForEvent(prevState: any, formData: FormData) {
   }
 
   try {
-    const { data, error } = await supabase
+    const { data, error } = await supabaseAdmin
       .from('registrations')
       .insert([validatedFields.data]);
 
