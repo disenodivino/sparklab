@@ -5,59 +5,39 @@ import React, { useEffect, useRef } from 'react';
 
 const CustomCursor = () => {
   const dotRef = useRef<HTMLDivElement>(null);
-  const cometsContainerRef = useRef<HTMLDivElement>(null);
+  const cometRef = useRef<HTMLDivElement>(null);
   const animationFrameRef = useRef<number>();
-  const lastMousePos = useRef({ x: 0, y: 0 });
+  const mousePos = useRef({ x: 0, y: 0 });
+  const dotPos = useRef({ x: 0, y: 0 });
+  const cometPos = useRef({ x: 0, y: 0 });
 
   useEffect(() => {
-    let frameCount = 0;
-    
     const handleMouseMove = (e: MouseEvent) => {
-      lastMousePos.current = { x: e.clientX, y: e.clientY };
-      
-      // Update dot position immediately on mouse move for responsiveness
-      if (dotRef.current) {
-        dotRef.current.style.transform = `translate(${e.clientX - 3}px, ${e.clientY - 3}px)`;
-      }
+      mousePos.current = { x: e.clientX, y: e.clientY };
     };
 
     const animate = () => {
-      frameCount++;
+      // Smooth following for dot (immediate)
+      dotPos.current.x = mousePos.current.x;
+      dotPos.current.y = mousePos.current.y;
       
-      // Only create comets every 5th frame to reduce performance impact
-      if (frameCount % 5 === 0 && cometsContainerRef.current) {
-        const comet = document.createElement('div');
-        comet.className = 'cursor cursor-comet';
-        comet.style.transform = `translate(${lastMousePos.current.x - 1.5}px, ${lastMousePos.current.y - 1.5}px)`;
-        
-        cometsContainerRef.current.appendChild(comet);
-        
-        // Make comets fade out faster
-        setTimeout(() => {
-            comet.style.opacity = '0';
-        }, 50);
+      // Smooth following for comet (with slight delay)
+      cometPos.current.x += (mousePos.current.x - cometPos.current.x) * 0.8;
+      cometPos.current.y += (mousePos.current.y - cometPos.current.y) * 0.8;
 
-        // Remove old comets from DOM to prevent memory leaks (reduced limit)
-        if (cometsContainerRef.current.children.length > 10) {
-            const oldComet = cometsContainerRef.current.children[0];
-            if (oldComet) {
-                cometsContainerRef.current.removeChild(oldComet);
-            }
-        }
-        
-        // Clean up fully faded comets from the DOM faster
-        setTimeout(() => {
-            if (comet.parentElement) {
-                comet.parentElement.removeChild(comet);
-            }
-        }, 250);
+      if (dotRef.current) {
+        dotRef.current.style.transform = `translate3d(${dotPos.current.x - 3}px, ${dotPos.current.y - 3}px, 0)`;
+      }
+
+      if (cometRef.current) {
+        cometRef.current.style.transform = `translate3d(${cometPos.current.x - 1.5}px, ${cometPos.current.y - 1.5}px, 0)`;
       }
       
       animationFrameRef.current = requestAnimationFrame(animate);
     };
 
     document.documentElement.classList.add('has-cursor');
-    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mousemove', handleMouseMove, { passive: true });
     animationFrameRef.current = requestAnimationFrame(animate);
 
     return () => {
@@ -72,7 +52,7 @@ const CustomCursor = () => {
   return (
     <div className="custom-cursor">
       <div ref={dotRef} className="cursor cursor-dot"></div>
-      <div ref={cometsContainerRef}></div>
+      <div ref={cometRef} className="cursor cursor-comet"></div>
     </div>
   );
 };
