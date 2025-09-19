@@ -6,14 +6,15 @@ import CountdownTimer from "@/components/countdown-timer";
 import Spark3D from "@/components/spark-3d";
 import { ArrowDown } from "lucide-react";
 import Image from "next/image";
-import ParticleFlares from "./particle-flares";
+import MovingGrid from "./moving-grid";
 
 export default function HeroSection() {
     return (
-        <section id="hero" className="relative w-full h-screen flex items-center justify-center pt-20">
+        <section id="hero" className="relative w-full h-screen flex items-center justify-center pt-20 overflow-hidden">
              <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-background to-transparent z-10 pointer-events-none"></div>
             
-            <ParticleFlares />
+            <MovingGrid />
+
             <div className="absolute inset-0 z-[2]">
                 <Spark3D />
             </div>
@@ -24,7 +25,7 @@ export default function HeroSection() {
                         <Image src="/sparklab logo.png" alt="SparkLab Logo" width={500} height={150} />
                     </div>
                     <p className="max-w-xl text-lg md:text-xl text-foreground/80 mb-6">
-                        A 30-Hour National Level Designathon by <span className="font-nimbus"><span className="text-foreground" style={{ textShadow: '0 0 8px hsl(var(--primary))' }}>Diseño</span> <span style={{color: '#40E0D0', textShadow: '0 0 8px #40E0D0'}}>Divino</span></span>
+                        A 30-Hour National Level Designathon by <span className="font-nimbus"><span className="text-foreground" style={{ textShadow: '0 0 8px hsl(var(--primary))' }}>Diseño</span> <span className="text-accent">Divino</span></span>
                     </p>
                     <p className="font-headline text-2xl md:text-3xl font-medium mb-8">Ignite. Innovate. Inspire.</p>
                     <div className="mb-12">
