@@ -62,9 +62,11 @@ export default function RegistrationForm() {
     }
   };
 
+  const buttonText = isSubmitting ? "Submitting..." : "Submit Registration";
+
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6" suppressHydrationWarning>
         <FormField
           control={form.control}
           name="name"
@@ -72,7 +74,7 @@ export default function RegistrationForm() {
             <FormItem>
               <FormLabel>Full Name</FormLabel>
               <FormControl>
-                <Input placeholder="John Doe" {...field} />
+                <Input placeholder="John Doe" {...field} suppressHydrationWarning />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -85,7 +87,7 @@ export default function RegistrationForm() {
             <FormItem>
               <FormLabel>Email Address</FormLabel>
               <FormControl>
-                <Input placeholder="you@example.com" {...field} />
+                <Input placeholder="you@example.com" {...field} suppressHydrationWarning />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -98,7 +100,7 @@ export default function RegistrationForm() {
             <FormItem>
               <FormLabel>University / College</FormLabel>
               <FormControl>
-                <Input placeholder="University of Design" {...field} />
+                <Input placeholder="University of Design" {...field} suppressHydrationWarning />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -111,7 +113,7 @@ export default function RegistrationForm() {
             <FormItem>
               <FormLabel>Why do you want to join SparkLab?</FormLabel>
               <FormControl>
-                <Textarea placeholder="Tell us about your passion for design..." {...field} />
+                <Textarea placeholder="Tell us about your passion for design..." {...field} suppressHydrationWarning />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -122,8 +124,9 @@ export default function RegistrationForm() {
           className="w-full bg-accent text-accent-foreground hover:bg-accent/90"
           size="lg"
           disabled={isSubmitting}
+          suppressHydrationWarning
         >
-          {isSubmitting ? "Submitting..." : "Submit Registration"}
+          {buttonText}
         </Button>
       </form>
     </Form>

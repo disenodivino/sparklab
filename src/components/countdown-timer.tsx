@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react';
 
 const CountdownTimer = () => {
   const calculateTimeLeft = () => {
-    const eventDate = new Date("2025-09-05T09:00:00Z").getTime();
+    const eventDate = new Date("2025-10-08T03:30:00Z").getTime(); // 9:00 AM IST = 3:30 AM UTC
     const now = new Date().getTime();
     const difference = eventDate - now;
 

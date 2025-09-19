@@ -25,8 +25,8 @@ const teamMembers = [
 ];
 
 const sponsors = [
-  { name: "TechCorp", logo: "https://placehold.co/300x150.png", hint: "tech company" },
-  { name: "DesignMinds", logo: "https://placehold.co/300x150.png", hint: "design agency" },
+  { name: "Google Gemini", logo: "https://i.ibb.co/Xf9QHmY3/result-Gemini-logo.jpg", hint: "tech company" },
+  { name: "ISTE", logo: "https://i.ibb.co/jPyNqcbD/result-ISTE-logo.jpg", hint: "design agency" },
   { name: "Innovate Inc.", logo: "https://placehold.co/300x150.png", hint: "startup incubator" },
   { name: "Creative Solutions", logo: "https://placehold.co/300x150.png", hint: "creative agency" },
 ];
