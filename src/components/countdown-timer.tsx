@@ -57,7 +57,7 @@ const CountdownTimer = () => {
         <div className="flex justify-center items-center gap-4 md:gap-8">
             {timeUnits.map((unit, index) => (
                 <div key={index} className="flex flex-col items-center">
-                    <div className="text-4xl md:text-6xl font-bold font-headline text-foreground tracking-tighter w-20 h-20 md:w-28 md:h-28 flex items-center justify-center bg-primary/10 rounded-lg border border-primary/20">
+                    <div className="text-4xl md:text-6xl font-bold font-space text-foreground tracking-tighter w-20 h-20 md:w-28 md:h-28 flex items-center justify-center bg-primary/10 rounded-lg border border-primary/20">
                         --
                     </div>
                     <span className="text-sm md:text-base font-medium text-foreground/70 mt-2">{unit.label}</span>
@@ -71,7 +71,7 @@ const CountdownTimer = () => {
     <div className="flex justify-center items-center gap-4 md:gap-8">
       {timeUnits.map((unit, index) => (
         <div key={index} className="flex flex-col items-center">
-          <div className="text-4xl md:text-6xl font-bold font-headline text-foreground tracking-tighter w-20 h-20 md:w-28 md:h-28 flex items-center justify-center bg-primary/10 rounded-lg border border-primary/20">
+          <div className="text-4xl md:text-6xl font-bold font-space text-foreground tracking-tighter w-20 h-20 md:w-28 md:h-28 flex items-center justify-center bg-primary/10 rounded-lg border border-primary/20">
             {String(unit.value).padStart(2, '0')}
           </div>
           <span className="text-sm md:text-base font-medium text-foreground/70 mt-2">{unit.label}</span>

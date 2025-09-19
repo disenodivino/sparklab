@@ -18,16 +18,14 @@ const Header = () => {
   }, []);
 
   return (
-    <header
-      className={cn(
-        "fixed top-0 left-0 right-0 z-50 transition-all duration-300",
-        scrolled ? "bg-background/80 backdrop-blur-lg border-b border-border/50" : "bg-transparent"
-      )}
-    >
-      <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between h-20">
+    <header className="fixed top-0 left-0 right-0 z-50 transition-all duration-300">
+      <div className="container mx-auto px-4 pt-4">
+        <div className={cn(
+          "flex items-center justify-between h-16 px-6 transition-all duration-300 rounded-full glass-navbar",
+          scrolled ? "backdrop-blur-2xl bg-background/15 border-white/15 shadow-2xl" : ""
+        )}>
           <Link href="/" className="flex items-center gap-2">
-            <div className="relative w-36 md:w-44 h-12">
+            <div className="relative w-32 md:w-40 h-10">
               <Image 
                 src="/Di - Rounded.png" 
                 alt="SparkLab Logo" 
@@ -41,10 +39,10 @@ const Header = () => {
             <a href="/#timeline" className="text-sm font-medium text-foreground/80 hover:text-primary transition-colors">Timeline</a>
             <a href="/#team" className="text-sm font-medium text-foreground/80 hover:text-primary transition-colors">Team</a>
             <a href="/#sponsors" className="text-sm font-medium text-foreground/80 hover:text-primary transition-colors">Sponsors</a>
-            <a href="/#register" className="text-sm font-medium text-foreground/80 hover:text-primary transition-colors">Register</a>
+            <a href="https://unstop.com/o/7DopUC5?utm_medium=Share&utm_source=logged_out_user&utm_campaign=Innovation_challenge" className="text-sm font-medium text-foreground/80 hover:text-primary transition-colors">Register</a>
           </nav>
-          <Button asChild variant="outline" className="hidden md:flex animated-border-button">
-            <a href="#register">Register Now</a>
+          <Button asChild variant="outline" className="hidden md:flex animated-border-button rounded-full">
+            <a href="https://unstop.com/o/7DopUC5?utm_medium=Share&utm_source=logged_out_user&utm_campaign=Innovation_challenge">Register Now</a>
           </Button>
         </div>
       </div>

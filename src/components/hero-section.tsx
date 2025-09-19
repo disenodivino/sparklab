@@ -32,7 +32,7 @@ export default function HeroSection() {
                         <CountdownTimer />
                     </div>
                     <Button size="lg" className="bg-accent text-accent-foreground hover:bg-accent/90 glow-shadow-accent transition-all duration-300" asChild>
-                        <a href="#register">Register Now</a>
+                        <a href="https://unstop.com/o/7DopUC5?utm_medium=Share&utm_source=logged_out_user&utm_campaign=Innovation_challenge">Register Now</a>
                     </Button>
                 </div>
             </div>

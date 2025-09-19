@@ -17,10 +17,13 @@ export default {
     },
     extend: {
       fontFamily: {
-        body: ['Inter', 'sans-serif'],
-        headline: ['"Space Grotesk"', 'sans-serif'],
+        sans: ['"Clash Grotesk"', 'Inter', 'sans-serif'],
+        body: ['"Clash Grotesk"', 'Inter', 'sans-serif'],
+        headline: ['"Clash Grotesk"', '"Space Grotesk"', 'sans-serif'],
         code: ['monospace'],
         nimbus: ['"Tan Nimbus"', 'sans-serif'],
+        clash: ['"Clash Grotesk"', 'sans-serif'],
+        space: ['"Space Grotesk"', 'sans-serif'],
       },
       colors: {
         background: 'hsl(var(--background))',
