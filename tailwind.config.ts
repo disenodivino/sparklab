@@ -117,7 +117,7 @@ export default {
         'accordion-up': 'accordion-up 0.2s ease-out',
         'fade-in': 'fade-in 1s ease-in-out',
         'fade-in-up': 'fade-in-up 1s ease-in-out',
-        'grid-pan': 'grid-pan 30s linear infinite',
+        'grid-pan': 'grid-pan 60s linear infinite',
       },
     },
   },

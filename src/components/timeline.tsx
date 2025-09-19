@@ -107,9 +107,9 @@ const TimelineCard = ({ event }: { event: (typeof timelineEvents)[0] }) => {
       ref={ref as React.RefObject<HTMLDivElement>} 
       style={style} 
       className={cn("transition-all duration-300 w-full mx-auto card-3d-interactive", {
-        "border-primary/50 shadow-primary/10": event.status === "completed",
+        "border-accent/60 shadow-accent/15 glow-shadow-accent": event.status === "completed",
         "border-accent/80 shadow-accent/20 glow-shadow-accent": event.status === "ongoing",
-        "border-border/50 bg-card/60": event.status === "upcoming"
+        "border-accent/40 shadow-accent/10 glow-shadow-accent": event.status === "upcoming"
       })}
     >
       <CardHeader>

@@ -22,15 +22,16 @@ const Header = () => {
       <div className="container mx-auto px-4 pt-4">
         <div className={cn(
           "flex items-center justify-between h-16 px-6 transition-all duration-300 rounded-full glass-navbar",
-          scrolled ? "backdrop-blur-2xl bg-background/15 border-white/15 shadow-2xl" : ""
+          scrolled ? "shadow-2xl" : ""
         )}>
-          <Link href="/" className="flex items-center gap-2">
-            <div className="relative w-32 md:w-40 h-10">
+          <Link href="/" className="flex items-center gap-2 pl-2">
+            <div className="relative w-10 h-10 md:w-12 md:h-12 rounded-full overflow-hidden bg-background/20 flex items-center justify-center">
               <Image 
                 src="/Di - Rounded.png" 
                 alt="SparkLab Logo" 
                 layout="fill"
-                objectFit="contain"
+                objectFit="cover"
+                className=""
               />
             </div>
           </Link>

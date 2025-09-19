@@ -23,10 +23,8 @@ const teamMembers = [
 ];
 
 const sponsors = [
+  { name: "ISTE", logo: "/istelogo.png", hint: "ISTE organization" },
   { name: "TechCorp", logo: "https://placehold.co/300x150.png", hint: "tech company" },
-  { name: "DesignMinds", logo: "https://placehold.co/300x150.png", hint: "design agency" },
-  { name: "Innovate Inc.", logo: "https://placehold.co/300x150.png", hint: "startup incubator" },
-  { name: "Creative Solutions", logo: "https://placehold.co/300x150.png", hint: "creative agency" },
 ];
 
 const aboutCardsData = [
@@ -145,7 +143,7 @@ export default function Home() {
         <section id="sponsors" className="py-20 lg:py-32">
           <div className="container mx-auto px-4 text-center">
             <h2 className="text-4xl md:text-5xl font-bold mb-12">Our Sponsors</h2>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-8 items-center">
+            <div className="flex flex-wrap justify-center items-center gap-8 md:gap-12">
               {sponsors.map((sponsor) => (
                 <div key={sponsor.name} className="flex justify-center">
                   <Image
