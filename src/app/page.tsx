@@ -20,6 +20,10 @@ const teamMembers = [
   { name: "Maria Garcia", role: "Design Lead", avatar: "https://placehold.co/128x128.png", hint: "person portrait" },
   { name: "Sam Lee", role: "Tech Lead", avatar: "https://placehold.co/128x128.png", hint: "person portrait" },
   { name: "Jessica Chen", role: "Sponsorship Coordinator", avatar: "https://placehold.co/128x128.png", hint: "person portrait" },
+    { name: "Alex Johnson1", role: "Lead Organizer", avatar: "https://placehold.co/128x128.png", hint: "person portrait" },
+  { name: "Maria Garcia1", role: "Design Lead", avatar: "https://placehold.co/128x128.png", hint: "person portrait" },
+  { name: "Sam Lee1", role: "Tech Lead", avatar: "https://placehold.co/128x128.png", hint: "person portrait" },
+  { name: "Jessica Chen1", role: "Sponsorship Coordinator", avatar: "https://placehold.co/128x128.png", hint: "person portrait" },
 ];
 
 const sponsors = [
