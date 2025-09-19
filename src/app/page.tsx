@@ -23,8 +23,15 @@ const teamMembers = [
 ];
 
 const sponsors = [
+<<<<<<< HEAD
   { name: "ISTE", logo: "/istelogo.png", hint: "ISTE organization" },
   { name: "TechCorp", logo: "https://placehold.co/300x150.png", hint: "tech company" },
+=======
+  { name: "Google Gemini", logo: "https://i.ibb.co/Xf9QHmY3/result-Gemini-logo.jpg", hint: "tech company" },
+  { name: "ISTE", logo: "https://i.ibb.co/jPyNqcbD/result-ISTE-logo.jpg", hint: "design agency" },
+  { name: "Innovate Inc.", logo: "https://placehold.co/300x150.png", hint: "startup incubator" },
+  { name: "Creative Solutions", logo: "https://placehold.co/300x150.png", hint: "creative agency" },
+>>>>>>> d8fd5b32f2b71edacbf404d7a380d9d175f7c7f7
 ];
 
 const aboutCardsData = [

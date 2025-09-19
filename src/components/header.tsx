@@ -43,7 +43,7 @@ const Header = () => {
             <a href="https://unstop.com/o/7DopUC5?utm_medium=Share&utm_source=logged_out_user&utm_campaign=Innovation_challenge" className="text-sm font-medium text-foreground/80 hover:text-primary transition-colors">Register</a>
           </nav>
           <Button asChild variant="outline" className="hidden md:flex animated-border-button rounded-full">
-            <a href="https://unstop.com/o/7DopUC5?utm_medium=Share&utm_source=logged_out_user&utm_campaign=Innovation_challenge">Register Now</a>
+            <a href="https://unstop.com/o/7DopUC5?utm_medium=Share&utm_source=logged_out_user&utm_campaign=Innovation_challenge" target="_blank" rel="noopener noreferrer">Register Now</a>
           </Button>
         </div>
       </div>
