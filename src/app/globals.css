@@ -78,34 +78,92 @@
   h1, h2, h3, h4, h5, h6 {
     @apply font-headline;
   }
-  html.has-cursor,
-  html.has-cursor *,
-  html.has-cursor *:hover {
-    cursor: none;
+  html.has-custom-cursor,
+  html.has-custom-cursor *,
+  html.has-custom-cursor *:hover {
+    cursor: none !important;
   }
 }
 
-.cursor {
+.custom-cursor {
   position: fixed;
-  left: 0;
   top: 0;
+  left: 0;
   pointer-events: none;
-  z-index: 9999;
+  z-index: 10000;
+  mix-blend-mode: difference;
 }
+
 .cursor-dot {
-  width: 6px;
-  height: 6px;
+  position: fixed;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
-  background-color: hsl(var(--primary));
-  transition: transform 0.2s ease-out;
+  background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--accent)));
+  transform-origin: center;
+  transition: transform 0.15s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  box-shadow: 
+    0 0 10px hsl(var(--primary) / 0.3),
+    0 0 20px hsl(var(--primary) / 0.2),
+    inset 0 0 5px hsl(var(--primary) / 0.5);
+  will-change: transform;
 }
-.cursor-comet {
-  width: 3px;
-  height: 3px;
+
+.cursor-outline {
+  position: fixed;
+  width: 32px;
+  height: 32px;
+  border: 2px solid hsl(var(--primary) / 0.3);
   border-radius: 50%;
-  background-color: hsl(var(--accent));
-  box-shadow: 0 0 10px hsl(var(--accent)), 0 0 20px hsl(var(--accent));
-  transition: opacity 0.3s ease-out;
+  background: radial-gradient(circle, hsl(var(--primary) / 0.1) 0%, transparent 70%);
+  transform-origin: center;
+  transition: 
+    transform 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+    border-color 0.2s ease,
+    background 0.2s ease;
+  backdrop-filter: blur(2px);
+  will-change: transform;
+}
+
+/* Hover states */
+.cursor-outline.cursor-hover {
+  border-color: hsl(var(--accent) / 0.6);
+  background: radial-gradient(circle, hsl(var(--accent) / 0.2) 0%, transparent 70%);
+  box-shadow: 
+    0 0 20px hsl(var(--accent) / 0.3),
+    inset 0 0 10px hsl(var(--accent) / 0.1);
+}
+
+.cursor-dot.cursor-pointer {
+  background: linear-gradient(135deg, hsl(var(--accent)), hsl(var(--primary)));
+  box-shadow: 
+    0 0 15px hsl(var(--accent) / 0.4),
+    0 0 30px hsl(var(--accent) / 0.2),
+    inset 0 0 8px hsl(var(--accent) / 0.5);
+}
+
+.cursor-outline.cursor-pressed {
+  transform: scale(0.8) !important;
+  border-color: hsl(var(--accent));
+  background: radial-gradient(circle, hsl(var(--accent) / 0.3) 0%, transparent 50%);
+}
+
+/* Moving state animation */
+.cursor-dot.cursor-moving {
+  box-shadow: 
+    0 0 15px hsl(var(--primary) / 0.4),
+    0 0 30px hsl(var(--primary) / 0.3),
+    0 0 45px hsl(var(--primary) / 0.2),
+    inset 0 0 8px hsl(var(--primary) / 0.6);
+}
+
+/* Reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  .cursor-dot,
+  .cursor-outline {
+    transition: none;
+    animation: none;
+  }
 }
 
 
