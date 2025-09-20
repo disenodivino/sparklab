@@ -28,7 +28,7 @@ const teamMembers = [
 
 const sponsors = [
   { name: "ISTE", logo: "/istelogo.png", hint: "ISTE organization" },
-  { name: "Google Gemini", logo: "/GoogleGemini_Lockup_FullColor_Black.png", hint: "Google Gemini" },
+  { name: "Google Gemini", logo: "/GoogleGemini_Lockup_FullColor_White.png", hint: "Google Gemini" },
 ];
 
 const aboutCardsData = [
