@@ -153,8 +153,8 @@ export default function Home() {
                   <Image
                     src={sponsor.logo}
                     alt={`${sponsor.name} logo`}
-                    width={200}
-                    height={100}
+                    width={sponsor.name === "Google Gemini" ? 300 : 200}
+                    height={sponsor.name === "Google Gemini" ? 150 : 100}
                     data-ai-hint={sponsor.hint}
                     className="opacity-70 grayscale hover:opacity-100 hover:grayscale-0 transition-all duration-300"
                   />
