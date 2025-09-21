@@ -156,7 +156,7 @@ export default function Home() {
                     width={sponsor.name === "Google Gemini" ? 500 : 200}
                     height={sponsor.name === "Google Gemini" ? 300 : 100}
                     data-ai-hint={sponsor.hint}
-                    className="opacity-70 grayscale hover:opacity-100 hover:grayscale-0 transition-all duration-300"
+                    className="opacity-90 hover:opacity-100 transition-all duration-300"
                   />
                 </div>
               ))}
