@@ -132,14 +132,18 @@ export default function TeamSection() {
           <h3 className="text-3xl font-headline text-center mb-12 text-accent">
             Advisory Committee
           </h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-12 max-w-6xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-12 max-w-6xl mx-auto justify-items-center">
             {advisoryCommittee.map((member, index) => (
-              <TeamCard
+              <div
                 key={member.name}
-                member={member}
-                size="large"
-                style={{ animationDelay: `${index * 0.2}s` }}
-              />
+                className={index === 3 ? "md:col-start-2" : ""}
+              >
+                <TeamCard
+                  member={member}
+                  size="large"
+                  style={{ animationDelay: `${index * 0.2}s` }}
+                />
+              </div>
             ))}
           </div>
         </div>
@@ -149,7 +153,7 @@ export default function TeamSection() {
           <h3 className="text-3xl font-headline text-center mb-12 text-accent">
             Executive Team
           </h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-12 max-w-6xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-12 max-w-6xl mx-auto justify-items-center">
             {executiveTeam.map((member, index) => (
               <TeamCard
                 key={member.name}
@@ -166,14 +170,24 @@ export default function TeamSection() {
           <h3 className="text-3xl font-headline text-center mb-12 text-accent">
             Organizers
           </h3>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-8 max-w-7xl mx-auto">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-8 max-w-7xl mx-auto justify-items-center">
             {organizers.map((member, index) => (
-              <TeamCard
+              <div
                 key={member.name}
-                member={member}
-                size="medium"
-                style={{ animationDelay: `${(index + 6) * 0.1}s` }}
-              />
+                className={
+                  index === 8
+                    ? "md:col-start-2"
+                    : index === 9
+                    ? "md:col-start-3"
+                    : ""
+                }
+              >
+                <TeamCard
+                  member={member}
+                  size="medium"
+                  style={{ animationDelay: `${(index + 6) * 0.1}s` }}
+                />
+              </div>
             ))}
           </div>
         </div>
