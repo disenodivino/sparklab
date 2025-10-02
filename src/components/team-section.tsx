@@ -33,7 +33,7 @@ const executiveTeam: TeamMember[] = [
   {
     name: "Srivathsa S Murthy",
     role: "President, Diseño Divino",
-    avatar: "/team_pics/Rohith.jpg",
+    avatar: "/team_pics/svsm.png",
     hint: "person portrait",
   },
   {
@@ -58,9 +58,9 @@ const organizers: TeamMember[] = [
     hint: "person portrait",
   },
   {
-    name: "Kalattur Somesh",
+    name: "lanja Somesh",
     role: "Operations Lead & Event Lead Coordinator",
-    avatar: "/team_pics/Rohith.jpg",
+    avatar: "/team_pics/lanja_somu.jpeg",
     hint: "person portrait",
   },
   {
