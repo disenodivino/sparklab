@@ -8,18 +8,26 @@ import React from "react";
 
 const timelineEvents = [
   {
-    time: "Day 1, 09:00 AM",
-    title: "Event Kick-off",
+    time: "Day 1, 08:00 AM",
+    title: "Reporting & Registration",
     description:
-      "Opening ceremony, theme reveal, and official start of the designathon.",
+      "Participants check in, receive their badges, and get settled in.",
     icon: Flag,
     status: "completed",
   },
   {
-    time: "Day 1, 10:00 AM",
-    title: "Ideation & Team Formation",
-    description: "Brainstorming session and final team formations.",
+    time: "Day 1, 09:00 AM",
+    title: "Opening Ceremony & Briefing",
+    description: "Welcome address and official start of the designathon.",
     icon: Zap,
+    status: "completed",
+  },
+  {
+    time: "Day 1, 10:00 AM",
+    title: "Themes Reveal and Designathon begins",
+    description:
+      "Exciting themes are unveiled to spark creativity and designathon begins.",
+    icon: Flag,
     status: "completed",
   },
   {
@@ -27,14 +35,6 @@ const timelineEvents = [
     title: "Lunch Break",
     description: "Time to refuel and network with fellow participants.",
     icon: Coffee,
-    status: "completed",
-  },
-  {
-    time: "Day 1, 02:00 PM",
-    title: "Design Sprint Begins",
-    description:
-      "Deep dive into designing and prototyping. Mentors will be available for guidance.",
-    icon: Clock,
     status: "ongoing",
   },
   {
@@ -45,10 +45,10 @@ const timelineEvents = [
     status: "upcoming",
   },
   {
-    time: "Day 1, 09:00 PM",
-    title: "Checkpoint 1",
-    description: "First progress check-in with the review panel.",
-    icon: CheckCircle,
+    time: "Day 2, 01:00 AM",
+    title: "Midnight Snacks",
+    description: "Snacks to keep the energy up during the late hours.",
+    icon: Coffee,
     status: "upcoming",
   },
   {
@@ -60,14 +60,14 @@ const timelineEvents = [
     status: "upcoming",
   },
   {
-    time: "Day 2, 01:00 PM",
+    time: "Day 2, 12:30 PM",
     title: "Submission Deadline",
     description: "Final project submissions are due.",
     icon: CheckCircle,
     status: "upcoming",
   },
   {
-    time: "Day 2, 02:00 PM",
+    time: "Day 2, 01:00 PM",
     title: "Project Demos",
     description:
       "Teams present their final projects to the judges and audience.",
@@ -75,7 +75,7 @@ const timelineEvents = [
     status: "upcoming",
   },
   {
-    time: "Day 2, 04:00 PM",
+    time: "Day 2, 03:00 PM",
     title: "Awards Ceremony",
     description: "Announcement of winners and closing remarks.",
     icon: Award,

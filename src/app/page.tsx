@@ -24,18 +24,11 @@ import Timeline from "@/components/timeline";
 import HeroSection from "@/components/hero-section";
 import PrizesSection from "@/components/prizes-section";
 import TeamSection from "@/components/team-section";
+import SponsorsSection from "@/components/sponsors-section";
+import ContactSection from "@/components/contact-section";
 import { useInteractiveCard } from "@/hooks/use-interactive-card";
 import { cn } from "@/lib/utils";
 import React from "react";
-
-const sponsors = [
-  {
-    name: "Google Gemini",
-    logo: "/GoogleGemini_Lockup_FullColor_White.png",
-    hint: "Google Gemini",
-  },
-  { name: "ISTE", logo: "/istelogo.png", hint: "ISTE organization" },
-];
 
 const aboutCardsData = [
   {
@@ -164,27 +157,9 @@ export default function Home() {
 
         <TeamSection />
 
-        <section id="sponsors" className="py-20 lg:py-32">
-          <div className="container mx-auto px-4 text-center">
-            <h2 className="text-4xl md:text-5xl font-headline mb-12">
-              Our Sponsors
-            </h2>
-            <div className="flex flex-wrap justify-center items-center gap-8 md:gap-12">
-              {sponsors.map((sponsor) => (
-                <div key={sponsor.name} className="flex justify-center">
-                  <Image
-                    src={sponsor.logo}
-                    alt={`${sponsor.name} logo`}
-                    width={sponsor.name === "Google Gemini" ? 500 : 200}
-                    height={sponsor.name === "Google Gemini" ? 300 : 100}
-                    data-ai-hint={sponsor.hint}
-                    className="opacity-70 grayscale hover:opacity-100 hover:grayscale-0 transition-all duration-300"
-                  />
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
+        <SponsorsSection />
+
+        <ContactSection />
       </main>
       <Footer />
     </div>
