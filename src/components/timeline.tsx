@@ -1,85 +1,95 @@
-"use client"
+"use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { cn } from "@/lib/utils"
-import { CheckCircle, Clock, Coffee, Flag, Award, Zap } from "lucide-react"
-import { useInteractiveCard } from "@/hooks/use-interactive-card"
-import React from "react"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
+import { CheckCircle, Clock, Coffee, Flag, Award, Zap } from "lucide-react";
+import { useInteractiveCard } from "@/hooks/use-interactive-card";
+import React from "react";
 
 const timelineEvents = [
   {
     time: "Day 1, 09:00 AM",
     title: "Event Kick-off",
-    description: "Opening ceremony, theme reveal, and official start of the designathon.",
+    description:
+      "Opening ceremony, theme reveal, and official start of the designathon.",
     icon: Flag,
-    status: "completed"
+    status: "completed",
   },
   {
     time: "Day 1, 10:00 AM",
     title: "Ideation & Team Formation",
     description: "Brainstorming session and final team formations.",
     icon: Zap,
-    status: "completed"
+    status: "completed",
   },
   {
     time: "Day 1, 01:00 PM",
     title: "Lunch Break",
     description: "Time to refuel and network with fellow participants.",
     icon: Coffee,
-    status: "completed"
+    status: "completed",
   },
   {
     time: "Day 1, 02:00 PM",
     title: "Design Sprint Begins",
-    description: "Deep dive into designing and prototyping. Mentors will be available for guidance.",
+    description:
+      "Deep dive into designing and prototyping. Mentors will be available for guidance.",
     icon: Clock,
-    status: "ongoing"
+    status: "ongoing",
   },
   {
     time: "Day 1, 07:00 PM",
     title: "Dinner",
     description: "A well-deserved dinner break.",
     icon: Coffee,
-    status: "upcoming"
+    status: "upcoming",
   },
-    {
+  {
     time: "Day 1, 09:00 PM",
     title: "Checkpoint 1",
     description: "First progress check-in with the review panel.",
     icon: CheckCircle,
-    status: "upcoming"
+    status: "upcoming",
   },
   {
     time: "Day 2, 08:00 AM",
     title: "Breakfast & Final Push",
-    description: "Grab breakfast and start the final sprint towards the finish line.",
+    description:
+      "Grab breakfast and start the final sprint towards the finish line.",
     icon: Coffee,
-    status: "upcoming"
+    status: "upcoming",
   },
   {
     time: "Day 2, 01:00 PM",
     title: "Submission Deadline",
     description: "Final project submissions are due.",
     icon: CheckCircle,
-    status: "upcoming"
+    status: "upcoming",
   },
   {
     time: "Day 2, 02:00 PM",
     title: "Project Demos",
-    description: "Teams present their final projects to the judges and audience.",
+    description:
+      "Teams present their final projects to the judges and audience.",
     icon: Clock,
-    status: "upcoming"
+    status: "upcoming",
   },
   {
     time: "Day 2, 04:00 PM",
     title: "Awards Ceremony",
     description: "Announcement of winners and closing remarks.",
     icon: Award,
-    status: "upcoming"
+    status: "upcoming",
   },
-]
+];
 
-const TimelineItem = ({ event, isLeft }: { event: (typeof timelineEvents)[0], isLeft: boolean }) => (
+const TimelineItem = ({
+  event,
+  isLeft,
+}: {
+  event: (typeof timelineEvents)[0];
+  isLeft: boolean;
+}) => (
   <div className="flex items-center w-full">
     {isLeft ? (
       <>
@@ -101,20 +111,28 @@ const TimelineItem = ({ event, isLeft }: { event: (typeof timelineEvents)[0], is
 
 const TimelineCard = ({ event }: { event: (typeof timelineEvents)[0] }) => {
   const { ref, style } = useInteractiveCard();
-  
+
   return (
-    <Card 
-      ref={ref as React.RefObject<HTMLDivElement>} 
-      style={style} 
-      className={cn("transition-all duration-300 w-full mx-auto card-3d-interactive", {
-        "border-accent/60 shadow-accent/15 glow-shadow-accent": event.status === "completed",
-        "border-accent/80 shadow-accent/20 glow-shadow-accent": event.status === "ongoing",
-        "border-accent/40 shadow-accent/10 glow-shadow-accent": event.status === "upcoming"
-      })}
+    <Card
+      ref={ref as React.RefObject<HTMLDivElement>}
+      style={style}
+      className={cn(
+        "transition-all duration-300 w-full mx-auto card-3d-interactive",
+        {
+          "border-accent/60 shadow-accent/15 glow-shadow-accent":
+            event.status === "completed",
+          "border-accent/80 shadow-accent/20 glow-shadow-accent":
+            event.status === "ongoing",
+          "border-accent/40 shadow-accent/10 glow-shadow-accent":
+            event.status === "upcoming",
+        }
+      )}
     >
       <CardHeader>
         <p className="text-sm text-muted-foreground">{event.time}</p>
-        <CardTitle>{event.title}</CardTitle>
+        <CardTitle className="font-headline font-light">
+          {event.title}
+        </CardTitle>
       </CardHeader>
       <CardContent>
         <p className="text-foreground/80">{event.description}</p>
@@ -122,7 +140,6 @@ const TimelineCard = ({ event }: { event: (typeof timelineEvents)[0] }) => {
     </Card>
   );
 };
-
 
 export default function Timeline() {
   return (
@@ -137,11 +154,19 @@ export default function Timeline() {
           {timelineEvents.map((event, index) => (
             <div key={event.title} className="relative flex justify-center">
               <div className="absolute left-1/2 -translate-x-1/2 z-10">
-                <div className={cn("h-8 w-8 rounded-full flex items-center justify-center ring-8 ring-background", {
-                  "bg-primary text-primary-foreground": event.status === "completed",
-                  "bg-accent text-accent-foreground animate-pulse": event.status === "ongoing",
-                  "bg-muted text-muted-foreground": event.status === "upcoming"
-                })}>
+                <div
+                  className={cn(
+                    "h-8 w-8 rounded-full flex items-center justify-center ring-8 ring-background",
+                    {
+                      "bg-primary text-primary-foreground":
+                        event.status === "completed",
+                      "bg-accent text-accent-foreground animate-pulse":
+                        event.status === "ongoing",
+                      "bg-muted text-muted-foreground":
+                        event.status === "upcoming",
+                    }
+                  )}
+                >
                   <event.icon className="h-5 w-5" />
                 </div>
               </div>
@@ -161,21 +186,29 @@ export default function Timeline() {
           {timelineEvents.map((event) => (
             <div key={event.title} className="relative flex items-start">
               <div className="absolute left-6 -translate-x-1/2 z-10">
-                <div className={cn("h-8 w-8 rounded-full flex items-center justify-center ring-4 ring-background", {
-                    "bg-primary text-primary-foreground": event.status === "completed",
-                    "bg-accent text-accent-foreground animate-pulse": event.status === "ongoing",
-                    "bg-muted text-muted-foreground": event.status === "upcoming"
-                })}>
-                    <event.icon className="h-5 w-5" />
+                <div
+                  className={cn(
+                    "h-8 w-8 rounded-full flex items-center justify-center ring-4 ring-background",
+                    {
+                      "bg-primary text-primary-foreground":
+                        event.status === "completed",
+                      "bg-accent text-accent-foreground animate-pulse":
+                        event.status === "ongoing",
+                      "bg-muted text-muted-foreground":
+                        event.status === "upcoming",
+                    }
+                  )}
+                >
+                  <event.icon className="h-5 w-5" />
                 </div>
               </div>
               <div className="w-full pl-12">
-                 <TimelineCard event={event} />
+                <TimelineCard event={event} />
               </div>
             </div>
           ))}
         </div>
       </div>
     </div>
-  )
+  );
 }

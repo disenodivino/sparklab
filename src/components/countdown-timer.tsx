@@ -1,11 +1,10 @@
-
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 
 const CountdownTimer = () => {
   const calculateTimeLeft = () => {
-    const eventDate = new Date("2025-10-01T09:00:00Z").getTime();
+    const eventDate = new Date("2025-10-24T09:00:00Z").getTime();
     const now = new Date().getTime();
     const difference = eventDate - now;
 
@@ -27,11 +26,16 @@ const CountdownTimer = () => {
     return timeLeft;
   };
 
-  const [timeLeft, setTimeLeft] = useState<{days: number, hours: number, minutes: number, seconds: number} | null>(null);
+  const [timeLeft, setTimeLeft] = useState<{
+    days: number;
+    hours: number;
+    minutes: number;
+    seconds: number;
+  } | null>(null);
 
   useEffect(() => {
     setTimeLeft(calculateTimeLeft());
-    
+
     const timer = setInterval(() => {
       setTimeLeft(calculateTimeLeft());
     }, 1000);
@@ -39,31 +43,35 @@ const CountdownTimer = () => {
     return () => clearInterval(timer);
   }, []);
 
-  const timeUnits = timeLeft ? [
-    { label: 'Days', value: timeLeft.days },
-    { label: 'Hours', value: timeLeft.hours },
-    { label: 'Minutes', value: timeLeft.minutes },
-    { label: 'Seconds', value: timeLeft.seconds },
-  ] : [
-    { label: 'Days', value: 0 },
-    { label: 'Hours', value: 0 },
-    { label: 'Minutes', value: 0 },
-    { label: 'Seconds', value: 0 },
-  ];
+  const timeUnits = timeLeft
+    ? [
+        { label: "Days", value: timeLeft.days },
+        { label: "Hours", value: timeLeft.hours },
+        { label: "Minutes", value: timeLeft.minutes },
+        { label: "Seconds", value: timeLeft.seconds },
+      ]
+    : [
+        { label: "Days", value: 0 },
+        { label: "Hours", value: 0 },
+        { label: "Minutes", value: 0 },
+        { label: "Seconds", value: 0 },
+      ];
 
   if (!timeLeft) {
     // Render a placeholder or loading state on the server and initial client render
     return (
-        <div className="flex justify-center items-center gap-4 md:gap-8">
-            {timeUnits.map((unit, index) => (
-                <div key={index} className="flex flex-col items-center">
-                    <div className="text-4xl md:text-6xl font-bold font-space text-foreground tracking-tighter w-20 h-20 md:w-28 md:h-28 flex items-center justify-center bg-primary/10 rounded-lg border border-primary/20">
-                        --
-                    </div>
-                    <span className="text-sm md:text-base font-medium text-foreground/70 mt-2">{unit.label}</span>
-                </div>
-            ))}
-        </div>
+      <div className="flex justify-center items-center gap-4 md:gap-8">
+        {timeUnits.map((unit, index) => (
+          <div key={index} className="flex flex-col items-center">
+            <div className="text-4xl md:text-6xl font-bold font-space text-foreground tracking-tighter w-20 h-20 md:w-28 md:h-28 flex items-center justify-center bg-primary/10 rounded-lg border border-primary/20">
+              --
+            </div>
+            <span className="text-sm md:text-base font-medium text-foreground/70 mt-2">
+              {unit.label}
+            </span>
+          </div>
+        ))}
+      </div>
     );
   }
 
@@ -72,9 +80,11 @@ const CountdownTimer = () => {
       {timeUnits.map((unit, index) => (
         <div key={index} className="flex flex-col items-center">
           <div className="text-4xl md:text-6xl font-bold font-space text-foreground tracking-tighter w-20 h-20 md:w-28 md:h-28 flex items-center justify-center bg-primary/10 rounded-lg border border-primary/20">
-            {String(unit.value).padStart(2, '0')}
+            {String(unit.value).padStart(2, "0")}
           </div>
-          <span className="text-sm md:text-base font-medium text-foreground/70 mt-2">{unit.label}</span>
+          <span className="text-sm md:text-base font-medium text-foreground/70 mt-2">
+            {unit.label}
+          </span>
         </div>
       ))}
     </div>

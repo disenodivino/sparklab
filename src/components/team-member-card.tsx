@@ -1,7 +1,7 @@
 "use client";
 
-import Image from 'next/image';
-import { useInteractiveCard } from '@/hooks/use-interactive-card';
+import Image from "next/image";
+import { useInteractiveCard } from "@/hooks/use-interactive-card";
 
 type TeamMemberCardProps = {
   member: {
@@ -19,7 +19,7 @@ const TeamMemberCard: React.FC<TeamMemberCardProps> = ({ member, style }) => {
   return (
     <div
       ref={ref as React.RefObject<HTMLDivElement>}
-      style={{...style, ...interactiveStyle}}
+      style={{ ...style, ...interactiveStyle }}
       className="flex flex-col items-center animate-fade-in-up card-3d-interactive p-4 rounded-lg"
     >
       <Image
@@ -30,7 +30,7 @@ const TeamMemberCard: React.FC<TeamMemberCardProps> = ({ member, style }) => {
         data-ai-hint={member.hint}
         className="rounded-full mb-4 border-2 border-primary/50"
       />
-      <h3 className="text-xl font-bold">{member.name}</h3>
+      <h3 className="text-xl font-headline">{member.name}</h3>
       <p className="text-accent">{member.role}</p>
     </div>
   );

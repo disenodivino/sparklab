@@ -66,6 +66,14 @@
     font-display: swap;
   }
 
+  @font-face {
+    font-family: 'Bebas Neue';
+    src: url('/fonts/BebasNeue-Regular.ttf') format('truetype');
+    font-weight: 100 400;
+    font-style: normal;
+    font-display: swap;
+  }
+
   * {
     @apply border-border;
   }

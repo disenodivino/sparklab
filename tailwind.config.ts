@@ -19,11 +19,12 @@ export default {
       fontFamily: {
         sans: ['"Clash Grotesk"', 'Inter', 'sans-serif'],
         body: ['"Clash Grotesk"', 'Inter', 'sans-serif'],
-        headline: ['"Clash Grotesk"', '"Space Grotesk"', 'sans-serif'],
+        headline: ['"Bebas Neue"', '"Clash Grotesk"', 'sans-serif'],
         code: ['monospace'],
         nimbus: ['"Tan Nimbus"', 'sans-serif'],
         clash: ['"Clash Grotesk"', 'sans-serif'],
         space: ['"Space Grotesk"', 'sans-serif'],
+        bebas: ['"Bebas Neue"', 'sans-serif'],
       },
       colors: {
         background: 'hsl(var(--background))',
