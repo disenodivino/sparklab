@@ -23,61 +23,10 @@ import Footer from "@/components/footer";
 import Timeline from "@/components/timeline";
 import HeroSection from "@/components/hero-section";
 import PrizesSection from "@/components/prizes-section";
-import TeamMemberCard from "@/components/team-member-card";
+import TeamSection from "@/components/team-section";
 import { useInteractiveCard } from "@/hooks/use-interactive-card";
 import { cn } from "@/lib/utils";
 import React from "react";
-
-const teamMembers = [
-  {
-    name: "Alex Johnson",
-    role: "Lead Organizer",
-    avatar: "https://placehold.co/128x128.png",
-    hint: "person portrait",
-  },
-  {
-    name: "Maria Garcia",
-    role: "Design Lead",
-    avatar: "https://placehold.co/128x128.png",
-    hint: "person portrait",
-  },
-  {
-    name: "Sam Lee",
-    role: "Tech Lead",
-    avatar: "https://placehold.co/128x128.png",
-    hint: "person portrait",
-  },
-  {
-    name: "Jessica Chen",
-    role: "Sponsorship Coordinator",
-    avatar: "https://placehold.co/128x128.png",
-    hint: "person portrait",
-  },
-  {
-    name: "Alex Johnson1",
-    role: "Lead Organizer",
-    avatar: "https://placehold.co/128x128.png",
-    hint: "person portrait",
-  },
-  {
-    name: "Maria Garcia1",
-    role: "Design Lead",
-    avatar: "https://placehold.co/128x128.png",
-    hint: "person portrait",
-  },
-  {
-    name: "Sam Lee1",
-    role: "Tech Lead",
-    avatar: "https://placehold.co/128x128.png",
-    hint: "person portrait",
-  },
-  {
-    name: "Jessica Chen1",
-    role: "Sponsorship Coordinator",
-    avatar: "https://placehold.co/128x128.png",
-    hint: "person portrait",
-  },
-];
 
 const sponsors = [
   {
@@ -213,22 +162,7 @@ export default function Home() {
 
         <PrizesSection />
 
-        <section id="team" className="py-20 lg:py-32">
-          <div className="container mx-auto px-4 text-center">
-            <h2 className="text-4xl md:text-5xl font-headline mb-12">
-              Meet the Team
-            </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
-              {teamMembers.map((member, index) => (
-                <TeamMemberCard
-                  key={member.name}
-                  member={member}
-                  style={{ animationDelay: `${index * 0.2}s` }}
-                />
-              ))}
-            </div>
-          </div>
-        </section>
+        <TeamSection />
 
         <section id="sponsors" className="py-20 lg:py-32">
           <div className="container mx-auto px-4 text-center">
