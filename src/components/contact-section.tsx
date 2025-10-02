@@ -47,7 +47,7 @@ const eventDetails = [
   {
     icon: Users,
     title: "Team Size",
-    detail: "2-4 Members",
+    detail: "1-4 Members",
     description: "Form your dream team",
   },
 ];

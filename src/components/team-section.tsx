@@ -32,7 +32,7 @@ const executiveTeam: TeamMember[] = [
   },
   {
     name: "Rohith Vishwanath",
-    role: "Secretary, Diseño Divino & Event Lead Coordinator",
+    role: "Secretary, Diseño Divino & Event Lead Organizer",
     avatar: "/team_pics/Rohith.jpg",
     hint: "person portrait",
   },
@@ -53,7 +53,7 @@ const organizers: TeamMember[] = [
   },
   {
     name: "Kalattur Somesh",
-    role: "Operations Lead & Event Coordinator",
+    role: "Operations Lead & Event Lead Coordinator",
     avatar: "/team_pics/Rohith.jpg",
     hint: "person portrait",
   },
