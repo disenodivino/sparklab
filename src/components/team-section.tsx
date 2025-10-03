@@ -82,7 +82,7 @@ const organizers: TeamMember[] = [
     hint: "person portrait",
   },
   {
-    name: "Aasiya Sheriff",
+    name: "Aasiya Shariff",
     role: "Social Media Lead",
     avatar: "/team_pics/Rohith.jpg",
     hint: "person portrait",

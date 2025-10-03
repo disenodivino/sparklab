@@ -31,9 +31,8 @@ const Header = () => {
               <Image
                 src="/Di - Rounded.png"
                 alt="SparkLab Logo"
-                layout="fill"
-                objectFit="cover"
-                className=""
+                fill
+                className="object-cover"
               />
             </div>
           </Link>

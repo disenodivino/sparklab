@@ -23,6 +23,12 @@ const sponsors: Sponsor[] = [
     hint: "ISTE organization",
     website: "https://www.iste.org",
   },
+  {
+    name: "Seamovation Labs Pvt. Ltd.",
+    logo: "/seamovation.png",
+    hint: "Seamovation Labs Pvt. Ltd.",
+    website: "https://www.seamovation.com",
+  },
 ];
 
 export default function SponsorsSection() {
@@ -52,25 +58,27 @@ export default function SponsorsSection() {
                   rel="noopener noreferrer"
                   className="block hover:scale-105 transition-transform duration-300"
                 >
-                  <Image
-                    src={sponsor.logo}
-                    alt={`${sponsor.name} logo`}
-                    width={sponsor.name === "Google Gemini" ? 500 : 200}
-                    height={sponsor.name === "Google Gemini" ? 300 : 100}
-                    data-ai-hint={sponsor.hint}
-                    className="hover:drop-shadow-lg transition-all duration-300"
-                  />
+                  <div className="h-16 md:h-20 lg:h-24 w-32 md:w-40 lg:w-48 relative">
+                    <Image
+                      src={sponsor.logo}
+                      alt={`${sponsor.name} logo`}
+                      fill
+                      data-ai-hint={sponsor.hint}
+                      className="object-contain hover:drop-shadow-lg transition-all duration-300"
+                    />
+                  </div>
                 </a>
               ) : (
                 <div className="hover:scale-105 transition-transform duration-300">
-                  <Image
-                    src={sponsor.logo}
-                    alt={`${sponsor.name} logo`}
-                    width={sponsor.name === "Google Gemini" ? 500 : 200}
-                    height={sponsor.name === "Google Gemini" ? 300 : 100}
-                    data-ai-hint={sponsor.hint}
-                    className="hover:drop-shadow-lg transition-all duration-300"
-                  />
+                  <div className="h-16 md:h-20 lg:h-24 w-32 md:w-40 lg:w-48 relative">
+                    <Image
+                      src={sponsor.logo}
+                      alt={`${sponsor.name} logo`}
+                      fill
+                      data-ai-hint={sponsor.hint}
+                      className="object-contain hover:drop-shadow-lg transition-all duration-300"
+                    />
+                  </div>
                 </div>
               )}
             </div>

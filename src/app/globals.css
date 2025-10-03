@@ -69,7 +69,7 @@
   @font-face {
     font-family: 'Bebas Neue';
     src: url('/fonts/BebasNeue-Regular.ttf') format('truetype');
-    font-weight: 100 400;
+    font-weight: normal;
     font-style: normal;
     font-display: swap;
   }
@@ -93,128 +93,31 @@
     cursor: none !important;
   }
   
-  /* CSS Custom Properties for mouse position */
-  :root {
-    --cursor-x: 0px;
-    --cursor-y: 0px;
-  }
 }
 
-/* SparkLab Cursor Container */
-.sparklab-cursor {
-  position: fixed;
-  top: 0;
-  left: 0;
-  pointer-events: none;
-  z-index: 10000;
-  width: 0;
-  height: 0;
+/* Figma-style cursor - simple and performant */
+html.figma-cursor * {
+  cursor: none !important;
 }
 
-/* Main cursor dot - instant follow */
-.sparklab-cursor-dot {
-  position: absolute;
-  width: 6px;
-  height: 6px;
-  background: hsl(var(--primary));
-  border-radius: 50%;
-  transform: translate3d(var(--cursor-x), var(--cursor-y), 0) translate(-50%, -50%);
-  box-shadow: 0 0 8px hsl(var(--primary) / 0.4);
-  will-change: transform;
-  /* Instant following - no transition */
+html.figma-cursor {
+  cursor: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTUgM0w3IDE1TDEyIDEyTDE5IDIwTDIwIDE5TDEyIDEyTDE1IDdMMyA1WiIgZmlsbD0iYmxhY2siLz4KPC9zdmc+'), auto !important;
 }
 
-/* Trailing element - smooth follow with CSS animation */
-.sparklab-cursor-trail {
-  position: absolute;
-  width: 24px;
-  height: 24px;
-  border: 1px solid hsl(var(--primary) / 0.4);
-  border-radius: 50%;
-  background: radial-gradient(circle, hsl(var(--primary) / 0.05) 0%, transparent 70%);
-  transform: translate3d(var(--cursor-x), var(--cursor-y), 0) translate(-50%, -50%);
-  transition: transform 0.15s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-  will-change: transform;
+html.figma-cursor button,
+html.figma-cursor a,
+html.figma-cursor [role="button"],
+html.figma-cursor input,
+html.figma-cursor select,
+html.figma-cursor textarea {
+  cursor: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTUgM0w3IDE1TDEyIDEyTDE5IDIwTDIwIDE5TDEyIDEyTDE1IDdMMyA1WiIgZmlsbD0iIzAwNzBmMyIvPgo8L3N2Zz4K'), pointer !important;
 }
 
-/* Hover states using global classes */
-html.cursor-hover .sparklab-cursor-dot {
-  background: hsl(var(--accent));
-  box-shadow: 0 0 12px hsl(var(--accent) / 0.5);
-  transform: translate3d(var(--cursor-x), var(--cursor-y), 0) translate(-50%, -50%) scale(1.2);
-}
-
-html.cursor-hover .sparklab-cursor-trail {
-  border-color: hsl(var(--accent) / 0.6);
-  background: radial-gradient(circle, hsl(var(--accent) / 0.1) 0%, transparent 70%);
-  transform: translate3d(var(--cursor-x), var(--cursor-y), 0) translate(-50%, -50%) scale(1.1);
-}
-
-/* Interactive element hover */
-html.cursor-hover-interactive .sparklab-cursor-dot {
-  background: linear-gradient(45deg, hsl(var(--accent)), hsl(var(--primary)));
-  box-shadow: 
-    0 0 15px hsl(var(--accent) / 0.6),
-    0 0 25px hsl(var(--primary) / 0.3);
-  transform: translate3d(var(--cursor-x), var(--cursor-y), 0) translate(-50%, -50%) scale(1.5);
-}
-
-html.cursor-hover-interactive .sparklab-cursor-trail {
-  border-color: hsl(var(--accent));
-  background: radial-gradient(circle, hsl(var(--accent) / 0.15) 0%, transparent 60%);
-  transform: translate3d(var(--cursor-x), var(--cursor-y), 0) translate(-50%, -50%) scale(1.3);
-  box-shadow: 0 0 20px hsl(var(--accent) / 0.2);
-}
-
-/* Pressed state */
-html.cursor-pressed .sparklab-cursor-dot {
-  transform: translate3d(var(--cursor-x), var(--cursor-y), 0) translate(-50%, -50%) scale(0.8);
-}
-
-html.cursor-pressed .sparklab-cursor-trail {
-  transform: translate3d(var(--cursor-x), var(--cursor-y), 0) translate(-50%, -50%) scale(0.9);
-}
-
-/* Pulse animation for enhanced visual feedback */
-@keyframes cursor-pulse {
-  0%, 100% { 
-    box-shadow: 0 0 8px hsl(var(--primary) / 0.4); 
-  }
-  50% { 
-    box-shadow: 0 0 16px hsl(var(--primary) / 0.6), 0 0 24px hsl(var(--primary) / 0.3); 
-  }
-}
-
-html.cursor-hover-interactive .sparklab-cursor-dot {
-  animation: cursor-pulse 2s ease-in-out infinite;
-}
-
-/* Accessibility: respect reduced motion */
-@media (prefers-reduced-motion: reduce) {
-  .sparklab-cursor-trail {
-    transition: none;
-  }
-  
-  .sparklab-cursor-dot {
-    animation: none !important;
-  }
-  
-  html.cursor-hover .sparklab-cursor-dot,
-  html.cursor-hover-interactive .sparklab-cursor-dot,
-  html.cursor-pressed .sparklab-cursor-dot {
-    transform: translate3d(var(--cursor-x), var(--cursor-y), 0) translate(-50%, -50%);
-  }
-  
-  html.cursor-hover .sparklab-cursor-trail,
-  html.cursor-hover-interactive .sparklab-cursor-trail,
-  html.cursor-pressed .sparklab-cursor-trail {
-    transform: translate3d(var(--cursor-x), var(--cursor-y), 0) translate(-50%, -50%);
-  }
-}
 
 
 .glowing-icon {
-  @apply text-primary drop-shadow-[0_0_8px_hsl(var(--primary))];
+  color: hsl(var(--primary));
+  filter: drop-shadow(0 0 8px hsl(var(--primary)));
 }
 
 .glow-shadow-accent {
