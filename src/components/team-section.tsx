@@ -45,7 +45,7 @@ const executiveTeam: TeamMember[] = [
   {
     name: "Sriram P S",
     role: "Treasurer, Diseño Divino & Finance Head",
-    avatar: "/team_pics/Rohith.jpg",
+    avatar: "/team_pics/SRIRAM P S.jpg",
     hint: "person portrait",
   },
 ];
@@ -54,7 +54,7 @@ const organizers: TeamMember[] = [
   {
     name: "Anirudha Acharya",
     role: "Sponsorship Lead",
-    avatar: "/team_pics/Rohith.jpg",
+    avatar: "/team_pics/ANIRUDHA_ACHARYA.jpg",
     hint: "person portrait",
   },
   {
@@ -72,25 +72,25 @@ const organizers: TeamMember[] = [
   {
     name: "Prarthana T Raj",
     role: "Operations & Logistics Coordinator",
-    avatar: "/team_pics/Rohith.jpg",
+    avatar: "/team_pics/PRARTHANA_T.jpg",
     hint: "person portrait",
   },
   {
     name: "Sahil Yadav",
     role: "Marketing Lead",
-    avatar: "/team_pics/Rohith.jpg",
+    avatar: "/team_pics/SAHIL YADAV.jpg",
     hint: "person portrait",
   },
   {
     name: "Aasiya Shariff",
     role: "Social Media Lead",
-    avatar: "/team_pics/Rohith.jpg",
+    avatar: "/team_pics/AASIYA SHARIFF.jpeg",
     hint: "person portrait",
   },
   {
     name: "Badarinarayana",
     role: "Hospitality Head",
-    avatar: "/team_pics/Rohith.jpg",
+    avatar: "/team_pics/BADARINARAYANA BR.jpg",
     hint: "person portrait",
   },
   {
@@ -108,7 +108,7 @@ const organizers: TeamMember[] = [
   {
     name: "Diya Sharma",
     role: "Event Coordinator",
-    avatar: "/team_pics/Rohith.jpg",
+    avatar: "/team_pics/Diya sharma.jpEg",
     hint: "person portrait",
   },
 ];
