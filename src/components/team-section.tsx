@@ -6,7 +6,7 @@ const advisoryCommittee: TeamMember[] = [
   {
     name: "Dr. Piyush Kumar Pareek",
     role: "Convener & Head of Department (AIML)",
-    avatar: "/team_pics/Rohith.jpg",
+    avatar: "/advisory_committee/Dr Piyush Kumar Pareek.jpg",
     hint: "professor portrait",
   },
   {
@@ -18,7 +18,7 @@ const advisoryCommittee: TeamMember[] = [
   {
     name: "Prof. Madhura G K",
     role: "Faculty Advisor, Diseño Divino (Asst. Prof. , AIML)",
-    avatar: "/team_pics/Rohith.jpg",
+    avatar: "/advisory_committee/Prof Madhura G K.jpg",
     hint: "professor portrait",
   },
   {
