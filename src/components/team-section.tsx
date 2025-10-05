@@ -72,13 +72,13 @@ const organizers: TeamMember[] = [
   {
     name: "Prarthana T Raj",
     role: "Operations & Logistics Coordinator",
-    avatar: "/team_pics/PRARTHANA_T.jpg",
+    avatar: "/team_pics/PRARTHANA T.jpg",
     hint: "person portrait",
   },
   {
     name: "Sahil Yadav",
     role: "Marketing Lead",
-    avatar: "/team_pics/SAHIL YADAV.jpg",
+    avatar: "/team_pics/SAHIL_YADAV.jpg",
     hint: "person portrait",
   },
   {
@@ -108,7 +108,7 @@ const organizers: TeamMember[] = [
   {
     name: "Diya Sharma",
     role: "Event Coordinator",
-    avatar: "/team_pics/Diya sharma.jpEg",
+    avatar: "/team_pics/Diya_sharma.jpeg",
     hint: "person portrait",
   },
 ];
