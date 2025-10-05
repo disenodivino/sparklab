@@ -45,7 +45,7 @@ const executiveTeam: TeamMember[] = [
   {
     name: "Sriram P S",
     role: "Treasurer, Diseño Divino & Finance Head",
-    avatar: "/team_pics/SRIRAM P S.jpg",
+    avatar: "/team_pics/SRIRAM P_S.jpg",
     hint: "person portrait",
   },
 ];
@@ -60,7 +60,7 @@ const organizers: TeamMember[] = [
   {
     name: "Kalattur Somesh",
     role: "Operations Lead & Event Lead Coordinator",
-    avatar: "/team_pics/somu.jpeg",
+    avatar: "/team_pics/KALATTUR SOMESH.jpg",
     hint: "person portrait",
   },
   {
