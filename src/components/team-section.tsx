@@ -12,7 +12,7 @@ const advisoryCommittee: TeamMember[] = [
   {
     name: "Dr. Sumana Sinha",
     role: "Faculty Advisor & ISTE Coordinator (Assoc. Prof. , ISE)",
-    avatar: "/team_pics/Rohith.jpg",
+    avatar: "/advisory_committee/Sumana Sinha.jpg",
     hint: "professor portrait",
   },
   {
@@ -32,7 +32,7 @@ const advisoryCommittee: TeamMember[] = [
 const executiveTeam: TeamMember[] = [
   {
     name: "Srivathsa S Murthy",
-    role: "President, Diseño Divino",
+    role: "President, Diseño Divino & Event Head",
     avatar: "/team_pics/svsm3.jpg",
     hint: "person portrait",
   },
@@ -96,7 +96,7 @@ const organizers: TeamMember[] = [
   {
     name: "Wilfred D'Souza",
     role: "Technical Lead",
-    avatar: "/team_pics/Rohith.jpg",
+    avatar: "/team_pics/Wilfred_D'Souza.jpg",
     hint: "person portrait",
   },
   {
