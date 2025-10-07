@@ -22,9 +22,9 @@ const advisoryCommittee: TeamMember[] = [
     hint: "professor portrait",
   },
   {
-    name: "Dr. Laxmana ",
+    name: "Dr. Lakshmana",
     role: "Faculty Advisor, SparkLab (HOD, Dept of AI&DS)",
-    avatar: "/team_pics/Rohith.jpg",
+    avatar: "/advisory_committee/Dr Lakshmana.jpg",
     hint: "professor portrait",
   },
 ];
