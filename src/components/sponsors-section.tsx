@@ -56,7 +56,7 @@ export default function SponsorsSection() {
                   href={sponsor.website}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="block hover:scale-105 transition-transform duration-300"
+                  className="block hover:scale-105 transition-transform duration-300 hover:cursor-none"
                 >
                   <div className="h-16 md:h-20 lg:h-24 w-32 md:w-40 lg:w-48 relative">
                     <Image
@@ -64,19 +64,19 @@ export default function SponsorsSection() {
                       alt={`${sponsor.name} logo`}
                       fill
                       data-ai-hint={sponsor.hint}
-                      className="object-contain hover:drop-shadow-lg transition-all duration-300"
+                      className="object-contain hover:drop-shadow-lg transition-all duration-300 hover:cursor-none"
                     />
                   </div>
                 </a>
               ) : (
-                <div className="hover:scale-105 transition-transform duration-300">
+                <div className="hover:scale-105 transition-transform duration-300 hover:cursor-none">
                   <div className="h-16 md:h-20 lg:h-24 w-32 md:w-40 lg:w-48 relative">
                     <Image
                       src={sponsor.logo}
                       alt={`${sponsor.name} logo`}
                       fill
                       data-ai-hint={sponsor.hint}
-                      className="object-contain hover:drop-shadow-lg transition-all duration-300"
+                      className="object-contain hover:drop-shadow-lg transition-all duration-300 hover:cursor-none"
                     />
                   </div>
                 </div>
@@ -91,7 +91,7 @@ export default function SponsorsSection() {
           </p>
           <a
             href="mailto:sponsors@sparklab.com"
-            className="text-accent hover:text-accent/80 font-medium transition-colors duration-300"
+            className="text-accent hover:text-accent/80 font-medium transition-colors duration-300 hover:underline hover:cursor-none"
           >
             Get in touch with us →
           </a>

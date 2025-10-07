@@ -6,25 +6,25 @@ const advisoryCommittee: TeamMember[] = [
   {
     name: "Dr. Piyush Kumar Pareek",
     role: "Convener & Head of Department (AIML)",
-    avatar: "/team_pics/Rohith.jpg",
+    avatar: "/advisory_committee/Dr Piyush Kumar Pareek.jpg",
     hint: "professor portrait",
   },
   {
     name: "Dr. Sumana Sinha",
     role: "Faculty Advisor & ISTE Coordinator (Assoc. Prof. , ISE)",
-    avatar: "/team_pics/Rohith.jpg",
+    avatar: "/advisory_committee/Sumana Sinha.jpg",
     hint: "professor portrait",
   },
   {
     name: "Prof. Madhura G K",
     role: "Faculty Advisor, Diseño Divino (Asst. Prof. , AIML)",
-    avatar: "/team_pics/Rohith.jpg",
+    avatar: "/advisory_committee/Prof Madhura G K.jpg",
     hint: "professor portrait",
   },
   {
-    name: "Dr. Laxmana ",
+    name: "Dr. Lakshmana",
     role: "Faculty Advisor, SparkLab (HOD, Dept of AI&DS)",
-    avatar: "/team_pics/Rohith.jpg",
+    avatar: "/advisory_committee/Dr Lakshmana.jpg",
     hint: "professor portrait",
   },
 ];
@@ -32,7 +32,7 @@ const advisoryCommittee: TeamMember[] = [
 const executiveTeam: TeamMember[] = [
   {
     name: "Srivathsa S Murthy",
-    role: "President, Diseño Divino",
+    role: "President, Diseño Divino & Event Head",
     avatar: "/team_pics/svsm3.jpg",
     hint: "person portrait",
   },
@@ -45,7 +45,7 @@ const executiveTeam: TeamMember[] = [
   {
     name: "Sriram P S",
     role: "Treasurer, Diseño Divino & Finance Head",
-    avatar: "/team_pics/Rohith.jpg",
+    avatar: "/team_pics/SRIRAM P_S.jpg",
     hint: "person portrait",
   },
 ];
@@ -54,61 +54,61 @@ const organizers: TeamMember[] = [
   {
     name: "Anirudha Acharya",
     role: "Sponsorship Lead",
-    avatar: "/team_pics/Rohith.jpg",
+    avatar: "/team_pics/ANIRUDHA_ACHARYA.jpg",
     hint: "person portrait",
   },
   {
     name: "Kalattur Somesh",
     role: "Operations Lead & Event Lead Coordinator",
-    avatar: "/team_pics/somu.jpeg",
+    avatar: "/team_pics/KALATTUR SOMESH.jpg",
     hint: "person portrait",
   },
   {
     name: "Vibhas Reddy",
     role: "Design Lead",
-    avatar: "/team_pics/Rohith.jpg",
+    avatar: "/team_pics/RACHAMALLU VIBHAS.jpeg",
     hint: "person portrait",
   },
   {
     name: "Prarthana T Raj",
     role: "Operations & Logistics Coordinator",
-    avatar: "/team_pics/Rohith.jpg",
+    avatar: "/team_pics/PRARTHANA_T.jpg",
     hint: "person portrait",
   },
   {
     name: "Sahil Yadav",
     role: "Marketing Lead",
-    avatar: "/team_pics/Rohith.jpg",
+    avatar: "/team_pics/SAHIL_YADAV.jpg",
     hint: "person portrait",
   },
   {
     name: "Aasiya Shariff",
     role: "Social Media Lead",
-    avatar: "/team_pics/Rohith.jpg",
+    avatar: "/team_pics/AASIYA SHARIFF.jpeg",
     hint: "person portrait",
   },
   {
     name: "Badarinarayana",
     role: "Hospitality Head",
-    avatar: "/team_pics/Rohith.jpg",
+    avatar: "/team_pics/BADARINARAYANA BR.jpg",
     hint: "person portrait",
   },
   {
     name: "Wilfred D'Souza",
     role: "Technical Lead",
-    avatar: "/team_pics/Rohith.jpg",
+    avatar: "/team_pics/Wilfred_D'Souza.jpg",
     hint: "person portrait",
   },
   {
     name: "Yogesh Kumar Singh",
     role: "Event Coordinator",
-    avatar: "/team_pics/Rohith.jpg",
+    avatar: "/team_pics/YOGESH_KUMAR.jpeg",
     hint: "person portrait",
   },
   {
     name: "Diya Sharma",
     role: "Event Coordinator",
-    avatar: "/team_pics/Rohith.jpg",
+    avatar: "/team_pics/Diya_sharma.jpeg",
     hint: "person portrait",
   },
 ];

@@ -29,6 +29,7 @@ import ContactSection from "@/components/contact-section";
 import { useInteractiveCard } from "@/hooks/use-interactive-card";
 import { cn } from "@/lib/utils";
 import React from "react";
+import FAQ from "@/components/faq";
 
 const aboutCardsData = [
   {
@@ -158,6 +159,8 @@ export default function Home() {
         <TeamSection />
 
         <SponsorsSection />
+        
+        <FAQ />
 
         <ContactSection />
       </main>
