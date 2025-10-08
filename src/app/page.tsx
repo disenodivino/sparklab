@@ -30,6 +30,7 @@ import { useInteractiveCard } from "@/hooks/use-interactive-card";
 import { cn } from "@/lib/utils";
 import React from "react";
 import FAQ from "@/components/faq";
+import ClubMember from "@/components/club-member";
 
 const aboutCardsData = [
   {
@@ -157,6 +158,8 @@ export default function Home() {
         <PrizesSection />
 
         <TeamSection />
+
+        <ClubMember />
 
         <SponsorsSection />
         
