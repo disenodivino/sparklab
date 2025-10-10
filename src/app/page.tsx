@@ -159,8 +159,6 @@ export default function Home() {
 
         <TeamSection />
 
-        <ClubMember />
-
         <SponsorsSection />
         
         <FAQ />
