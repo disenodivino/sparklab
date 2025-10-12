@@ -26,21 +26,25 @@ export default function HeroSection() {
           {/* Logo section - always center aligned */}
           <div className="flex flex-col items-center mb-6">
             {/* Petro Logo with "presents" text */}
-            <div className="flex flex-col items-center mb-4">
-              <div className="w-[120px] md:w-[150px] mb-2">
-                <Image
-                  src="/petro_logo.svg"
-                  alt="Petro Logo"
-                  width={150}
-                  height={60}
-                  className="object-contain"
-                />
-              </div>
-              <p className="text-sm md:text-base font-medium text-foreground/70">
+            <div className="flex flex-col text-center items-center mb-4">
+              <div className="w-[200px] md:w-[200px] mb-2">
+                <span className="font-nimbus">
+                <span
+                  className="text-foreground text-xl md:text-2xl"
+                  style={{ textShadow: "0 0 8px hsl(var(--primary))" }}
+                >
+                  Diseño
+                </span>{" "}
+                <span className="text-accent text-xl md:text-2xl">
+                  Divino
+                </span>
+              </span>{" "}
+              <span className="text-sm md:text-base font-medium text-foreground/70">
                 presents
-              </p>
+              </span>
+              </div>
+              
             </div>
-
             {/* Main SparkLab Logo */}
             <div className="w-[200px] md:w-[500px]">
               <Image
@@ -58,16 +62,7 @@ export default function HeroSection() {
               Design Tomorrow. Today!
             </h1> */}
             <p className="max-w-xl text-lg md:text-xl text-foreground/80 mb-6">
-              A 30-Hour National Level Designathon by{" "}
-              <span className="font-nimbus">
-                <span
-                  className="text-foreground"
-                  style={{ textShadow: "0 0 8px hsl(var(--primary))" }}
-                >
-                  Diseño
-                </span>{" "}
-                <span className="text-accent">Divino</span>
-              </span>
+              A 30-Hour National Level Designathon
             </p>
 
             <div className="mb-12">

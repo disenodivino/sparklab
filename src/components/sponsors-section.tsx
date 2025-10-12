@@ -12,22 +12,28 @@ export type Sponsor = {
 
 const sponsors: Sponsor[] = [
   {
+    name: "Petro",
+    logo: "/Petronet_LNG.jpg",
+    hint: "Petro Logo",
+    website: "https://petro.com",
+  },
+  {
     name: "Google Gemini",
     logo: "/GoogleGemini_Lockup_FullColor_White.png",
     hint: "Google Gemini",
     website: "https://gemini.google.com",
   },
   {
-    name: "ISTE",
-    logo: "/istelogo.png",
-    hint: "ISTE organization",
-    website: "https://www.iste.org",
-  },
-  {
     name: "Seamovation Labs Pvt. Ltd.",
     logo: "/seamovation.png",
     hint: "Seamovation Labs Pvt. Ltd.",
     website: "https://www.seamovation.com",
+  },
+  {
+    name: "ISTE",
+    logo: "/istelogo.png",
+    hint: "ISTE organization",
+    website: "https://www.iste.org",
   },
 ];
 
