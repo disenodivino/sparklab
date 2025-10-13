@@ -42,7 +42,7 @@ export default function SponsorsSection() {
     <section id="sponsors" className="py-20 lg:py-32">
       <div className="container mx-auto px-4 text-center">
         <h2 className="text-4xl md:text-5xl font-headline mb-6">
-          Our Sponsors
+          In Collaboration With
         </h2>
         <p className="text-lg text-foreground/80 max-w-3xl mx-auto mb-12">
           We're grateful to our amazing sponsors who make SparkLab possible.
