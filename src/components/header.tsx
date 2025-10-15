@@ -5,9 +5,11 @@ import Link from "next/link";
 import { Button } from "./ui/button";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
+import { Menu, X } from "lucide-react";
 
 const Header = () => {
   const [scrolled, setScrolled] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -22,7 +24,7 @@ const Header = () => {
       <div className="container mx-auto px-4 pt-4">
         <div
           className={cn(
-            "flex items-center justify-between h-16 px-6 transition-all duration-300 rounded-full glass-navbar",
+            "flex items-center justify-between h-16 px-6 transition-all duration-300 rounded-full glass-navbar-enhanced",
             scrolled ? "shadow-2xl" : ""
           )}
         >
@@ -36,6 +38,8 @@ const Header = () => {
               />
             </div>
           </Link>
+
+          {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center gap-6">
             <a
               href="/#about"
@@ -62,6 +66,12 @@ const Header = () => {
               Team
             </a>
             <a
+              href="/#jury"
+              className="text-sm font-medium text-foreground/80 hover:text-primary transition-colors"
+            >
+              Jury
+            </a>
+            <a
               href="/#sponsors"
               className="text-sm font-medium text-foreground/80 hover:text-primary transition-colors"
             >
@@ -74,6 +84,8 @@ const Header = () => {
               Contact
             </a>
           </nav>
+
+          {/* Desktop Register Button */}
           <Button
             asChild
             variant="outline"
@@ -87,7 +99,87 @@ const Header = () => {
               Register Now
             </a>
           </Button>
+
+          {/* Mobile Menu Button */}
+          <button
+            className="md:hidden p-3 text-foreground hover:text-primary transition-colors rounded-full hover:bg-white/10 active:bg-white/20"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            aria-label="Toggle mobile menu"
+          >
+            {mobileMenuOpen ? <X size={28} /> : <Menu size={28} />}
+          </button>
         </div>
+
+        {/* Mobile Navigation Dropdown */}
+        {mobileMenuOpen && (
+          <div className="md:hidden mt-2 glass-navbar-enhanced rounded-2xl overflow-hidden animate-in slide-in-from-top-2 duration-200">
+            <nav className="flex flex-col p-6 space-y-4">
+              <a
+                href="/#about"
+                className="text-base font-medium text-foreground hover:text-primary transition-colors py-3 px-2 rounded-lg hover:bg-white/10"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                About
+              </a>
+              <a
+                href="/#timeline"
+                className="text-base font-medium text-foreground hover:text-primary transition-colors py-3 px-2 rounded-lg hover:bg-white/10"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Timeline
+              </a>
+              <a
+                href="/#prizes"
+                className="text-base font-medium text-foreground hover:text-primary transition-colors py-3 px-2 rounded-lg hover:bg-white/10"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Prizes
+              </a>
+              <a
+                href="/#team"
+                className="text-base font-medium text-foreground hover:text-primary transition-colors py-3 px-2 rounded-lg hover:bg-white/10"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Team
+              </a>
+              <a
+                href="/#jury"
+                className="text-base font-medium text-foreground hover:text-primary transition-colors py-3 px-2 rounded-lg hover:bg-white/10"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Jury
+              </a>
+              <a
+                href="/#sponsors"
+                className="text-base font-medium text-foreground hover:text-primary transition-colors py-3 px-2 rounded-lg hover:bg-white/10"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Sponsors
+              </a>
+              <a
+                href="/#contact"
+                className="text-base font-medium text-foreground hover:text-primary transition-colors py-3 px-2 rounded-lg hover:bg-white/10"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Contact
+              </a>
+              <Button
+                asChild
+                variant="outline"
+                className="animated-border-button rounded-full mt-6 mx-2"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                <a
+                  href="https://unstop.com/o/7DopUC5?utm_medium=Share&utm_source=logged_out_user&utm_campaign=Innovation_challenge"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Register Now
+                </a>
+              </Button>
+            </nav>
+          </div>
+        )}
       </div>
     </header>
   );

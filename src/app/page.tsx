@@ -23,7 +23,9 @@ import Footer from "@/components/footer";
 import Timeline from "@/components/timeline";
 import HeroSection from "@/components/hero-section";
 import PrizesSection from "@/components/prizes-section";
-import TeamSection from "@/components/team-section";
+import AdvisorySection from "@/components/advisory-section";
+import JurySection from "@/components/jury-section";
+import ExecutiveTeamSection from "@/components/executive-team-section";
 import SponsorsSection from "@/components/sponsors-section";
 import ContactSection from "@/components/contact-section";
 import { useInteractiveCard } from "@/hooks/use-interactive-card";
@@ -156,10 +158,14 @@ export default function Home() {
 
         <PrizesSection />
 
-        <TeamSection />
+        <AdvisorySection />
+
+        <JurySection />
+
+        <ExecutiveTeamSection />
 
         <SponsorsSection />
-        
+
         <FAQ />
 
         <ContactSection />

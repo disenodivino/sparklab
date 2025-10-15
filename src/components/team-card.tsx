@@ -11,6 +11,8 @@ export type TeamMember = {
   role: string;
   avatar: string;
   hint?: string;
+  company?: string;
+  designation?: string;
 };
 
 export type TeamCardProps = {
@@ -77,6 +79,16 @@ export const TeamCard = ({ member, size = "medium", style }: TeamCardProps) => {
         <h3 className={cn("font-headline font-light mb-2", currentSize.name)}>
           {member.name}
         </h3>
+        {member.designation && (
+          <p className={cn("text-primary font-medium mb-1", currentSize.role)}>
+            {member.designation}
+          </p>
+        )}
+        {member.company && (
+          <p className={cn("text-foreground/70 text-sm mb-1")}>
+            {member.company}
+          </p>
+        )}
         <p className={cn("text-accent/80", currentSize.role)}>{member.role}</p>
       </div>
     </div>

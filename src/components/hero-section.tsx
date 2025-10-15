@@ -25,25 +25,23 @@ export default function HeroSection() {
         <div className="flex flex-col animate-fade-in-up">
           {/* Logo section - always center aligned */}
           <div className="flex flex-col items-center mb-6">
-            {/* Petro Logo with "presents" text */}
             <div className="flex flex-col text-center items-center mb-4">
               <div className="w-[200px] md:w-[200px] mb-2">
                 <span className="font-nimbus">
-                <span
-                  className="text-foreground text-xl md:text-2xl"
-                  style={{ textShadow: "0 0 8px hsl(var(--primary))" }}
-                >
-                  Diseño
+                  <span
+                    className="text-foreground text-xl md:text-2xl"
+                    style={{ textShadow: "0 0 8px hsl(var(--primary))" }}
+                  >
+                    Diseño
+                  </span>{" "}
+                  <span className="text-accent text-xl md:text-2xl">
+                    Divino
+                  </span>
                 </span>{" "}
-                <span className="text-accent text-xl md:text-2xl">
-                  Divino
+                <span className="text-sm md:text-base font-medium text-foreground/70">
+                  presents
                 </span>
-              </span>{" "}
-              <span className="text-sm md:text-base font-medium text-foreground/70">
-                presents
-              </span>
               </div>
-              
             </div>
             {/* Main SparkLab Logo */}
             <div className="w-[200px] md:w-[500px]">
@@ -62,7 +60,8 @@ export default function HeroSection() {
               Design Tomorrow. Today!
             </h1> */}
             <p className="max-w-xl text-lg md:text-xl text-foreground/80 mb-6">
-              A 30-Hour National Level Designathon
+              A 30-Hour National Level Designathon by NMIT, Bangalore Department
+              of Artificial Intelligence and Machine Learning
             </p>
 
             <div className="mb-12">

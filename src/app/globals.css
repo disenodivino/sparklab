@@ -192,3 +192,57 @@ html.figma-cursor textarea {
     0 8px 32px rgba(0, 0, 0, 0.15),
     inset 0 1px 0 rgba(255, 255, 255, 0.25);
 }
+
+.glass-navbar-enhanced {
+  /* Slightly reduced frosted glass background */
+  background: linear-gradient(135deg, rgba(0, 0, 0, 0.88), rgba(15, 15, 20, 0.85)) !important;
+  backdrop-filter: blur(32px) saturate(200%) brightness(1.05) !important;
+  -webkit-backdrop-filter: blur(32px) saturate(200%) brightness(1.05) !important;
+  border: none !important;
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.7),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5),
+    0 4px 16px rgba(0, 0, 0, 0.4),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.08) !important;
+}
+
+/* Stronger fallback for browsers that don't support backdrop-filter */
+@supports not (backdrop-filter: blur(1px)) {
+  .glass-navbar-enhanced {
+    background: linear-gradient(135deg, rgba(0, 0, 0, 0.98), rgba(20, 20, 25, 0.96)) !important;
+  }
+}
+
+/* Jury Section Styles */
+.jury-card-wrapper {
+  position: relative;
+  filter: drop-shadow(0 4px 20px rgba(59, 130, 246, 0.15));
+}
+
+.jury-card-wrapper:hover {
+  filter: drop-shadow(0 8px 32px rgba(59, 130, 246, 0.25));
+}
+
+.jury-card-bg {
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  transition: all 0.3s ease;
+}
+
+.jury-card-wrapper:hover .jury-card-bg {
+  border-color: rgba(59, 130, 246, 0.4);
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.08) 0%, rgba(14, 165, 233, 0.12) 100%);
+}
+
+/* Enhanced mobile navbar visibility */
+@media (max-width: 768px) {
+  .glass-navbar-enhanced {
+    background: linear-gradient(135deg, rgba(0, 0, 0, 0.90), rgba(15, 15, 20, 0.87)) !important;
+    backdrop-filter: blur(36px) saturate(220%) brightness(1.1) !important;
+    -webkit-backdrop-filter: blur(36px) saturate(220%) brightness(1.1) !important;
+    border: none !important;
+    box-shadow: 
+      0 8px 32px rgba(0, 0, 0, 0.75),
+      inset 0 1px 0 rgba(255, 255, 255, 0.6),
+      0 4px 20px rgba(0, 0, 0, 0.5) !important;
+  }
+}
