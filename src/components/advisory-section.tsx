@@ -10,8 +10,8 @@ const advisoryCommittee: TeamMember[] = [
     hint: "professor portrait",
   },
   {
-    name: "Ms. Sumana Sinha",
-    role: "Co-Convener & Associate Professor (AIML)",
+    name: "Dr. Sumana Sinha",
+    role: "Associate Professor (ISE), ISTE Co-ordinator, NMIT Chapter",
     avatar: "/advisory_committee/Sumana Sinha.jpg",
     hint: "professor portrait",
   },
@@ -23,7 +23,7 @@ const advisoryCommittee: TeamMember[] = [
   },
   {
     name: "Dr. Lakshmana",
-    role: "Associate Professor (AIML)",
+    role: "Head of Department (AI&DS)",
     avatar: "/advisory_committee/Dr Lakshmana.jpg",
     hint: "professor portrait",
   },
