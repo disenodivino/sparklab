@@ -7,7 +7,7 @@ const juryMembers: TeamMember[] = [
     name: "Shilpa Kotian",
     designation: "Senior UI/UX Designer",
     company: "Tata Elxsi",
-    role: "Industry Expert & Senior Developer",
+    role: "Jury Panelist",
     avatar: "/jury/shilpa.png",
     hint: "professional portrait",
   },
