@@ -5,7 +5,7 @@ import { TeamCard, TeamMember } from "./team-card";
 const juryMembers: TeamMember[] = [
   {
     name: "Shilpa Kotian",
-    designation: "Senior Designer | UX / UI Designer",
+    designation: "Senior UI/UX Designer",
     company: "Tata Elxsi",
     role: "Industry Expert & Senior Developer",
     avatar: "/jury/shilpa.png",
