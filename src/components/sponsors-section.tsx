@@ -96,7 +96,7 @@ export default function SponsorsSection() {
             Interested in sponsoring SparkLab?
           </p>
           <a
-            href="mailto:sponsors@sparklab.com"
+            href="mailto:diseno.divino@nmit.ac.in"
             className="text-accent hover:text-accent/80 font-medium transition-colors duration-300 hover:underline hover:cursor-none"
           >
             Get in touch with us →
