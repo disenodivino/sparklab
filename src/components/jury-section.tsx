@@ -19,6 +19,22 @@ const juryMembers: TeamMember[] = [
     avatar: "/jury/sunil.jpg",
     hint: "professional portrait",
   },
+  {
+    name: "Harish Kumar S",
+    designation: "Service Now Architect",
+    company: "Hexaware Technologies",
+    role: "Internal Jury Member",
+    avatar: "/jury/Harish_Kumar_s.jpg",
+    hint: "professional portrait",
+  },
+  {
+    name: "Sowmya A",
+    designation: "Associate Director, Consulting, Kyndryl",
+    company: "Currently working with Kyndryl ",
+    role: "Internal Jury Member",
+    avatar: "/jury/Sowmya_A.jpg",
+    hint: "professional portrait",
+  },
 ];
 
 export default function JurySection() {
