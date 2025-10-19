@@ -1,0 +1,30 @@
+/* Normal cursor for /event routes */
+body {
+  cursor: default !important;
+}
+
+/* Reset all cursor styles */
+html.has-custom-cursor,
+html.has-custom-cursor *,
+html.has-custom-cursor *:hover,
+html.figma-cursor,
+html.figma-cursor * {
+  cursor: default !important;
+}
+
+/* Reset hover cursor styles for interactive elements */
+html.figma-cursor button,
+html.figma-cursor a,
+html.figma-cursor [role="button"],
+html.figma-cursor input,
+html.figma-cursor select,
+html.figma-cursor textarea {
+  cursor: pointer !important;
+}
+
+/* Disable any cursor animation classes */
+.custom-cursor,
+.cursor-dot,
+.cursor-ring {
+  display: none !important;
+}

@@ -85,20 +85,32 @@ const Header = () => {
             </a>
           </nav>
 
-          {/* Desktop Register Button */}
-          <Button
-            asChild
-            variant="outline"
-            className="hidden md:flex animated-border-button rounded-full"
-          >
-            <a
-              href="https://unstop.com/o/7DopUC5?utm_medium=Share&utm_source=logged_out_user&utm_campaign=Innovation_challenge"
-              target="_blank"
-              rel="noopener noreferrer"
+          {/* Desktop Register & Login Buttons */}
+          <div className="hidden md:flex items-center gap-3">
+            <Button
+              asChild
+              variant="outline"
+              className="animated-border-button rounded-full"
             >
-              Register Now
-            </a>
-          </Button>
+              <a
+                href="https://unstop.com/o/7DopUC5?utm_medium=Share&utm_source=logged_out_user&utm_campaign=Innovation_challenge"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Register Now
+              </a>
+            </Button>
+            
+            <Button
+              asChild
+              variant="ghost"
+              className="rounded-full hover:bg-white/10"
+            >
+              <Link href="/event/login">
+                Login
+              </Link>
+            </Button>
+          </div>
 
           {/* Mobile Menu Button */}
           <button
@@ -163,20 +175,33 @@ const Header = () => {
               >
                 Contact
               </a>
-              <Button
-                asChild
-                variant="outline"
-                className="animated-border-button rounded-full mt-6 mx-2"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                <a
-                  href="https://unstop.com/o/7DopUC5?utm_medium=Share&utm_source=logged_out_user&utm_campaign=Innovation_challenge"
-                  target="_blank"
-                  rel="noopener noreferrer"
+              <div className="space-y-3 mt-6 mx-2">
+                <Button
+                  asChild
+                  variant="outline"
+                  className="animated-border-button rounded-full w-full"
+                  onClick={() => setMobileMenuOpen(false)}
                 >
-                  Register Now
-                </a>
-              </Button>
+                  <a
+                    href="https://unstop.com/o/7DopUC5?utm_medium=Share&utm_source=logged_out_user&utm_campaign=Innovation_challenge"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Register Now
+                  </a>
+                </Button>
+                
+                <Button
+                  asChild
+                  variant="ghost"
+                  className="rounded-full w-full hover:bg-white/10"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  <Link href="/event/login">
+                    Login
+                  </Link>
+                </Button>
+              </div>
             </nav>
           </div>
         )}

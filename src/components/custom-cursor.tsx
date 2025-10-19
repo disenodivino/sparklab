@@ -20,8 +20,18 @@ const CustomCursor = () => {
   const [particles, setParticles] = useState<Particle[]>([]);
   const particleId = useRef(0);
   const moveTimeout = useRef<NodeJS.Timeout>();
+  const [isEventPage, setIsEventPage] = useState(false);
 
   useEffect(() => {
+    // Check if current page is an event page
+    if (typeof window !== 'undefined') {
+      const isEvent = window.location.pathname.startsWith('/event');
+      setIsEventPage(isEvent);
+      
+      // If on event page, don't enable custom cursor
+      if (isEvent) return;
+    }
+    
     // Only enable on devices with hover support
     const hasHover = window.matchMedia("(hover: hover)").matches;
     if (!hasHover) return;
@@ -114,6 +124,11 @@ const CustomCursor = () => {
     return () => clearInterval(interval);
   }, []);
 
+  // Don't render anything for event pages
+  if (isEventPage) {
+    return null;
+  }
+  
   return (
     <>
       {/* Golden Particles */}
