@@ -27,31 +27,29 @@ export default function TeamDashboard() {
   const router = useRouter();
 
   useEffect(() => {
-    // Check if user is logged in
-    const storedUser = localStorage.getItem('user');
-    
-    if (!storedUser) {
-      router.push('/event/login');
-      return;
-    }
-    
+    // Auto-login as team since login functionality is removed
     try {
-      const parsedUser = JSON.parse(storedUser);
+      // Create mock team user
+      const teamUser = {
+        id: 2,
+        team_name: 'Demo Team',
+        role: 'team',
+        participants: [
+          { id: '1', name: 'Team Member 1', role: 'Leader' },
+          { id: '2', name: 'Team Member 2', role: 'Developer' },
+          { id: '3', name: 'Team Member 3', role: 'Designer' }
+        ]
+      };
       
-      if (parsedUser.role !== 'team') {
-        // Redirect non-team users
-        router.push('/event/login');
-        return;
-      }
-      
-      setUser(parsedUser);
+      // Save to localStorage
+      localStorage.setItem('user', JSON.stringify(teamUser));
+      setUser(teamUser);
+      setIsLoading(false);
     } catch (error) {
-      console.error('Failed to parse user data', error);
-      router.push('/event/login');
-    } finally {
+      console.error('Failed to set up team user', error);
       setIsLoading(false);
     }
-  }, [router]);
+  }, []);
 
   const handleLogout = () => {
     localStorage.removeItem('user');
@@ -89,7 +87,7 @@ export default function TeamDashboard() {
             <CardContent>
               <div className="space-y-4">
                 <div>
-                  <h3 className="font-medium text-lg">{user.name}</h3>
+                  <h3 className="font-medium text-lg">{user.team_name}</h3>
                   <p className="text-sm text-muted-foreground">Team ID: {user.id}</p>
                   <Badge variant="outline" className="mt-2">Team</Badge>
                 </div>

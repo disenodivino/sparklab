@@ -12,39 +12,53 @@ export default function OrganizerLayout({ children }: { children: React.ReactNod
   const router = useRouter();
 
   useEffect(() => {
-    // Check if user is logged in and is an organizer
-    const userString = localStorage.getItem('user');
-    
-    if (!userString) {
-      toast({
-        title: 'Access Denied',
-        description: 'Please log in to access the organizer dashboard',
-        variant: 'destructive',
-      });
-      router.push('/event');
-      return;
-    }
-    
-    try {
-      const user = JSON.parse(userString);
-      
-      if (user.role !== 'organizer') {
-        toast({
-          title: 'Access Denied',
-          description: 'You do not have permission to access the organizer dashboard',
-          variant: 'destructive',
-        });
-        router.push('/event/dashboard');
-        return;
+    // Auto-login as organizer since login functionality is removed
+    async function setupOrganizer() {
+      try {
+        // Import supabase
+        const { supabase } = await import('@/lib/supabase');
+        
+        // Create mock organizer user - use ID 1 which is expected to be the Organizer Team ID in Supabase
+        const organizerUser = {
+          id: 1,
+          username: 'organizer',
+          name: 'Event Organizer',
+          role: 'organizer',
+        };
+        
+        // Check if the Organizer Team exists in the database
+        const { data: teamExists, error: teamCheckError } = await supabase
+          .from('teams')
+          .select('id')
+          .eq('id', organizerUser.id)
+          .single();
+        
+        // If organizer team doesn't exist, create it
+        if (teamCheckError) {
+          const { data: newTeam, error: createTeamError } = await supabase
+            .from('teams')
+            .insert([{ id: organizerUser.id, team_name: 'Organizer Team' }])
+            .select()
+            .single();
+            
+          if (createTeamError) {
+            console.error('Error creating organizer team:', createTeamError);
+          } else {
+            console.log('Created organizer team:', newTeam);
+          }
+        }
+        
+        // Save to localStorage
+        localStorage.setItem('user', JSON.stringify(organizerUser));
+      } catch (error) {
+        console.error('Error setting up organizer user:', error);
+      } finally {
+        setIsLoading(false);
       }
-      
-      setIsLoading(false);
-    } catch (error) {
-      console.error('Error checking user role:', error);
-      localStorage.removeItem('user');
-      router.push('/event');
     }
-  }, [router]);
+    
+    setupOrganizer();
+  }, []);
 
   const handleToggleSidebar = () => {
     setSidebarCollapsed(!sidebarCollapsed);

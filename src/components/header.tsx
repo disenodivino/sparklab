@@ -85,7 +85,7 @@ const Header = () => {
             </a>
           </nav>
 
-          {/* Desktop Register & Login Buttons */}
+          {/* Desktop Register Button */}
           <div className="hidden md:flex items-center gap-3">
             <Button
               asChild
@@ -99,16 +99,6 @@ const Header = () => {
               >
                 Register Now
               </a>
-            </Button>
-            
-            <Button
-              asChild
-              variant="ghost"
-              className="rounded-full hover:bg-white/10"
-            >
-              <Link href="/event/login">
-                Login
-              </Link>
             </Button>
           </div>
 
@@ -189,17 +179,6 @@ const Header = () => {
                   >
                     Register Now
                   </a>
-                </Button>
-                
-                <Button
-                  asChild
-                  variant="ghost"
-                  className="rounded-full w-full hover:bg-white/10"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  <Link href="/event/login">
-                    Login
-                  </Link>
                 </Button>
               </div>
             </nav>

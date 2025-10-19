@@ -41,25 +41,108 @@ export default function OrganizerDashboardPage() {
   useEffect(() => {
     async function fetchDashboardData() {
       try {
-        // Use the API routes to fetch data in parallel
-        const [statsResponse, activitiesResponse, checkpointsResponse] = await Promise.all([
-          fetch('/api/dashboard/stats'),
-          fetch('/api/dashboard/activities'),
-          fetch('/api/dashboard/checkpoints')
-        ]);
+        // Fetch data directly from Supabase
         
-        if (!statsResponse.ok) throw new Error('Failed to fetch stats');
-        if (!activitiesResponse.ok) throw new Error('Failed to fetch activities');
-        if (!checkpointsResponse.ok) throw new Error('Failed to fetch checkpoints');
+        // Fetch teams count
+        const { count: teamsCount, error: teamsError } = await supabase
+          .from('teams')
+          .select('*', { count: 'exact', head: true });
+          
+        if (teamsError) throw teamsError;
         
-        const { stats: dashboardStats } = await statsResponse.json();
-        const { activities: dashboardActivities } = await activitiesResponse.json();
-        const { checkpoints: dashboardCheckpoints } = await checkpointsResponse.json();
+        // Fetch messages
+        const { data: messagesData, error: messagesError } = await supabase
+          .from('messages')
+          .select('*');
+          
+        if (messagesError) throw messagesError;
+        
+        // Fetch checkpoints
+        const { data: checkpointsData, error: checkpointsError } = await supabase
+          .from('checkpoints')
+          .select('*')
+          .order('deadline', { ascending: true });
+          
+        if (checkpointsError) throw checkpointsError;
+        
+        // Process the checkpoint data
+        const now = new Date();
+        const processedCheckpoints = checkpointsData?.map(checkpoint => {
+          const deadlineDate = new Date(checkpoint.deadline);
+          const daysRemaining = Math.ceil((deadlineDate.getTime() - now.getTime()) / (1000 * 3600 * 24));
+          
+          return {
+            id: checkpoint.id,
+            title: checkpoint.title || 'Untitled Checkpoint',
+            description: checkpoint.description || '',
+            deadline: checkpoint.deadline,
+            daysRemaining: daysRemaining > 0 ? daysRemaining : 0
+          };
+        }) || [];
+        
+        // Get next checkpoint days
+        let nextCheckpointDays = null;
+        if (processedCheckpoints.length > 0) {
+          const futureCheckpoints = processedCheckpoints.filter(cp => cp.daysRemaining > 0);
+          if (futureCheckpoints.length > 0) {
+            nextCheckpointDays = futureCheckpoints[0].daysRemaining;
+          }
+        }
+        
+        // Generate mock activities from recent messages and submissions
+        const mockActivities: Activity[] = [];
+        
+        // Add message activities
+        if (messagesData) {
+          const recentMessages = messagesData
+            .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+            .slice(0, 5);
+            
+          recentMessages.forEach((message, index) => {
+            mockActivities.push({
+              id: index + 1,
+              type: 'message',
+              title: `New message from Team ${message.sender_team_id}`,
+              timestamp: message.timestamp
+            });
+          });
+        }
+        
+        // Add team activities
+        mockActivities.push({
+          id: mockActivities.length + 1,
+          type: 'team',
+          title: 'New team registered',
+          timestamp: new Date().toISOString()
+        });
+        
+        // Add submission activities
+        mockActivities.push({
+          id: mockActivities.length + 1,
+          type: 'submission',
+          title: 'Project submission received',
+          timestamp: new Date(Date.now() - 48 * 3600 * 1000).toISOString()
+        });
+        
+        // Sort activities by timestamp
+        mockActivities.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+        
+        // Create stats object
+        const mockStats: Stats = {
+          teamsCount: teamsCount || 0,
+          participantsCount: (teamsCount || 0) * 3, // Assume average 3 participants per team
+          checkpointsCount: checkpointsData?.length || 0,
+          nextCheckpointDays,
+          messagesCount: messagesData?.length || 0,
+          unreadMessagesCount: 0, // We don't track read status yet
+          submissionsCount: 2, // Mock data
+          pendingSubmissionsCount: 1 // Mock data
+        };
         
         // Update state with fetched data
-        setStats(dashboardStats);
-        setActivities(dashboardActivities);
-        setCheckpoints(dashboardCheckpoints);
+        setStats(mockStats);
+        setActivities(mockActivities);
+        setCheckpoints(processedCheckpoints);
       } catch (error) {
         console.error('Error fetching dashboard data:', error);
       } finally {

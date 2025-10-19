@@ -49,29 +49,54 @@ export default function TeamMessagesPage() {
     }
   }, [messages]);
   
-  // Check if user is authenticated
+  // Auto setup with mock team
   const checkAuth = async () => {
     try {
+      // Create mock team user if it doesn't exist
+      let teamUser;
       const storedUser = localStorage.getItem('user');
       
-      if (!storedUser) {
-        router.push('/event/login');
-        return;
+      if (storedUser) {
+        teamUser = JSON.parse(storedUser);
+      } else {
+        teamUser = {
+          id: 2,
+          team_name: 'Demo Team',
+          role: 'team',
+        };
+        localStorage.setItem('user', JSON.stringify(teamUser));
       }
       
-      const parsedUser = JSON.parse(storedUser);
+      // Check if the team exists in the database
+      const { data: teamExists, error: teamCheckError } = await supabase
+        .from('teams')
+        .select('id')
+        .eq('id', teamUser.id)
+        .single();
       
-      if (parsedUser.role !== 'team') {
-        router.push('/event/login');
-        return;
+      // If team doesn't exist, create it
+      if (teamCheckError) {
+        const { data: newTeam, error: createTeamError } = await supabase
+          .from('teams')
+          .insert([{ id: teamUser.id, team_name: teamUser.team_name }])
+          .select()
+          .single();
+          
+        if (createTeamError) {
+          console.error('Error creating team:', createTeamError);
+        } else {
+          console.log('Created team:', newTeam);
+        }
       }
       
-      // User is authenticated, set the team ID and fetch data
-      setTeamId(parsedUser.id);
-      fetchData(parsedUser.id);
+      // Set the team ID and fetch data
+      setTeamId(teamUser.id);
+      fetchData(teamUser.id);
     } catch (error) {
-      console.error('Auth error:', error);
-      router.push('/event/login');
+      console.error('Setup error:', error);
+      // Create a default team ID and try to continue
+      setTeamId(2);
+      fetchData(2);
     }
   };
   
@@ -85,24 +110,50 @@ export default function TeamMessagesPage() {
         .eq('team_name', 'Organizer Team')
         .single();
 
-      if (organizerError) throw organizerError;
-      
-      if (organizerData) {
-        setOrganizerTeamId(organizerData.id);
-      }
-
-      // Fetch all messages between the team and organizer
-      if (currentTeamId && organizerData?.id) {
-        const currentOrganizerId = organizerData.id;
-        
-        const { data: messagesData, error: messagesError } = await supabase
-          .from('messages')
-          .select('*, sender:sender_team_id(team_name), receiver:receiver_id(team_name)')
-          .or(`and(sender_team_id.eq.${currentTeamId},receiver_id.eq.${currentOrganizerId}),and(sender_team_id.eq.${currentOrganizerId},receiver_id.eq.${currentTeamId})`)
-          .order('timestamp', { ascending: true });
+      // If organizer team doesn't exist, create it
+      if (organizerError) {
+        console.log('Creating organizer team');
+        const { data: newOrganizer, error: createError } = await supabase
+          .from('teams')
+          .insert([{ id: 1, team_name: 'Organizer Team' }])
+          .select()
+          .single();
           
-        if (messagesError) throw messagesError;
-        setMessages(messagesData || []);
+        if (createError) throw createError;
+        setOrganizerTeamId(newOrganizer.id);
+        
+        // Fetch all messages between the team and organizer
+        if (currentTeamId && newOrganizer?.id) {
+          const currentOrganizerId = newOrganizer.id;
+          
+          const { data: messagesData, error: messagesError } = await supabase
+            .from('messages')
+            .select('*, sender:sender_team_id(team_name), receiver:receiver_id(team_name)')
+            .or(`and(sender_team_id.eq.${currentTeamId},receiver_id.eq.${currentOrganizerId}),and(sender_team_id.eq.${currentOrganizerId},receiver_id.eq.${currentTeamId})`)
+            .order('timestamp', { ascending: true });
+            
+          if (messagesError) throw messagesError;
+          setMessages(messagesData || []);
+        }
+      } else {
+        // Organizer team exists
+        if (organizerData) {
+          setOrganizerTeamId(organizerData.id);
+        }
+  
+        // Fetch all messages between the team and organizer
+        if (currentTeamId && organizerData?.id) {
+          const currentOrganizerId = organizerData.id;
+          
+          const { data: messagesData, error: messagesError } = await supabase
+            .from('messages')
+            .select('*, sender:sender_team_id(team_name), receiver:receiver_id(team_name)')
+            .or(`and(sender_team_id.eq.${currentTeamId},receiver_id.eq.${currentOrganizerId}),and(sender_team_id.eq.${currentOrganizerId},receiver_id.eq.${currentTeamId})`)
+            .order('timestamp', { ascending: true });
+            
+          if (messagesError) throw messagesError;
+          setMessages(messagesData || []);
+        }
       }
     } catch (error) {
       console.error('Error fetching data:', error);
@@ -135,7 +186,7 @@ export default function TeamMessagesPage() {
       if (error) throw error;
       
       // Refresh data
-      await fetchData();
+      await fetchData(teamId);
       setReplyMessage('');
       
     } catch (error) {
@@ -182,8 +233,10 @@ export default function TeamMessagesPage() {
         <Button 
           variant="outline" 
           onClick={() => { 
-            setIsRefreshing(true);
-            fetchData(teamId!);
+            if (teamId) {
+              setIsRefreshing(true);
+              fetchData(teamId);
+            }
           }}
           disabled={isLoading || isRefreshing}
         >
