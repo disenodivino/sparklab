@@ -20,15 +20,66 @@ interface Checkpoint {
   status: 'open' | 'upcoming' | 'closed';
 }
 
+// Helper functions for IST time handling
+const IST_TIMEZONE = 'Asia/Kolkata';
+
+// Get current time in IST by creating a date in UTC and formatting in IST
+const getCurrentTimeIST = (): Date => {
+  const now = new Date();
+  // Return the current time - we'll handle timezone conversion when needed
+  return now;
+};
+
+// Format a date string to display in IST timezone
+const formatToISTString = (dateStr: string): string => {
+  const date = new Date(dateStr);
+  return date.toLocaleString('en-IN', {
+    timeZone: IST_TIMEZONE,
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true
+  }) + ' IST';
+};
+
+// Explicitly convert local browser time to IST for storage in Supabase
+const formatForStorage = (localDateTimeInput: string): string => {
+  // Parse the user's input in local time
+  const localDate = new Date(localDateTimeInput);
+  
+  // If the user inputs "2025-10-19T19:00", we want to store "2025-10-19T19:00:00+05:30"
+  // We want to keep the same hour/minute but change the timezone to IST
+  
+  // Extract year, month, day, hour, minute from the local date
+  const year = localDate.getFullYear();
+  const month = String(localDate.getMonth() + 1).padStart(2, '0');
+  const day = String(localDate.getDate()).padStart(2, '0');
+  const hour = String(localDate.getHours()).padStart(2, '0');
+  const minute = String(localDate.getMinutes()).padStart(2, '0');
+  
+  // Create an IST timestamp string directly
+  // Format: YYYY-MM-DDTHH:MM:SS+05:30
+  return `${year}-${month}-${day}T${hour}:${minute}:00+05:30`;
+};
+
 // Helper function to determine checkpoint status
 const determineStatus = (deadline: string): 'open' | 'upcoming' | 'closed' => {
   const now = new Date();
-  const deadlineDate = new Date(deadline);
-  const timeDiff = deadlineDate.getTime() - now.getTime();
+  
+  // Get the current time in IST
+  const nowInIST = new Date(now.toLocaleString('en-US', { timeZone: IST_TIMEZONE }));
+  
+  // Get the deadline in IST
+  const deadlineInIST = new Date(new Date(deadline).toLocaleString('en-US', { timeZone: IST_TIMEZONE }));
+  
+  // Compare dates in the same timezone
+  const timeDiff = deadlineInIST.getTime() - nowInIST.getTime();
   const daysDiff = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
   
-  if (daysDiff < 0) return 'closed';
-  if (daysDiff <= 7) return 'open';
+  if (timeDiff < 0) return 'closed'; // Past deadline
+  if (daysDiff <= 7) return 'open';  // Within 7 days
   return 'upcoming';
 };
 
@@ -45,40 +96,87 @@ export default function CheckpointsPage() {
   const [description, setDescription] = useState('');
   const [deadline, setDeadline] = useState('');
   
-  // Fetch checkpoints from database
-  useEffect(() => {
-    async function fetchCheckpoints() {
-      try {
-        const { data, error } = await supabase
-          .from('checkpoints')
-          .select('*')
-          .order('deadline', { ascending: true });
-          
-        if (error) {
-          throw error;
-        }
+  // Function to fetch and process checkpoints
+  const fetchCheckpoints = async (showToastOnError = true) => {
+    try {
+      const { data, error } = await supabase
+        .from('checkpoints')
+        .select('*')
+        .order('deadline', { ascending: true });
         
-        // Process checkpoints and add status
-        const processedCheckpoints = data.map(checkpoint => ({
-          ...checkpoint,
-          status: determineStatus(checkpoint.deadline)
-        }));
+      if (error) {
+        throw error;
+      }
+      
+      // Process checkpoints and add status based on IST time
+      const processedCheckpoints = data.map(checkpoint => ({
+        ...checkpoint,
+        status: determineStatus(checkpoint.deadline)
+      }));
+      
+      // Sort checkpoints: open first, then upcoming, then closed
+      const sortedCheckpoints = [...processedCheckpoints].sort((a, b) => {
+        // First by status priority
+        const statusPriority: Record<string, number> = { open: 0, upcoming: 1, closed: 2 };
+        const statusDiff = statusPriority[a.status as string] - statusPriority[b.status as string];
+        if (statusDiff !== 0) return statusDiff;
         
-        setCheckpoints(processedCheckpoints);
-      } catch (error) {
-        console.error('Error fetching checkpoints:', error);
+        // Within same status, sort by deadline
+        const aDate = new Date(a.deadline);
+        const bDate = new Date(b.deadline);
+        return aDate.getTime() - bDate.getTime();
+      });
+      
+      setCheckpoints(sortedCheckpoints);
+      return true;
+    } catch (error) {
+      console.error('Error fetching checkpoints:', error);
+      if (showToastOnError) {
         toast({
           title: 'Error',
           description: 'Failed to load checkpoints',
           variant: 'destructive',
         });
-      } finally {
-        setIsLoading(false);
+      }
+      return false;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
+  // Initial fetch and periodic refresh of checkpoints
+  useEffect(() => {
+    // Initial fetch
+    fetchCheckpoints();
+    
+    // Set up auto-refresh every minute to update checkpoint statuses
+    const intervalId = setInterval(() => {
+      // Silent refresh (no error toasts)
+      fetchCheckpoints(false);
+    }, 60000); // Every minute
+    
+    // Clean up interval on component unmount
+    return () => clearInterval(intervalId);
+  }, []);
+  
+  // Re-evaluate statuses whenever the component renders to ensure accuracy
+  useEffect(() => {
+    if (checkpoints.length > 0) {
+      const updatedCheckpoints = checkpoints.map(checkpoint => ({
+        ...checkpoint,
+        status: determineStatus(checkpoint.deadline)
+      }));
+      
+      // Only update if statuses have changed
+      const statusesChanged = updatedCheckpoints.some(
+        (checkpoint, index) => checkpoint.status !== checkpoints[index].status
+      );
+      
+      if (statusesChanged) {
+        setCheckpoints(updatedCheckpoints);
       }
     }
-    
-    fetchCheckpoints();
-  }, []);
+  }, [checkpoints]);
   
   const handleAddCheckpoint = async () => {
     if (!title.trim() || !description.trim() || !deadline) {
@@ -93,23 +191,40 @@ export default function CheckpointsPage() {
     setIsSubmitting(true);
     
     try {
-      // Insert checkpoint into database
+      // Format the deadline with explicit IST timezone
+      const formattedDeadline = formatForStorage(deadline);
+      
+      // Debug information to help troubleshoot time issues
+      console.log('Time Debug Info:');
+      console.log('  Input deadline from form:', deadline);
+      console.log('  Formatted for storage with IST timezone:', formattedDeadline);
+      
+      // Insert checkpoint into database with explicit IST timezone
       const { data, error } = await supabase.from('checkpoints').insert({ 
         title, 
         description, 
-        deadline: new Date(deadline).toISOString()
+        deadline: formattedDeadline
       }).select();
       
       if (error) throw error;
       
       // Add the new checkpoint to state
       if (data && data.length > 0) {
+        // Debug information about what we received from the database
+        console.log('Database Response:');
+        console.log('  DB deadline string:', data[0].deadline);
+        console.log('  Parsed as Date:', new Date(data[0].deadline).toString());
+        console.log('  Displayed format:', formatDeadline(data[0].deadline));
+        console.log('  Status:', determineStatus(data[0].deadline));
+        
         const newCheckpoint = {
           ...data[0],
           status: determineStatus(data[0].deadline)
         };
         
-        setCheckpoints([...checkpoints, newCheckpoint]);
+        // Add to checkpoints and re-sort
+        const updatedCheckpoints = [...checkpoints, newCheckpoint];
+        fetchCheckpoints(false); // Refresh to sort properly
       }
       
       // Reset form
@@ -134,6 +249,28 @@ export default function CheckpointsPage() {
     }
   };
   
+  // Format a date from the database for the datetime-local input
+  // We need to convert from timestamptz to local browser time for the input
+  const formatDateForInput = (dateString: string): string => {
+    // First, create a date object from the database string (timestamptz)
+    const date = new Date(dateString);
+    
+    // Format for datetime-local input (YYYY-MM-DDThh:mm) - use local browser time
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    
+    // Log for debugging
+    console.log('Edit conversion debug:');
+    console.log('  DB date string:', dateString);
+    console.log('  Parsed as Date:', date.toString());
+    console.log('  Formatted for input:', `${year}-${month}-${day}T${hours}:${minutes}`);
+    
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
+  };
+
   const handleEditCheckpoint = (checkpoint: Checkpoint) => {
     setEditingCheckpointId(checkpoint.id);
     setTitle(checkpoint.title);
@@ -141,10 +278,8 @@ export default function CheckpointsPage() {
     
     // Format date for datetime-local input
     try {
-      const dateObj = new Date(checkpoint.deadline);
-      const isoString = dateObj.toISOString();
-      const formattedDate = isoString.substring(0, isoString.length - 8); // Remove seconds and milliseconds
-      setDeadline(formattedDate);
+      // With timestamptz, browser automatically converts to local timezone
+      setDeadline(formatDateForInput(checkpoint.deadline));
     } catch (error) {
       setDeadline('');
       console.error('Error formatting date:', error);
@@ -166,30 +301,28 @@ export default function CheckpointsPage() {
     setIsSubmitting(true);
     
     try {
-      // Update checkpoint in database
+      // Format deadline with explicit IST timezone
+      const formattedDeadline = formatForStorage(deadline);
+      
+      // Debug information for update
+      console.log('Update Checkpoint Debug:');
+      console.log('  Input deadline from form:', deadline);
+      console.log('  Formatted for storage with IST timezone:', formattedDeadline);
+      
+      // Update checkpoint in database with explicit timezone
       const { error } = await supabase
         .from('checkpoints')
         .update({ 
           title, 
           description, 
-          deadline: new Date(deadline).toISOString() 
+          deadline: formattedDeadline
         })
         .eq('id', editingCheckpointId);
       
       if (error) throw error;
       
-      // Update local state
-      setCheckpoints(checkpoints.map(checkpoint => 
-        checkpoint.id === editingCheckpointId 
-          ? { 
-              ...checkpoint, 
-              title, 
-              description, 
-              deadline: new Date(deadline).toISOString(),
-              status: determineStatus(new Date(deadline).toISOString())
-            }
-          : checkpoint
-      ));
+      // Refresh to ensure proper sorting and status calculation with IST time
+      fetchCheckpoints(false);
       
       // Reset form
       setTitle('');
@@ -262,44 +395,64 @@ export default function CheckpointsPage() {
   };
   
   const formatDeadline = (deadline: string) => {
-    const date = new Date(deadline);
-    return date.toLocaleString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-      hour: 'numeric',
-      minute: '2-digit',
-    });
+    // Simply use our helper function to format the date in IST
+    return formatToISTString(deadline);
   };
   
   const getStatusBadge = (status: string, deadline: string) => {
+    // Use the same method as determineStatus for consistency
     const now = new Date();
-    const deadlineDate = new Date(deadline);
-    const timeRemaining = deadlineDate.getTime() - now.getTime();
-    const daysRemaining = Math.ceil(timeRemaining / (1000 * 60 * 60 * 24));
     
-    if (status === 'open') {
+    // Get the current time in IST
+    const nowInIST = new Date(now.toLocaleString('en-US', { timeZone: IST_TIMEZONE }));
+    
+    // Get the deadline in IST
+    const deadlineInIST = new Date(new Date(deadline).toLocaleString('en-US', { timeZone: IST_TIMEZONE }));
+    
+    // Compare dates in the same timezone
+    const timeRemaining = deadlineInIST.getTime() - nowInIST.getTime();
+    const daysRemaining = Math.ceil(timeRemaining / (1000 * 60 * 60 * 24));
+    const hoursRemaining = Math.ceil(timeRemaining / (1000 * 60 * 60));
+    const minutesRemaining = Math.ceil(timeRemaining / (1000 * 60));
+    
+    // Force a re-check of the status based on current time
+    const currentStatus = determineStatus(deadline);
+    
+    if (currentStatus === 'open') {
+      let timeDisplay = '';
+      if (timeRemaining <= 0) {
+        timeDisplay = 'Deadline passed';
+      } else if (hoursRemaining <= 1) {
+        // Show minutes when less than 1 hour remains
+        timeDisplay = `${minutesRemaining} minutes left`;
+      } else if (daysRemaining <= 1) {
+        // Show hours when within 24 hours
+        timeDisplay = `${hoursRemaining} hours left`;
+      } else {
+        timeDisplay = `${daysRemaining} days left`;
+      }
+      
       return (
         <div className="inline-flex items-center bg-green-500/10 text-green-500 px-2 py-1 rounded text-xs font-medium">
           <Clock className="mr-1 h-3 w-3" /> 
-          {daysRemaining <= 0 ? 'Due today' : `${daysRemaining} days left`}
+          {timeDisplay}
         </div>
       );
     }
     
-    if (status === 'upcoming') {
+    if (currentStatus === 'upcoming') {
       return (
         <div className="inline-flex items-center bg-blue-500/10 text-blue-500 px-2 py-1 rounded text-xs font-medium">
           <CalendarDays className="mr-1 h-3 w-3" />
-          Upcoming
+          Upcoming ({daysRemaining} days)
         </div>
       );
     }
     
-    if (status === 'closed') {
+    if (currentStatus === 'closed') {
       return (
         <div className="inline-flex items-center bg-gray-500/10 text-gray-500 px-2 py-1 rounded text-xs font-medium">
-          Closed
+          Completed
         </div>
       );
     }
@@ -323,7 +476,31 @@ export default function CheckpointsPage() {
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold">Checkpoints</h1>
-          <p className="text-muted-foreground">Manage submission checkpoints and deadlines</p>
+          <p className="text-muted-foreground">
+            Manage submission checkpoints and deadlines (Indian Standard Time)
+            <span className="ml-2 text-xs text-muted-foreground">
+              Current IST: {new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}
+            </span>
+          </p>
+        </div>
+        
+        <div className="flex items-center gap-2">
+          <Button 
+            variant="outline" 
+            onClick={async () => {
+              const success = await fetchCheckpoints();
+              if (success) {
+                toast({
+                  title: 'Refreshed',
+                  description: 'Checkpoint statuses updated successfully',
+                });
+              }
+            }}
+            disabled={isLoading}
+          >
+            <RefreshCw className={`mr-2 h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
+            Refresh Status
+          </Button>
         </div>
         
         <Dialog open={isAddingCheckpoint} onOpenChange={setIsAddingCheckpoint}>
@@ -364,12 +541,17 @@ export default function CheckpointsPage() {
               
               <div className="space-y-2">
                 <Label htmlFor="deadline">Deadline</Label>
-                <Input 
-                  id="deadline" 
-                  type="datetime-local"
-                  value={deadline}
-                  onChange={(e) => setDeadline(e.target.value)}
-                />
+                <div className="space-y-1">
+                  <Input 
+                    id="deadline" 
+                    type="datetime-local"
+                    value={deadline}
+                    onChange={(e) => setDeadline(e.target.value)}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Enter deadline in your local time. All times are displayed in IST on the dashboard.
+                  </p>
+                </div>
               </div>
             </div>
             <DialogFooter>
@@ -412,12 +594,17 @@ export default function CheckpointsPage() {
               
               <div className="space-y-2">
                 <Label htmlFor="edit-deadline">Deadline</Label>
-                <Input 
-                  id="edit-deadline" 
-                  type="datetime-local"
-                  value={deadline}
-                  onChange={(e) => setDeadline(e.target.value)}
-                />
+                <div className="space-y-1">
+                  <Input 
+                    id="edit-deadline" 
+                    type="datetime-local"
+                    value={deadline}
+                    onChange={(e) => setDeadline(e.target.value)}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Enter deadline in your local time. All times are displayed in IST on the dashboard.
+                  </p>
+                </div>
               </div>
             </div>
             <DialogFooter>
@@ -437,7 +624,9 @@ export default function CheckpointsPage() {
             <CardHeader className="flex flex-row items-start justify-between space-y-0">
               <div>
                 <CardTitle className="text-lg">{checkpoint.title}</CardTitle>
-                <CardDescription>Created: {checkpoint.created_at}</CardDescription>
+                <CardDescription>
+                  Created: {checkpoint.created_at ? formatToISTString(checkpoint.created_at) : 'N/A'}
+                </CardDescription>
               </div>
               {getStatusBadge(checkpoint.status, checkpoint.deadline)}
             </CardHeader>

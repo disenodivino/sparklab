@@ -14,11 +14,11 @@ interface Participant {
 }
 
 interface TeamUser {
-  id: string;
-  name: string;
-  username: string;
-  role: string;
-  participants: Participant[];
+  id: number;
+  team_name: string;
+  username?: string;
+  role?: string;
+  participants?: Participant[];
 }
 
 export default function TeamDashboard() {
@@ -73,7 +73,10 @@ export default function TeamDashboard() {
     <div className="container mx-auto py-8 px-4 md:px-8">
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-3xl font-bold">Team Dashboard</h1>
-        <Button variant="outline" onClick={handleLogout}>Logout</Button>
+        <div className="space-x-2">
+          <Button variant="default" onClick={() => router.push('/event/team/messages')}>Messages</Button>
+          <Button variant="outline" onClick={handleLogout}>Logout</Button>
+        </div>
       </div>
       
       {user && (

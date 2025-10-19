@@ -10,8 +10,6 @@ import { Label } from '@/components/ui/label';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/lib/supabase';
 import { hashPassword } from '@/lib/crypto';
-import { debugUserInsert } from '@/lib/debug-user-ops';
-import { checkDatabaseTables } from '@/lib/db-check';
 import { PlusCircle, Users, UserPlus, Trash2, Edit, Search, RefreshCw, Loader2 } from 'lucide-react';
 import { format } from 'date-fns';
 
@@ -24,18 +22,17 @@ interface Team {
   password_hash?: string;
 }
 
-interface Participant {
+interface TeamMember {
   id: number;
   name: string;
   team_id: number | null;
   team_name?: string;
   created_at: string;
-  role?: string;
 }
 
 export default function TeamsPage() {
   const [teams, setTeams] = useState<Team[]>([]);
-  const [participants, setParticipants] = useState<Participant[]>([]);
+  const [participants, setParticipants] = useState<TeamMember[]>([]);
   const [isAddingTeamWithParticipants, setIsAddingTeamWithParticipants] = useState(false);
   const [isEditingTeam, setIsEditingTeam] = useState(false);
   const [isEditingParticipant, setIsEditingParticipant] = useState(false);
@@ -58,14 +55,14 @@ export default function TeamsPage() {
     participants: [{ name: '' }]
   });
   
-  // Function to fetch teams and participants from the database
+  // Function to fetch teams and team members from the database
   const fetchData = async (showLoading = true) => {
     if (showLoading) {
       setIsLoading(true);
     }
     
     try {
-      console.log('Fetching teams and participants data...');
+      console.log('Fetching teams and team members data...');
       
       // Fetch teams
       const { data: teamsData, error: teamsError } = await supabase
@@ -73,42 +70,66 @@ export default function TeamsPage() {
         .select('*')
         .order('created_at', { ascending: false });
         
-      if (teamsError) throw teamsError;
+      if (teamsError) {
+        console.error('Error fetching teams:', teamsError);
+        toast({
+          title: 'Error',
+          description: 'Failed to load teams',
+          variant: 'destructive',
+        });
+        setIsLoading(false);
+        return;
+      }
       
-      console.log('Teams fetched:', teamsData?.length || 0);
+      console.log('Teams fetched successfully:', teamsData?.length || 0, teamsData);
 
-      // Fetch participants from the participants table
-      const { data: participantsData, error: participantsError } = await supabase
-        .from('participants')
+      // Fetch users from the users table
+      const { data: usersData, error: usersError } = await supabase
+        .from('users')
         .select('*')
         .order('created_at', { ascending: false });
         
-      if (participantsError) throw participantsError;
-      
-      console.log('Participants fetched:', participantsData?.length || 0);
+      if (usersError) {
+        console.error('Error fetching users:', usersError);
+        toast({
+          title: 'Error',
+          description: 'Failed to load team members',
+          variant: 'destructive',
+        });
+        // Still continue with teams data
+      } else {
+        console.log('Users fetched successfully:', usersData?.length || 0, usersData);
+      }
       
       // Count team members and add that info
       const teamsWithMembers = teamsData.map(team => {
-        const memberCount = participantsData.filter(p => p.team_id === team.id).length;
+        // If usersData is null or undefined, provide an empty array
+        const memberCount = (usersData || []).filter(p => p.team_id === team.id).length;
         return { ...team, members: memberCount };
       });
       
-      // Add team name to participants for display
-      const participantsWithTeamNames = participantsData.map(participant => {
-        const team = teamsData.find(t => t.id === participant.team_id);
-        return {
-          ...participant,
-          team_name: team ? team.team_name : 'No team'
-        };
-      });
+      // Process users as participants if we have them
+      let participantsWithTeamNames = [];
+      if (usersData && usersData.length > 0) {
+        participantsWithTeamNames = usersData.map(user => {
+          const team = teamsData.find(t => t.id === user.team_id);
+          return {
+            ...user,
+            team_name: team ? team.team_name : 'No team'
+          };
+        });
+      }
 
+      // Update state with the data we have
       setTeams(teamsWithMembers);
       setParticipants(participantsWithTeamNames);
+      
+      console.log('Data fetching completed successfully.');
     } catch (error) {
-      console.error('Error fetching teams and participants:', error);
+      console.error('Error fetching teams and team members:', error);
       toast({
         title: 'Error',
-        description: 'Failed to load teams and participants',
+        description: 'Failed to load teams and team members',
         variant: 'destructive',
       });
     } finally {
@@ -118,27 +139,32 @@ export default function TeamsPage() {
     }
   };
   
-  // Fetch data on component mount
+  // Fetch data on component mount and when the component refreshes
   useEffect(() => {
-    // Check database tables to diagnose any issues
-    checkDatabaseTables().then(result => {
-      console.log('Database tables check result:', result);
-      
-      if (!result.usersAccessible) {
-        toast({
-          title: "Database Warning",
-          description: "The users table may not be accessible or properly configured",
-          variant: "destructive"
-        });
-      }
-    });
+    console.log('Teams component mounted, fetching initial data...');
     
-    // Fetch team and participant data
-    fetchData();
+    // Set a loading state immediately to show loading indicator
+    setIsLoading(true);
+    
+    // Fetch data with error handling
+    fetchData(false)
+      .then(() => {
+        console.log('Initial data fetch completed successfully');
+      })
+      .catch(error => {
+        console.error('Error during initial data fetch:', error);
+        toast({
+          title: 'Data Load Error',
+          description: 'There was a problem loading the teams data. Please try refreshing.',
+          variant: 'destructive',
+        });
+      });
   }, []);
   
   // Add team with participants in a single operation
   const handleAddTeam = async () => {
+    console.log("Starting team creation process...");
+    
     // Validate team name, username, and password
     if (!newTeamData.teamName.trim()) {
       toast({
@@ -167,7 +193,7 @@ export default function TeamsPage() {
       return;
     }
     
-    // Validate that we have at least one valid participant
+    // Validate that we have at least one valid team member
     const validParticipants = newTeamData.participants.filter(
       p => p.name.trim()
     );
@@ -175,16 +201,18 @@ export default function TeamsPage() {
     if (validParticipants.length === 0) {
       toast({
         title: 'Error',
-        description: 'Please add at least one participant with a name',
+        description: 'Please add at least one team member with a name',
         variant: 'destructive',
       });
       return;
     }
     
+    console.log(`Creating team "${newTeamData.teamName}" with ${validParticipants.length} team members`);
     setIsSubmitting(true);
     
     try {      
       // Create the team with username and hashed password
+      console.log("Creating team record in database...");
       const { data: teamData, error: teamError } = await supabase
         .from('teams')
         .insert({ 
@@ -194,39 +222,33 @@ export default function TeamsPage() {
         })
         .select();
       
-      if (teamError) throw teamError;
-      
-      if (!teamData || teamData.length === 0) {
-        throw new Error('Failed to create team');
+      if (teamError) {
+        console.error("Team creation error:", teamError);
+        throw new Error(`Failed to create team: ${teamError.message}`);
       }
       
-      const newTeam = teamData[0];
-      const createdParticipants: Participant[] = [];
+      if (!teamData || teamData.length === 0) {
+        console.error("Team creation failed: No team data returned");
+        throw new Error('Failed to create team: No data returned from database');
+      }
       
-      // Step 2: Create participants for the team and add them to both participants and users tables
-      for (const participant of validParticipants) {
+      console.log("Team created successfully:", teamData[0]);
+      
+      const newTeam = teamData[0];
+      const createdUsers: TeamMember[] = [];
+      let userErrors = 0;
+      
+      // Step 2: Create users for the team
+      console.log(`Creating ${validParticipants.length} users for team ${newTeam.team_name} (ID: ${newTeam.id})`);
+      
+      for (let i = 0; i < validParticipants.length; i++) {
+        const participant = validParticipants[i];
         try {
-          // Create participant record in the participants table
-          const { data: participantData, error: participantError } = await supabase
-            .from('participants')
-            .insert({
-              name: participant.name,
-              role: 'participant',
-              team_id: newTeam.id,
-              created_at: new Date().toISOString()
-            })
-            .select();
+          console.log(`Creating user ${i+1}/${validParticipants.length}: ${participant.name}`);
           
-          if (participantError) {
-            console.error('Error creating participant record:', participantError);
-            console.error('Error details:', participantError.message, participantError.details);
-            continue;
-          }
-          
-          // Also add the participant to the users table - use debug helper for detailed diagnostics
+          // Add the user to the users table
           console.log(`Adding ${participant.name} to users table with team_id ${newTeam.id}`);
           
-          // Try direct insert first
           const { data: userData, error: userError } = await supabase
             .from('users')
             .insert({
@@ -236,32 +258,42 @@ export default function TeamsPage() {
             })
             .select();
           
-          // If there's an error, use the debug helper to diagnose
           if (userError) {
             console.error('Error creating user record:', userError);
-            console.error('Error details:', userError.message, userError.details);
-            
-            // Use debug helper to get more information
-            const debugResult = await debugUserInsert(supabase, participant.name, newTeam.id);
-            console.log('Debug user insert result:', debugResult);
-            
-            // Continue anyway since the participant was created successfully
+            console.error('Error details:', userError.message);
+            userErrors++;
           } else {
-            console.log('User record created successfully:', userData);
-          }
-          
-          if (participantData && participantData[0]) {
-            createdParticipants.push({
-              ...participantData[0],
-              team_name: newTeam.team_name
-            });
+            console.log('User created successfully:', userData);
+            
+            if (userData && userData[0]) {
+              createdUsers.push({
+                ...userData[0],
+                team_name: newTeam.team_name
+              });
+              console.log(`Successfully created user ${participant.name} (ID: ${userData[0].id})`);
+            }
           }
         } catch (error) {
-          console.error('Error creating participant:', error);
+          console.error('Error creating user:', error);
+          userErrors++;
         }
       }
       
-      // Reset form
+      // Log summary of team member creation
+      console.log(`Team member creation summary: ${createdUsers.length} created, ${userErrors} errors`);
+      
+      // If no team members were created but team was, show a warning
+      if (createdUsers.length === 0 && validParticipants.length > 0) {
+        console.error("Failed to create any team members even though team was created successfully!");
+      }
+      
+      // Save info for the toast message before resetting the form
+      const teamName = newTeamData.teamName;
+      const userCount = createdUsers.length;
+      
+      console.log("Team creation process completed, now resetting form and refreshing data...");
+      
+      // Reset the form
       setNewTeamData({
         teamName: '',
         username: '',
@@ -269,15 +301,39 @@ export default function TeamsPage() {
         participants: [{ name: '' }]
       });
       
+      // Close the form panel
       setIsAddingTeamWithParticipants(false);
       
-      // Refresh data from the server to ensure we have the latest state
-      await fetchData(false); // Don't show loading state during this refresh
+      // Show success or partial success message based on user creation results
+      if (userCount === validParticipants.length) {
+        toast({
+          title: 'Success',
+          description: `Team "${teamName}" created with ${userCount} team members`,
+        });
+      } else {
+        toast({
+          title: 'Partial Success',
+          description: `Team "${teamName}" created but only ${userCount} of ${validParticipants.length} team members were added`,
+          variant: 'warning',
+        });
+      }
       
-      toast({
-        title: 'Success',
-        description: `Team "${newTeamData.teamName}" created with ${createdParticipants.length} participants`,
-      });
+      // Refresh data from the server with a longer delay to ensure all database writes have completed
+      console.log("Scheduling data refresh after team creation...");
+      setTimeout(async () => {
+        console.log("Executing refresh data after team creation...");
+        try {
+          await fetchData(true);
+          console.log("Data refresh completed successfully");
+        } catch (refreshError) {
+          console.error("Error during data refresh:", refreshError);
+          toast({
+            title: 'Warning',
+            description: 'Team created but there was an error refreshing the data. Please click refresh manually.',
+            variant: 'warning',
+          });
+        }
+      }, 1000);
       
     } catch (error) {
       console.error('Error creating team with participants:', error);
@@ -343,12 +399,28 @@ export default function TeamsPage() {
         <div className="flex items-center gap-2">
           <Button 
             variant="outline"
-            onClick={() => {
+            onClick={async () => {
+              console.log("Manual refresh requested...");
               toast({
                 title: "Refreshing data",
-                description: "Fetching latest teams and participants data"
+                description: "Fetching latest teams and team members data"
               });
-              fetchData();
+              
+              try {
+                await fetchData(true);
+                console.log("Manual refresh completed successfully");
+                toast({
+                  title: "Refresh complete",
+                  description: "Teams and team members data has been updated"
+                });
+              } catch (error) {
+                console.error("Error during manual refresh:", error);
+                toast({
+                  title: "Refresh failed",
+                  description: "There was an error refreshing the data. Please try again.",
+                  variant: "destructive"
+                });
+              }
             }}
             disabled={isLoading}
           >
@@ -356,45 +428,7 @@ export default function TeamsPage() {
             Refresh
           </Button>
           
-          <Button
-            variant="outline" 
-            className="border-amber-500 text-amber-500 hover:bg-amber-500/10"
-            onClick={async () => {
-              try {
-                toast({
-                  title: "Checking database",
-                  description: "Verifying table structure..."
-                });
-                
-                const response = await fetch('/api/debug/check-tables');
-                const result = await response.json();
-                
-                console.log('Database check result:', result);
-                
-                if (result.success) {
-                  toast({
-                    title: "Database check completed",
-                    description: result.message,
-                  });
-                } else {
-                  toast({
-                    title: "Database check failed",
-                    description: result.error || "Unknown error",
-                    variant: "destructive"
-                  });
-                }
-              } catch (error) {
-                console.error('Error checking database:', error);
-                toast({
-                  title: "Error",
-                  description: "Failed to check database structure",
-                  variant: "destructive"
-                });
-              }
-            }}
-          >
-            <span className="text-xs">Check DB</span>
-          </Button>
+
           
           <Dialog open={isAddingTeamWithParticipants} onOpenChange={setIsAddingTeamWithParticipants}>
             <DialogTrigger asChild>
@@ -536,7 +570,7 @@ export default function TeamsPage() {
           </TabsTrigger>
           <TabsTrigger value="participants" className="flex items-center">
             <UserPlus className="mr-2 h-4 w-4" />
-            Participants ({participants.length})
+            Team Members ({participants.length})
           </TabsTrigger>
         </TabsList>
         
@@ -593,13 +627,13 @@ export default function TeamsPage() {
                                   if (window.confirm(`Are you sure you want to delete ${team.team_name}?`)) {
                                     setIsSubmitting(true);
                                     try {
-                                      // First check if there are participants in this team
-                                      const teamParticipants = participants.filter(p => p.team_id === team.id);
+                                      // First check if there are team members in this team
+                                      const teamMembers = participants.filter(p => p.team_id === team.id);
                                       
-                                      if (teamParticipants.length > 0) {
+                                      if (teamMembers.length > 0) {
                                         toast({
                                           title: 'Error',
-                                          description: `Cannot delete team with ${teamParticipants.length} participants. Please reassign or remove participants first.`,
+                                          description: `Cannot delete team with ${teamMembers.length} team members. Please reassign or remove team members first.`,
                                           variant: 'destructive',
                                         });
                                         return;
@@ -648,8 +682,8 @@ export default function TeamsPage() {
         <TabsContent value="participants" className="mt-6">
           <Card>
             <CardHeader>
-              <CardTitle>Participants</CardTitle>
-              <CardDescription>List of all registered participants</CardDescription>
+              <CardTitle>Team Members</CardTitle>
+              <CardDescription>List of all registered team members</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="rounded-md border">
@@ -694,35 +728,28 @@ export default function TeamsPage() {
                                 variant="ghost" 
                                 className="text-red-500 hover:text-red-700"
                                 onClick={async () => {
-                                  if (window.confirm(`Are you sure you want to delete ${participant.name}?`)) {
+                                  if (window.confirm(`Are you sure you want to delete team member ${participant.name}?`)) {
                                     setIsSubmitting(true);
                                     try {
-                                      // Delete participant from the participants table
+                                      console.log(`Deleting team member: ${participant.name} (ID: ${participant.id})`);
+                                      
+                                      // Delete from users table directly
                                       const { error } = await supabase
-                                        .from('participants')
+                                        .from('users')
                                         .delete()
                                         .eq('id', participant.id);
                                       
-                                      if (error) throw error;
-                                      
-                                      // Also delete from users table where name and team_id match
-                                      const { error: userError } = await supabase
-                                        .from('users')
-                                        .delete()
-                                        .match({ 
-                                          name: participant.name, 
-                                          team_id: participant.team_id 
-                                        });
-                                      
-                                      if (userError) {
-                                        console.error('Error deleting user record:', userError);
-                                        // Continue anyway as the participant was deleted
+                                      if (error) {
+                                        console.error('Error deleting team member:', error);
+                                        throw error;
                                       }
+                                      
+                                      console.log('Team member deleted successfully from database');
                                       
                                       // Update local state
                                       setParticipants(participants.filter(p => p.id !== participant.id));
                                       
-                                      // Update team members count if the participant was in a team
+                                      // Update team members count if the member was in a team
                                       if (participant.team_id) {
                                         setTeams(teams.map(team => 
                                           team.id === participant.team_id 
@@ -733,13 +760,13 @@ export default function TeamsPage() {
                                       
                                       toast({
                                         title: 'Success',
-                                        description: 'Participant deleted successfully',
+                                        description: 'Team member deleted successfully',
                                       });
                                     } catch (error) {
-                                      console.error('Error deleting participant:', error);
+                                      console.error('Error deleting team member:', error);
                                       toast({
                                         title: 'Error',
-                                        description: 'Failed to delete participant',
+                                        description: 'Failed to delete team member',
                                         variant: 'destructive',
                                       });
                                     } finally {
