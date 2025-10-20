@@ -1,10 +1,12 @@
 import { supabase } from './supabase';
 
+const isDev = process.env.NODE_ENV === 'development';
+
 /**
  * Utility function to check the database schema and validate table structures
  */
 export async function checkDatabaseTables() {
-  console.log('Checking database tables...');
+  if (isDev) console.log('Checking database tables...');
   
   try {
     // Check teams table
@@ -14,9 +16,9 @@ export async function checkDatabaseTables() {
       .limit(1);
       
     if (teamsError) {
-      console.error('Error accessing teams table:', teamsError);
+      if (isDev) console.error('Error accessing teams table:', teamsError);
     } else {
-      console.log('Teams table accessible, first row:', teamsInfo);
+      if (isDev) console.log('Teams table accessible, first row:', teamsInfo);
     }
     
     // Check users table
@@ -26,17 +28,17 @@ export async function checkDatabaseTables() {
       .limit(1);
       
     if (usersError) {
-      console.error('Error accessing users table:', usersError);
+      if (isDev) console.error('Error accessing users table:', usersError);
       
       // Try to get more detailed information about the users table structure using system tables
       // This is a workaround for Supabase's limited ability to query schema information
       const { error: schemaError } = await supabase.rpc('check_table_exists', { table_name: 'users' });
       
       if (schemaError) {
-        console.error('Could not check if users table exists:', schemaError);
+        if (isDev) console.error('Could not check if users table exists:', schemaError);
       }
     } else {
-      console.log('Users table accessible, first row:', usersInfo);
+      if (isDev) console.log('Users table accessible, first row:', usersInfo);
     }
     
     // Check participants table
@@ -46,9 +48,9 @@ export async function checkDatabaseTables() {
       .limit(1);
       
     if (participantsError) {
-      console.error('Error accessing participants table:', participantsError);
+      if (isDev) console.error('Error accessing participants table:', participantsError);
     } else {
-      console.log('Participants table accessible, first row:', participantsInfo);
+      if (isDev) console.log('Participants table accessible, first row:', participantsInfo);
     }
     
     return {
@@ -57,7 +59,7 @@ export async function checkDatabaseTables() {
       participantsAccessible: !participantsError
     };
   } catch (error) {
-    console.error('Error checking database tables:', error);
+    if (isDev) console.error('Error checking database tables:', error);
     return {
       teamsAccessible: false,
       usersAccessible: false,
@@ -75,13 +77,13 @@ export async function setupDiagnosticFunctions() {
     const { error } = await supabase.rpc('create_check_table_exists_function');
     
     if (error) {
-      console.error('Error creating diagnostic function:', error);
+      if (isDev) console.error('Error creating diagnostic function:', error);
       return false;
     }
     
     return true;
   } catch (error) {
-    console.error('Error setting up diagnostic functions:', error);
+    if (isDev) console.error('Error setting up diagnostic functions:', error);
     return false;
   }
 }

@@ -1,10 +1,12 @@
 import { supabase } from './supabase';
 
+const isDev = process.env.NODE_ENV === 'development';
+
 export async function testParticipantInsertion() {
   const testTeamId = 1; // Use an existing team ID
   const timestamp = new Date().toISOString();
   
-  console.log('Testing participant insertion...');
+  if (isDev) console.log('Testing participant insertion...');
   
   try {
     // Attempt to insert a test participant
@@ -18,12 +20,14 @@ export async function testParticipantInsertion() {
       .select();
       
     if (participantError) {
-      console.error('Participant insertion error:', participantError);
-      console.error('Error details:', participantError.message, participantError.details);
+      if (isDev) {
+        console.error('Participant insertion error:', participantError);
+        console.error('Error details:', participantError.message, participantError.details);
+      }
       return { success: false, error: participantError };
     }
     
-    console.log('Participant inserted successfully:', participantData);
+    if (isDev) console.log('Participant inserted successfully:', participantData);
     
     // Now attempt to insert into users table
     const { data: userData, error: userError } = await supabase
@@ -36,15 +40,17 @@ export async function testParticipantInsertion() {
       .select();
       
     if (userError) {
-      console.error('User insertion error:', userError);
-      console.error('Error details:', userError.message, userError.details);
+      if (isDev) {
+        console.error('User insertion error:', userError);
+        console.error('Error details:', userError.message, userError.details);
+      }
       return { success: false, error: userError };
     }
     
-    console.log('User inserted successfully:', userData);
+    if (isDev) console.log('User inserted successfully:', userData);
     return { success: true, participant: participantData[0], user: userData[0] };
   } catch (error) {
-    console.error('Unexpected error during test:', error);
+    if (isDev) console.error('Unexpected error during test:', error);
     return { success: false, error };
   }
 }
@@ -59,14 +65,14 @@ export async function getTableStructure(tableName: string) {
       .limit(0);
       
     if (error) {
-      console.error(`Error getting structure for table ${tableName}:`, error);
+      if (isDev) console.error(`Error getting structure for table ${tableName}:`, error);
       return { success: false, error };
     }
     
     // If we get here, the table exists and we have access to it
     return { success: true, columns: data };
   } catch (error) {
-    console.error(`Unexpected error getting structure for table ${tableName}:`, error);
+    if (isDev) console.error(`Unexpected error getting structure for table ${tableName}:`, error);
     return { success: false, error };
   }
 }

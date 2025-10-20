@@ -4,4 +4,29 @@
 runConfig:
   # Increase this value if you'd like to automatically spin up
   # more instances in response to increased traffic.
-  maxInstances: 1
+  # For production, consider increasing based on your needs
+  minInstances: 0
+  maxInstances: 3
+  
+  # Memory allocation per instance (options: 512MB, 1GB, 2GB, 4GB, 8GB)
+  memory: 1GB
+  
+  # CPU allocation (options: 1, 2, 4, 8)
+  cpu: 1
+  
+  # Maximum concurrent requests per instance
+  concurrency: 80
+
+env:
+  # Environment variables are set via Firebase CLI
+  # Use: firebase apphosting:secrets:set VARIABLE_NAME
+  # Required variables:
+  # - NEXT_PUBLIC_SUPABASE_URL
+  # - NEXT_PUBLIC_SUPABASE_ANON_KEY
+  # - SUPABASE_SERVICE_KEY
+  # - GOOGLE_GENAI_API_KEY
+  # - NEXT_PUBLIC_ORGANIZER_USERNAME
+  # - NEXT_PUBLIC_ORGANIZER_PASSWORD
+  - variable: NODE_ENV
+    value: production
+

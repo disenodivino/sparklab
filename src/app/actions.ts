@@ -12,8 +12,15 @@ const formSchema = z.object({
 });
 
 export async function registerForEvent(data: z.infer<typeof formSchema>) {
-  const supabaseUrl = 'https://izahxmtcripexpgtaxdr.supabase.co';
-  const supabaseServiceKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml6YWh4bXRjcmlwZXhwZ3RheGRyIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1NDE0OTkyNiwiZXhwIjoyMDY5NzI1OTI2fQ.WwgIQHDogt5yTRcUsWgC3yS5SKoBfRfsLU-Alhsr-s8';
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+  const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY || '';
+  
+  if (!supabaseUrl || !supabaseServiceKey) {
+    return { 
+      success: false, 
+      message: "Server configuration error. Please contact support." 
+    };
+  }
   
   const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
     auth: {

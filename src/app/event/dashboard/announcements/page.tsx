@@ -18,74 +18,32 @@ interface Message {
 export default function AnnouncementsPage() {
   const [announcements, setAnnouncements] = useState<Message[]>([]);
   const [loading, setLoading] = useState(true);
-  const [currentTeamId, setCurrentTeamId] = useState<number | null>(null);
-  const [nonOrganizerTeamsCount, setNonOrganizerTeamsCount] = useState<number>(0);
 
   useEffect(() => {
-    // Get current team ID from localStorage
-    const userString = localStorage.getItem('user');
-    if (userString) {
-      try {
-        const userData = JSON.parse(userString);
-        setCurrentTeamId(userData.id || userData.team_id);
-      } catch (error) {
-        console.error('Error parsing user data:', error);
-      }
-    }
-  }, []);
-
-  useEffect(() => {
-    if (!currentTeamId) return;
-
     const fetchAnnouncements = async () => {
       setLoading(true);
       try {
-        // Count all teams except the organizer (id 1)
-        const { data: teamsData, error: teamsError } = await supabase
-          .from('teams')
-          .select('id');
-        if (teamsError) throw teamsError;
-        const nonOrganizerTeams = (teamsData || []).filter(t => t.id !== 1);
-        const nonOrgCount = nonOrganizerTeams.length;
-        setNonOrganizerTeamsCount(nonOrgCount);
+        // Fetch all announcements from the announcements table
+        const { data: announcementsData, error: announcementsError } = await supabase
+          .from('announcements')
+          .select('*')
+          .order('created_at', { ascending: false });
+        
+        if (announcementsError) {
+          console.error('Error fetching announcements:', announcementsError);
+          throw announcementsError;
+        }
 
-        // Fetch all messages sent by organizer to teams
-        const { data: orgMessages, error: orgMsgError } = await supabase
-          .from('messages')
-          .select('id, sender_team_id, receiver_id, content, timestamp')
-          .eq('sender_team_id', 1)
-          .not('receiver_id', 'is', null)
-          .order('timestamp', { ascending: false });
-        if (orgMsgError) throw orgMsgError;
+        // Map announcements to match the Message interface
+        const mappedAnnouncements: Message[] = (announcementsData || []).map((announcement: any) => ({
+          id: announcement.id,
+          sender_team_id: 1, // Organizer team ID
+          receiver_id: null, // Broadcast to all
+          content: announcement.message,
+          timestamp: announcement.created_at
+        }));
 
-        // Group by content + minute and collect unique receivers
-        type Group = { key: string; messages: Message[]; receivers: Set<number> };
-        const groups = new Map<string, Group>();
-        (orgMessages || []).forEach((m) => {
-          const ts = new Date(m.timestamp);
-          const key = `${m.content.trim()}__${ts.getFullYear()}-${ts.getMonth()}-${ts.getDate()}_${ts.getHours()}-${ts.getMinutes()}`;
-          if (!groups.has(key)) {
-            groups.set(key, { key, messages: [m as Message], receivers: new Set<number>(m.receiver_id ? [m.receiver_id] : []) });
-          } else {
-            const g = groups.get(key)!;
-            g.messages.push(m as Message);
-            if (m.receiver_id) g.receivers.add(m.receiver_id);
-          }
-        });
-
-        // Keep only groups where the message was sent to ALL non-organizer teams
-        const broadcastGroups = Array.from(groups.values()).filter(g => g.receivers.size === nonOrgCount);
-
-        // For each group, pick the message that belongs to this current team
-        const result: Message[] = [];
-        broadcastGroups.forEach(g => {
-          const msgForTeam = g.messages.find(m => m.receiver_id === currentTeamId);
-          if (msgForTeam) result.push(msgForTeam);
-        });
-
-        // Sort descending by timestamp
-        result.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
-        setAnnouncements(result);
+        setAnnouncements(mappedAnnouncements);
       } catch (error) {
         console.error('Error fetching announcements:', error);
         toast({
@@ -100,27 +58,22 @@ export default function AnnouncementsPage() {
 
     fetchAnnouncements();
 
-    // Subscribe to new messages and recompute (debounced) so we only keep true broadcasts
-    let debounceTimer: any;
+    // Subscribe to new announcements
     const channel = supabase
       .channel('announcements')
       .on(
         'postgres_changes',
-        { event: 'INSERT', schema: 'public', table: 'messages' },
+        { event: 'INSERT', schema: 'public', table: 'announcements' },
         () => {
-          clearTimeout(debounceTimer);
-          debounceTimer = setTimeout(() => {
-            fetchAnnouncements();
-          }, 500);
+          fetchAnnouncements();
         }
       )
       .subscribe();
 
     return () => {
-      clearTimeout(debounceTimer);
       supabase.removeChannel(channel);
     };
-  }, [currentTeamId]);
+  }, []);
 
   if (loading) {
     return (

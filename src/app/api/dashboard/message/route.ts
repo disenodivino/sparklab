@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase";
+import { supabase } from "@/lib/supabase";
 import { cookies } from "next/headers";
 
 export async function POST(request: NextRequest) {
   const cookieStore = cookies();
-  const supabase = createClient(cookieStore);
+  // Using the imported supabase client
+  // Note: This endpoint may need refactoring for proper session-based authentication
 
   try {
     // Get authenticated user

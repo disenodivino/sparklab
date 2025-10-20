@@ -19,6 +19,7 @@ import { supabase } from '@/lib/supabase';
 import { toast } from '@/hooks/use-toast';
 import { format, formatDistanceToNow } from 'date-fns';
 import UserHeader from '@/components/user-header';
+import Footer from '@/components/footer';
 
 interface Checkpoint {
   id: number;
@@ -77,6 +78,7 @@ export default function TeamDashboardPage() {
     try {
       const userData = JSON.parse(userString);
       
+      // Check if user is organizer (redirect to organizer dashboard)
       if (userData.role === 'organizer') {
         router.push('/event/organizer');
         return;

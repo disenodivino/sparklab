@@ -43,6 +43,7 @@ interface Conversation {
 export default function MessagesPage() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [teams, setTeams] = useState<Team[]>([]);
+  const [isAnnouncementDialogOpen, setIsAnnouncementDialogOpen] = useState(false);
   const [isSendingAnnouncement, setIsSendingAnnouncement] = useState(false);
   const [selectedConversation, setSelectedConversation] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -206,47 +207,27 @@ export default function MessagesPage() {
       ).sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime())
     : [];
     
-  // Get broadcast messages (sent from organizer to all teams)
-  const getBroadcastMessages = () => {
-    if (!organizerTeamId) return [];
-    
-    // Get unique teams excluding organizer
-    const nonOrganizerTeams = teams.filter(team => team.id !== organizerTeamId);
-    
-    // Create a map to track broadcast message groups by content and timestamp
-    const broadcastGroups = new Map<string, Message[]>();
-    
-    // Group messages that appear to be broadcasts (same content sent to multiple teams at same time)
-    messages.forEach(message => {
-      if (message.sender_team_id === organizerTeamId) {
-        // Use content + timestamp (to the minute) as a group key
-        const timestamp = new Date(message.timestamp);
-        const groupKey = `${message.content}_${timestamp.getFullYear()}-${timestamp.getMonth()}-${timestamp.getDate()}_${timestamp.getHours()}-${timestamp.getMinutes()}`;
-        
-        if (!broadcastGroups.has(groupKey)) {
-          broadcastGroups.set(groupKey, [message]);
-        } else {
-          broadcastGroups.get(groupKey)?.push(message);
-        }
-      }
-    });
-    
-    // Filter to keep only groups that were sent to multiple teams (broadcasts)
-    const broadcastMessages: Message[] = [];
-    broadcastGroups.forEach((messages, key) => {
-      if (messages.length > 1) {
-        // Use the first message as the representative for this broadcast
-        const broadcastMessage = {...messages[0], is_broadcast: true};
-        broadcastMessages.push(broadcastMessage);
-      }
-    });
-    
-    return broadcastMessages.sort((a, b) => 
-      new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
-    );
-  };
+  // State for announcements
+  const [announcements, setAnnouncements] = useState<any[]>([]);
   
-  const broadcastMessages = getBroadcastMessages();
+  // Fetch announcements from the announcements table
+  useEffect(() => {
+    fetchAnnouncements();
+  }, []);
+  
+  const fetchAnnouncements = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('announcements')
+        .select('*')
+        .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      setAnnouncements(data || []);
+    } catch (error) {
+      console.error('Error fetching announcements:', error);
+    }
+  };
     
     // Scroll to bottom of conversation when messages change
   useEffect(() => {
@@ -269,7 +250,7 @@ export default function MessagesPage() {
     
     try {
       if (selectedTeamId) {
-        // Send to a specific team
+        // Send to a specific team as a direct message
         const { data, error } = await supabase.from('messages').insert({
           content: announcementMessage.trim(),
           sender_team_id: organizerTeamId,
@@ -288,27 +269,26 @@ export default function MessagesPage() {
           setMessages(prev => prev.some(m => m.id === enriched.id) ? prev : [...prev, enriched]);
         }
       } else {
-        // Send to all teams (broadcast)
-        // Get all teams except organizer
-        const recipientTeams = teams.filter(team => team.id !== organizerTeamId);
+        // Broadcast to all teams - insert into announcements table
+        const { data, error } = await supabase.from('announcements').insert({
+          message: announcementMessage.trim(),
+          created_at: new Date().toISOString()
+        }).select();
         
-        // Create a message for each team
-        const promises = recipientTeams.map(team => {
-          return supabase.from('messages').insert({
-            content: announcementMessage.trim(),
-            sender_team_id: organizerTeamId,
-            receiver_id: team.id,
-            timestamp: new Date().toISOString()
-          });
-        });
+        if (error) {
+          console.error('Supabase error details:', error);
+          throw error;
+        }
         
-        await Promise.all(promises);
+        // Refresh announcements to show the new one
+        await fetchAnnouncements();
       }
       
       // Reset form
       setAnnouncementMessage('');
       setSelectedTeamId(null);
       setIsSendingAnnouncement(false);
+      setIsAnnouncementDialogOpen(false);
       
       toast({
         title: 'Success',
@@ -395,7 +375,7 @@ export default function MessagesPage() {
             Refresh
           </Button>
           
-          <Dialog open={isSendingAnnouncement} onOpenChange={setIsSendingAnnouncement}>
+          <Dialog open={isAnnouncementDialogOpen} onOpenChange={setIsAnnouncementDialogOpen}>
             <DialogTrigger asChild>
               <Button>
                 <Bell className="mr-2 h-4 w-4" />
@@ -443,7 +423,7 @@ export default function MessagesPage() {
                 </div>
               </div>
               <DialogFooter>
-                <Button variant="outline" onClick={() => setIsSendingAnnouncement(false)} disabled={isSendingAnnouncement}>
+                <Button variant="outline" onClick={() => setIsAnnouncementDialogOpen(false)} disabled={isSendingAnnouncement}>
                   Cancel
                 </Button>
                 <Button onClick={handleSendAnnouncement} disabled={isSendingAnnouncement || !announcementMessage.trim()}>
@@ -472,7 +452,7 @@ export default function MessagesPage() {
             </TabsTrigger>
             <TabsTrigger value="announcements" className="flex items-center">
               <Bell className="mr-2 h-4 w-4" />
-              Announcements ({broadcastMessages.length})
+              Announcements ({announcements.length})
             </TabsTrigger>
           </TabsList>
           
@@ -595,14 +575,14 @@ export default function MessagesPage() {
                 <CardDescription>Messages sent to all participants</CardDescription>
               </CardHeader>
               <CardContent>
-                {broadcastMessages.length === 0 ? (
+                {announcements.length === 0 ? (
                   <div className="p-6 text-center text-muted-foreground border rounded-md">
                     No announcements yet
                   </div>
                 ) : (
                   <div className="space-y-4">
-                    {broadcastMessages.map((message) => (
-                      <div key={message.id} className="border border-secondary/20 rounded-lg p-4">
+                    {announcements.map((announcement) => (
+                      <div key={announcement.id} className="border border-secondary/20 rounded-lg p-4">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-2">
                             <div className="bg-primary/10 rounded-full p-2">
@@ -611,10 +591,10 @@ export default function MessagesPage() {
                             <p className="font-medium">Announcement</p>
                           </div>
                           <p className="text-xs text-muted-foreground">
-                            {formatTimestamp(message.timestamp)}
+                            {formatTimestamp(announcement.created_at)}
                           </p>
                         </div>
-                        <p className="mt-2">{message.content}</p>
+                        <p className="mt-2">{announcement.message}</p>
                       </div>
                     ))}
                   </div>

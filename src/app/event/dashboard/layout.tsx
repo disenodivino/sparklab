@@ -26,7 +26,10 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
         {children}
       </main>
       <MessagePopup />
-      <Footer />
+      {/* Footer with left margin to avoid sidebar overlap */}
+      <div className={sidebarCollapsed ? 'ml-20' : 'ml-64'}>
+        <Footer />
+      </div>
     </div>
   );
 }

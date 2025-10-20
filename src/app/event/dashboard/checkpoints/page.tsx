@@ -7,6 +7,42 @@ import { supabase } from '@/lib/supabase';
 import { toast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 
+// Countdown Timer Component
+function CountdownTimer({ deadline }: { deadline: string }) {
+  const [timeLeft, setTimeLeft] = useState({ hours: 0, minutes: 0, seconds: 0 });
+
+  useEffect(() => {
+    const calculateTimeLeft = () => {
+      const now = new Date().getTime();
+      const target = new Date(deadline).getTime();
+      const difference = target - now;
+
+      if (difference > 0) {
+        const hours = Math.floor(difference / (1000 * 60 * 60));
+        const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((difference % (1000 * 60)) / 1000);
+        
+        setTimeLeft({ hours, minutes, seconds });
+      } else {
+        setTimeLeft({ hours: 0, minutes: 0, seconds: 0 });
+      }
+    };
+
+    calculateTimeLeft();
+    const timer = setInterval(calculateTimeLeft, 1000);
+
+    return () => clearInterval(timer);
+  }, [deadline]);
+
+  return (
+    <span className="font-mono text-lg font-bold">
+      {String(timeLeft.hours).padStart(2, '0')}:
+      {String(timeLeft.minutes).padStart(2, '0')}:
+      {String(timeLeft.seconds).padStart(2, '0')}
+    </span>
+  );
+}
+
 interface Checkpoint {
   id: number;
   title: string;
@@ -97,6 +133,9 @@ export default function CheckpointsPage() {
     );
   }
 
+  // Find the next immediate checkpoint (first checkpoint that is not past and not today)
+  const nextCheckpointIndex = checkpoints.findIndex(cp => !cp.isPast && !cp.isToday);
+
   return (
     <div className="space-y-6">
       <div>
@@ -119,6 +158,7 @@ export default function CheckpointsPage() {
           <div className="space-y-8">
             {checkpoints.map((checkpoint, index) => {
               const isLast = index === checkpoints.length - 1;
+              const isNextCheckpoint = index === nextCheckpointIndex;
               
               return (
                 <div key={checkpoint.id} className="relative pl-16">
@@ -189,14 +229,18 @@ export default function CheckpointsPage() {
                         {!checkpoint.isPast && (
                           <div className={`flex items-center gap-2 font-semibold ${getStatusColor(checkpoint)}`}>
                             <Clock className="h-4 w-4" />
-                            <span>
-                              {checkpoint.isToday 
-                                ? 'Due Today!' 
-                                : checkpoint.daysRemaining < 0 
-                                ? 'Overdue' 
-                                : `${Math.abs(checkpoint.daysRemaining)} day${Math.abs(checkpoint.daysRemaining) !== 1 ? 's' : ''} remaining`
-                              }
-                            </span>
+                            {isNextCheckpoint ? (
+                              <CountdownTimer deadline={checkpoint.deadline} />
+                            ) : (
+                              <span>
+                                {checkpoint.isToday 
+                                  ? 'Due Today!' 
+                                  : checkpoint.daysRemaining < 0 
+                                  ? 'Overdue' 
+                                  : `${Math.abs(checkpoint.daysRemaining)} day${Math.abs(checkpoint.daysRemaining) !== 1 ? 's' : ''} remaining`
+                                }
+                              </span>
+                            )}
                           </div>
                         )}
                       </div>

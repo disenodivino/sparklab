@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase";
+import { supabase } from "@/lib/supabase";
 import { cookies } from "next/headers";
 
 export async function GET(request: NextRequest) {
   const cookieStore = cookies();
-  const supabase = createClient(cookieStore);
-  
+  // Using the imported supabase client
+  // Note: This endpoint may need refactoring for proper session-based authentication
+
   try {
     // Try to get team ID from the query parameters (for localStorage auth)
     const teamId = request.nextUrl.searchParams.get('teamId');

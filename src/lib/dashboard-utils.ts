@@ -29,14 +29,14 @@ export function useRealtimeSubscription<T>(
     
     const subscription = channel
       .on(
-        'postgres_changes',
+        'postgres_changes' as any, // Type assertion needed for Supabase realtime
         {
           event: event,
           schema: 'public',
           table: table,
           filter: filterColumn && filterValue !== undefined ? 
             `${filterColumn}=eq.${filterValue}` : undefined,
-        },
+        } as any,
         (payload: any) => {
           if (mounted) {
             setData(payload.new as T);

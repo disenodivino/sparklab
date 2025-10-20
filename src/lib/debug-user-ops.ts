@@ -1,12 +1,14 @@
 // Helper function to debug Supabase user table operations
 import { SupabaseClient } from '@supabase/supabase-js';
 
+const isDev = process.env.NODE_ENV === 'development';
+
 export async function debugUserInsert(
   supabase: SupabaseClient, 
   name: string, 
   team_id: number
 ) {
-  console.log('DEBUG: Starting user insert check...');
+  if (isDev) console.log('DEBUG: Starting user insert check...');
 
   // 1. Check if team exists
   const { data: team, error: teamError } = await supabase
@@ -16,11 +18,11 @@ export async function debugUserInsert(
     .single();
 
   if (teamError) {
-    console.error('DEBUG: Team lookup error:', teamError);
+    if (isDev) console.error('DEBUG: Team lookup error:', teamError);
     return { success: false, error: 'Team not found' };
   }
 
-  console.log(`DEBUG: Found team ${team.team_name} with ID ${team.id}`);
+  if (isDev) console.log(`DEBUG: Found team ${team.team_name} with ID ${team.id}`);
 
   // 2. Try to insert the user
   try {
@@ -34,20 +36,20 @@ export async function debugUserInsert(
       .select();
 
     if (userError) {
-      console.error('DEBUG: User insert error:', userError);
+      if (isDev) console.error('DEBUG: User insert error:', userError);
       
       // Try to get more detailed error information
       if (userError.message.includes('foreign key constraint')) {
-        console.error('DEBUG: This appears to be a foreign key constraint violation');
+        if (isDev) console.error('DEBUG: This appears to be a foreign key constraint violation');
       }
       
       return { success: false, error: userError };
     }
 
-    console.log('DEBUG: User inserted successfully:', userData);
+    if (isDev) console.log('DEBUG: User inserted successfully:', userData);
     return { success: true, data: userData };
   } catch (error) {
-    console.error('DEBUG: Unexpected error during user insert:', error);
+    if (isDev) console.error('DEBUG: Unexpected error during user insert:', error);
     return { success: false, error };
   }
 }

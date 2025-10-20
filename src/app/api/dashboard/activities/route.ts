@@ -2,8 +2,13 @@ import { createClient } from '@supabase/supabase-js';
 import { NextResponse } from 'next/server';
 
 // Initialize Supabase on the server side
-const supabaseUrl = 'https://wawqvwyaijzcoynpxsvj.supabase.co';
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indhd3F2d3lhaWp6Y295bnB4c3ZqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA2OTIzMTMsImV4cCI6MjA3NjI2ODMxM30.qxZC5V6izAjl0cvyoJP6hsj_euQ1By5Ko4kLirE8L0I';
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
+
+if (!supabaseUrl || !supabaseKey) {
+  throw new Error('Missing Supabase environment variables');
+}
+
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 export async function GET() {
@@ -49,12 +54,20 @@ export async function GET() {
 
     // Combine and sort activities
     const activities = [
-      ...(submissionsResult.data?.map(sub => ({
-        id: sub.id,
-        type: 'submission',
-        title: `Team ${sub.teams?.team_name || 'Unknown'} submitted their work`,
-        timestamp: sub.submitted_at
-      })) || []),
+      ...(submissionsResult.data?.map(sub => {
+        // Handle teams relation which might be array or object
+        const teams: any = sub.teams;
+        const teamName = Array.isArray(teams) 
+          ? (teams[0]?.team_name || 'Unknown')
+          : (teams?.team_name || 'Unknown');
+        
+        return {
+          id: sub.id,
+          type: 'submission',
+          title: `Team ${teamName} submitted their work`,
+          timestamp: sub.submitted_at
+        };
+      }) || []),
       ...(teamsResult.data?.map(team => ({
         id: team.id,
         type: 'team',

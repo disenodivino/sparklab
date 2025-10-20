@@ -11,56 +11,27 @@ import MovingGrid from '@/components/moving-grid';
 export default function OrganizerLayout({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [isAuthorized, setIsAuthorized] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
-    // Auto-login as organizer since login functionality is removed
-    async function setupOrganizer() {
-      try {
-        // Import supabase
-        const { supabase } = await import('@/lib/supabase');
-        
-        // Create mock organizer user - use ID 1 which is expected to be the Organizer Team ID in Supabase
-        const organizerUser = {
-          id: 1,
-          username: 'organizer',
-          name: 'Event Organizer',
-          role: 'organizer',
-        };
-        
-        // Check if the Organizer Team exists in the database
-        const { data: teamExists, error: teamCheckError } = await supabase
-          .from('teams')
-          .select('id')
-          .eq('id', organizerUser.id)
-          .single();
-        
-        // If organizer team doesn't exist, create it
-        if (teamCheckError) {
-          const { data: newTeam, error: createTeamError } = await supabase
-            .from('teams')
-            .insert([{ id: organizerUser.id, team_name: 'Organizer Team' }])
-            .select()
-            .single();
-            
-          if (createTeamError) {
-            console.error('Error creating organizer team:', createTeamError);
-          } else {
-            console.log('Created organizer team:', newTeam);
-          }
-        }
-        
-        // Save to localStorage
-        localStorage.setItem('user', JSON.stringify(organizerUser));
-      } catch (error) {
-        console.error('Error setting up organizer user:', error);
-      } finally {
-        setIsLoading(false);
-      }
+    // Check for organizer authentication
+    const userStr = typeof window !== 'undefined' ? localStorage.getItem('user') : null;
+    let user = null;
+    try {
+      user = userStr ? JSON.parse(userStr) : null;
+    } catch (e) {
+      user = null;
     }
-    
-    setupOrganizer();
-  }, []);
+    if (user && user.role === 'organizer') {
+      setIsAuthorized(true);
+      setIsLoading(false);
+    } else {
+      setIsAuthorized(false);
+      setIsLoading(false);
+      router.replace('/event');
+    }
+  }, [router]);
 
   const handleToggleSidebar = () => {
     setSidebarCollapsed(!sidebarCollapsed);
@@ -73,7 +44,9 @@ export default function OrganizerLayout({ children }: { children: React.ReactNod
       </div>
     );
   }
-
+  if (!isAuthorized) {
+    return null; // Or show an access denied message
+  }
   return (
     <div className="bg-background min-h-screen flex flex-col relative overflow-hidden">
       {/* Animated background gradient */}
@@ -85,7 +58,10 @@ export default function OrganizerLayout({ children }: { children: React.ReactNod
       <main className={`pt-24 px-6 py-6 transition-all duration-300 flex-grow relative z-10 ${sidebarCollapsed ? 'ml-20' : 'ml-64'}`}>
         {children}
       </main>
-      <Footer />
+      {/* Footer with left margin to avoid sidebar overlap */}
+      <div className={sidebarCollapsed ? 'ml-20' : 'ml-64'}>
+        <Footer />
+      </div>
     </div>
   );
 }

@@ -89,32 +89,25 @@ export default function DashboardPage() {
         .select('*', { count: 'exact', head: true })
         .eq('team_id', teamId);
 
-      // Fetch announcements count (last 7 days)
-      const sevenDaysAgo = new Date();
-      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-      const { data: recentAnnouncements } = await supabase
-        .from('messages')
+      // Fetch announcements from announcements table (last 30 days)
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+      const { data: recentAnnouncements, error: announcementsError } = await supabase
+        .from('announcements')
         .select('*')
-        .eq('sender_team_id', 1)
-        .eq('receiver_id', teamId)
-        .gte('timestamp', sevenDaysAgo.toISOString())
-        .order('timestamp', { ascending: false });
+        .gte('created_at', thirtyDaysAgo.toISOString())
+        .order('created_at', { ascending: false });
 
-      // Deduplicate announcements by content and timestamp
-      const uniqueAnnouncements = new Map<string, any>();
-      recentAnnouncements?.forEach((msg: any) => {
-        const timestamp = new Date(msg.timestamp);
-        const groupKey = `${msg.content}_${timestamp.getFullYear()}-${timestamp.getMonth()}-${timestamp.getDate()}_${timestamp.getHours()}-${timestamp.getMinutes()}`;
-        if (!uniqueAnnouncements.has(groupKey)) {
-          uniqueAnnouncements.set(groupKey, msg);
-        }
-      });
-      const announcementsArray = Array.from(uniqueAnnouncements.values()).slice(0, 3);
+      if (announcementsError) {
+        console.error('Error fetching announcements:', announcementsError);
+      }
+
+      const announcementsArray = recentAnnouncements?.slice(0, 3) || [];
 
       setStats({
         upcomingCheckpoints: checkpointsCount || 0,
         teamMembers: membersCount || 0,
-        unreadAnnouncements: uniqueAnnouncements.size || 0,
+        unreadAnnouncements: recentAnnouncements?.length || 0,
         submissions: 0
       });
 
@@ -146,11 +139,11 @@ export default function DashboardPage() {
 
       // Set recent announcements for Latest Updates section
       setRecentAnnouncements(
-        announcementsArray?.map((announcement: any) => ({
+        announcementsArray.map((announcement: any) => ({
           id: `announcement-${announcement.id}`,
-          content: announcement.content,
-          timestamp: announcement.timestamp
-        })) || []
+          content: announcement.message,
+          timestamp: announcement.created_at
+        }))
       );
       
     } catch (error) {

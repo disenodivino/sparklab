@@ -333,7 +333,7 @@ export default function TeamsPage() {
         toast({
           title: 'Partial Success',
           description: `Team "${teamName}" created but only ${userCount} of ${validParticipants.length} team members were added`,
-          variant: 'warning',
+          variant: 'destructive', // Changed from 'warning' to 'destructive' as it's a valid variant
         });
       }
       
@@ -349,7 +349,7 @@ export default function TeamsPage() {
           toast({
             title: 'Warning',
             description: 'Team created but there was an error refreshing the data. Please click refresh manually.',
-            variant: 'warning',
+            variant: 'destructive', // Changed from 'warning' to 'destructive' as it's a valid variant
           });
         }
       }, 1000);

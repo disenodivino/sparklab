@@ -89,13 +89,7 @@ export default function UserSidebar({ collapsed, onToggle }: UserSidebarProps) {
         </ul>
       </nav>
       
-      <div className="p-4 border-t border-secondary/20">
-        <div className={`px-4 py-2 text-sm text-muted-foreground ${
-          collapsed ? 'text-center' : ''
-        }`}>
-          {!collapsed && <p>SparkLab 2025</p>}
-        </div>
-      </div>
+      {/* Removed SparkLab 2025 text from sidebar bottom */}
     </div>
   );
 }

@@ -14,8 +14,13 @@ export interface AuthResponse {
 export async function loginUser({ username, password }: LoginCredentials): Promise<AuthResponse> {
   try {
     // Special case for the organizer account
-    if (username === 'organizer' && password === 'password123') {
-      console.log('Organizer login successful via auth.ts');
+    const organizerUsername = process.env.NEXT_PUBLIC_ORGANIZER_USERNAME || 'organizer';
+    const organizerPassword = process.env.NEXT_PUBLIC_ORGANIZER_PASSWORD || 'password123';
+    
+    if (username === organizerUsername && password === organizerPassword) {
+      if (process.env.NODE_ENV === 'development') {
+        console.log('Organizer login successful via auth.ts');
+      }
       
       // Use hardcoded values for organizer
       return { 
@@ -43,11 +48,15 @@ export async function loginUser({ username, password }: LoginCredentials): Promi
 
     // Verify password against stored hash
     if (!verifyPassword(password, team.password_hash)) {
-      console.error('Password does not match');
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Password does not match');
+      }
       return { user: null, error: 'Invalid username or password' };
     }
     
-    console.log('Login successful via password verification');
+    if (process.env.NODE_ENV === 'development') {
+      console.log('Login successful via password verification');
+    }
     
     // Get team participants
     const { data: participants } = await supabase
@@ -69,7 +78,9 @@ export async function loginUser({ username, password }: LoginCredentials): Promi
 
     return { user: teamUser, error: null };
   } catch (error) {
-    console.error('Login error:', error);
+    if (process.env.NODE_ENV === 'development') {
+      console.error('Login error:', error);
+    }
     return { user: null, error: 'An unexpected error occurred' };
   }
 }

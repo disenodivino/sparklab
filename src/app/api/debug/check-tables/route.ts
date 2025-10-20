@@ -2,11 +2,23 @@ import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
 // Initialize Supabase with admin role for schema changes
-const supabaseUrl = 'https://wawqvwyaijzcoynpxsvj.supabase.co';
-const supabaseKey = process.env.SUPABASE_SERVICE_KEY || 'YOUR_SERVICE_ROLE_KEY';
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+const supabaseKey = process.env.SUPABASE_SERVICE_KEY || '';
+
+if (!supabaseUrl || !supabaseKey) {
+  throw new Error('Missing required Supabase environment variables');
+}
+
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 export async function GET(request: Request) {
+  // Disable this endpoint in production for security
+  if (process.env.NODE_ENV === 'production') {
+    return NextResponse.json({ 
+      error: 'This endpoint is disabled in production' 
+    }, { status: 403 });
+  }
+
   try {
     console.log('Starting database table check and repair...');
     
