@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Inter, Space_Grotesk } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
@@ -26,6 +25,7 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark">
       <head>
+        <link rel="icon" href="/logo.svg" type="image/svg+xml" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link
           rel="preconnect"
@@ -45,7 +45,6 @@ export default function RootLayout({
         <StartupLogo />
         <CustomCursor />
         {children}
-        <SpeedInsights />
         <Toaster />
       </body>
     </html>

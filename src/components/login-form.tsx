@@ -80,8 +80,6 @@ export default function LoginForm() {
         router.push("/event/dashboard");
       }
     } catch (error: any) {
-      console.error("Login error details:", error);
-      
       toast({
         title: "Login Failed",
         description: error.message || "An error occurred during login",
