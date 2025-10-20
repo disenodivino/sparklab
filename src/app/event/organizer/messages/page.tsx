@@ -118,6 +118,9 @@ export default function MessagesPage() {
       // If message is from another team to organizer
       if (message.sender_team_id !== organizerTeamId && message.receiver_id === organizerTeamId) {
         const teamId = message.sender_team_id;
+        // Skip if sender is organizer itself (safety check)
+        if (teamId === organizerTeamId) return;
+        
         if (!conversations[teamId]) {
           conversations[teamId] = {
             id: teamId,
@@ -134,7 +137,14 @@ export default function MessagesPage() {
       // If message is from organizer to another team
       else if (message.sender_team_id === organizerTeamId && message.receiver_id !== organizerTeamId) {
         const teamId = message.receiver_id;
+        // Skip if receiver is organizer itself (safety check)
+        if (teamId === organizerTeamId) return;
+        
         if (!conversations[teamId] && message.receiver) {
+          // Additional check: don't add if receiver team name contains "organizer"
+          const receiverName = message.receiver.team_name.toLowerCase();
+          if (receiverName.includes('organizer') || receiverName.includes('admin')) return;
+          
           conversations[teamId] = {
             id: teamId,
             name: message.receiver.team_name,

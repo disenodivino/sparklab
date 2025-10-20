@@ -10,7 +10,7 @@ interface Stats {
   teamsCount: number;
   participantsCount: number;
   checkpointsCount: number;
-  nextCheckpointDays: number | null;
+  nextCheckpointHours: number | null;
   messagesCount: number;
   unreadMessagesCount: number;
   submissionsCount: number;
@@ -29,7 +29,7 @@ interface Checkpoint {
   title: string;
   description: string;
   deadline: string;
-  daysRemaining: number;
+  hoursRemaining: number;
 }
 
 export default function OrganizerDashboardPage() {
@@ -43,12 +43,23 @@ export default function OrganizerDashboardPage() {
       try {
         // Fetch data directly from Supabase
         
-        // Fetch teams count
-        const { count: teamsCount, error: teamsError } = await supabase
+        // Fetch teams count (excluding organizer team)
+        // Use .or() to include teams where role is null or not equal to 'organizer'
+        const { data: teamsData, error: teamsError } = await supabase
           .from('teams')
-          .select('*', { count: 'exact', head: true });
+          .select('*')
+          .or('role.is.null,role.neq.organizer');
           
         if (teamsError) throw teamsError;
+        
+        const teamsCount = teamsData?.length || 0;
+        
+        // Fetch actual participants count from users table
+        const { count: participantsCount, error: participantsError } = await supabase
+          .from('users')
+          .select('*', { count: 'exact', head: true });
+          
+        if (participantsError) throw participantsError;
         
         // Fetch messages
         const { data: messagesData, error: messagesError } = await supabase
@@ -69,23 +80,23 @@ export default function OrganizerDashboardPage() {
         const now = new Date();
         const processedCheckpoints = checkpointsData?.map(checkpoint => {
           const deadlineDate = new Date(checkpoint.deadline);
-          const daysRemaining = Math.ceil((deadlineDate.getTime() - now.getTime()) / (1000 * 3600 * 24));
+          const hoursRemaining = Math.ceil((deadlineDate.getTime() - now.getTime()) / (1000 * 3600));
           
           return {
             id: checkpoint.id,
             title: checkpoint.title || 'Untitled Checkpoint',
             description: checkpoint.description || '',
             deadline: checkpoint.deadline,
-            daysRemaining: daysRemaining > 0 ? daysRemaining : 0
+            hoursRemaining: hoursRemaining > 0 ? hoursRemaining : 0
           };
         }) || [];
         
-        // Get next checkpoint days
-        let nextCheckpointDays = null;
+        // Get next checkpoint hours
+        let nextCheckpointHours = null;
         if (processedCheckpoints.length > 0) {
-          const futureCheckpoints = processedCheckpoints.filter(cp => cp.daysRemaining > 0);
+          const futureCheckpoints = processedCheckpoints.filter(cp => cp.hoursRemaining > 0);
           if (futureCheckpoints.length > 0) {
-            nextCheckpointDays = futureCheckpoints[0].daysRemaining;
+            nextCheckpointHours = futureCheckpoints[0].hoursRemaining;
           }
         }
         
@@ -130,9 +141,9 @@ export default function OrganizerDashboardPage() {
         // Create stats object
         const mockStats: Stats = {
           teamsCount: teamsCount || 0,
-          participantsCount: (teamsCount || 0) * 3, // Assume average 3 participants per team
+          participantsCount: participantsCount || 0,
           checkpointsCount: checkpointsData?.length || 0,
-          nextCheckpointDays,
+          nextCheckpointHours,
           messagesCount: messagesData?.length || 0,
           unreadMessagesCount: 0, // We don't track read status yet
           submissionsCount: 2, // Mock data
@@ -209,8 +220,8 @@ export default function OrganizerDashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats?.checkpointsCount || 0}</div>
-            {stats?.nextCheckpointDays !== null ? (
-              <p className="text-xs text-muted-foreground">Next in {stats?.nextCheckpointDays} days</p>
+            {stats?.nextCheckpointHours !== null ? (
+              <p className="text-xs text-muted-foreground">Next in {stats?.nextCheckpointHours} hours</p>
             ) : (
               <p className="text-xs text-muted-foreground">No upcoming checkpoints</p>
             )}
@@ -293,13 +304,13 @@ export default function OrganizerDashboardPage() {
                     </div>
                     <div className={`
                       px-2 py-1 rounded text-xs font-medium
-                      ${checkpoint.daysRemaining <= 2 
+                      ${checkpoint.hoursRemaining <= 48 
                         ? 'bg-yellow-500/10 text-yellow-500' 
                         : 'bg-green-500/10 text-green-500'}
                     `}>
-                      {checkpoint.daysRemaining === 1 
-                        ? '1 day left' 
-                        : `${checkpoint.daysRemaining} days left`}
+                      {checkpoint.hoursRemaining === 1 
+                        ? '1 hour left' 
+                        : `${checkpoint.hoursRemaining} hours left`}
                     </div>
                   </div>
                 ))}

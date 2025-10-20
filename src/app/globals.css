@@ -246,3 +246,67 @@ html.figma-cursor textarea {
       0 4px 20px rgba(0, 0, 0, 0.5) !important;
   }
 }
+
+/* New animations for login page */
+@keyframes twinkle {
+  0%, 100% { 
+    opacity: 0.3;
+    transform: scale(0.8);
+  }
+  50% { 
+    opacity: 1;
+    transform: scale(1.5);
+  }
+}
+
+@keyframes move-1 {
+  0%, 100% { 
+    transform: translate(0, 0);
+  }
+  33% { 
+    transform: translate(100px, 50px);
+  }
+  66% { 
+    transform: translate(-50px, 100px);
+  }
+}
+
+@keyframes move-2 {
+  0%, 100% { 
+    transform: translate(0, 0);
+  }
+  33% { 
+    transform: translate(-80px, 80px);
+  }
+  66% { 
+    transform: translate(80px, -50px);
+  }
+}
+
+@keyframes move-3 {
+  0%, 100% { 
+    transform: translate(0, 0);
+  }
+  33% { 
+    transform: translate(50px, -100px);
+  }
+  66% { 
+    transform: translate(-100px, -50px);
+  }
+}
+
+.animate-twinkle {
+  animation: twinkle 3s ease-in-out infinite;
+}
+
+.animate-move-1 {
+  animation: move-1 20s ease-in-out infinite;
+}
+
+.animate-move-2 {
+  animation: move-2 25s ease-in-out infinite;
+}
+
+.animate-move-3 {
+  animation: move-3 30s ease-in-out infinite;
+}

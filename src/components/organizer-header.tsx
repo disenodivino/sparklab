@@ -1,7 +1,7 @@
 'use client';
 
 import Image from 'next/image';
-import { Bell, LogOut } from 'lucide-react';
+import { LogOut } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { toast } from '@/hooks/use-toast';
 
@@ -35,17 +35,12 @@ export default function OrganizerHeader({ collapsed }: OrganizerHeaderProps) {
       </div>
       
       <div className="flex items-center space-x-4">
-        <button className="p-2 rounded-full hover:bg-secondary/50 transition-colors relative">
-          <Bell className="w-5 h-5" />
-          <span className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full"></span>
-        </button>
-        
         <Image 
           src="/2 (1).png"
           alt="SparkLab Icon"
-          width={36}
-          height={36}
-          className="h-9 w-9"
+          width={56}
+          height={56}
+          className="h-14 w-14"
         />
         
         <button 

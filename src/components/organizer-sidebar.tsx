@@ -9,7 +9,6 @@ import {
   FileText, 
   Menu, 
   X, 
-  PlusCircle,
   Home
 } from 'lucide-react';
 
@@ -80,15 +79,6 @@ export default function OrganizerSidebar({ collapsed, onToggle }: OrganizerSideb
           ))}
         </ul>
       </nav>
-      
-      <div className="p-4 border-t border-secondary/20">
-        <button className={`flex items-center w-full px-4 py-2 rounded-md bg-primary/10 hover:bg-primary/20 transition-colors ${
-          collapsed ? 'justify-center' : 'space-x-2'
-        }`}>
-          <PlusCircle className="w-5 h-5" />
-          {!collapsed && <span>New Announcement</span>}
-        </button>
-      </div>
     </div>
   );
 }

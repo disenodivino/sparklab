@@ -23,26 +23,7 @@ export async function POST(request: Request) {
       );
     }
 
-    // Special case for the organizer account
-    if (username === 'organizer' && password === 'password123') {
-      console.log('Organizer login credentials matched - using hardcoded values');
-      
-      // Create a user object for the organizer
-      const organizerUser = {
-        id: 'org-001',
-        email: 'organizer@sparklab.com',
-        name: 'Organizer',
-        role: 'organizer',
-        team_id: null
-      };
-      
-      console.log('Returning organizer user:', organizerUser);
-      
-      // Simply use hardcoded credentials without database lookup
-      return NextResponse.json({ user: organizerUser });
-    }
-
-    // For team login, check the teams table
+    // Check the teams table for both organizer and team logins
     const { data: team, error: teamError } = await supabase
       .from('teams')
       .select('*')
@@ -50,6 +31,7 @@ export async function POST(request: Request) {
       .single();
 
     if (teamError || !team) {
+      console.log('User not found:', username);
       return NextResponse.json(
         { error: 'Invalid username or password' },
         { status: 401 }
@@ -71,19 +53,34 @@ export async function POST(request: Request) {
     
     console.log('Login successful via password verification');
     
-    // Authentication succeeded (either method), continue
+    // Check if this is an organizer or team account
+    const isOrganizer = team.role === 'organizer';
     
-    // Get all team participants for reference
+    if (isOrganizer) {
+      // Return organizer user object
+      const organizerUser = {
+        id: team.id,
+        email: team.username,
+        name: team.team_name || 'Organizer',
+        role: 'organizer',
+        team_id: null
+      };
+      
+      console.log('Returning organizer user:', organizerUser);
+      return NextResponse.json({ user: organizerUser });
+    }
+    
+    // For team login, get team participants
     const { data: participants } = await supabase
-      .from('participants')
+      .from('users')
       .select('*')
       .eq('team_id', team.id);
     
-    // Create a session (without sensitive information)
+    // Create a session for team
     const session = {
       user: {
         id: team.id,
-        name: team.name,
+        name: team.team_name,
         username: team.username,
         role: 'team',
         participants: participants || []

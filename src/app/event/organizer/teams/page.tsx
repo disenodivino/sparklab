@@ -20,6 +20,7 @@ interface Team {
   members?: number;
   username?: string;
   password_hash?: string;
+  role?: string;
 }
 
 interface TeamMember {
@@ -40,6 +41,15 @@ export default function TeamsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   
+  // Undo states
+  const [deletedTeam, setDeletedTeam] = useState<{
+    team: Team;
+    members: TeamMember[];
+    messages: any[];
+    submissions: any[];
+  } | null>(null);
+  const [deletedParticipant, setDeletedParticipant] = useState<TeamMember | null>(null);
+  
   // Edit states
   const [editTeamId, setEditTeamId] = useState<number | null>(null);
   const [editTeamName, setEditTeamName] = useState('');
@@ -52,7 +62,7 @@ export default function TeamsPage() {
     teamName: '',
     username: '',
     password: '',
-    participants: [{ name: '' }]
+    participants: [{ name: '', gender: '' }]
   });
   
   // Function to fetch teams and team members from the database
@@ -83,6 +93,13 @@ export default function TeamsPage() {
       
       console.log('Teams fetched successfully:', teamsData?.length || 0, teamsData);
 
+      // Filter out the organizer team (role === 'organizer' or team_name contains 'organizer')
+      const participantTeams = (teamsData || []).filter(team => 
+        team.role !== 'organizer' && 
+        !team.team_name.toLowerCase().includes('organizer')
+      );
+      console.log('Participant teams (excluding organizer):', participantTeams.length, participantTeams);
+
       // Fetch users from the users table
       const { data: usersData, error: usersError } = await supabase
         .from('users')
@@ -101,8 +118,8 @@ export default function TeamsPage() {
         console.log('Users fetched successfully:', usersData?.length || 0, usersData);
       }
       
-      // Count team members and add that info
-      const teamsWithMembers = teamsData.map(team => {
+      // Count team members and add that info (only for participant teams)
+      const teamsWithMembers = participantTeams.map(team => {
         // If usersData is null or undefined, provide an empty array
         const memberCount = (usersData || []).filter(p => p.team_id === team.id).length;
         return { ...team, members: memberCount };
@@ -112,7 +129,7 @@ export default function TeamsPage() {
       let participantsWithTeamNames = [];
       if (usersData && usersData.length > 0) {
         participantsWithTeamNames = usersData.map(user => {
-          const team = teamsData.find(t => t.id === user.team_id);
+          const team = participantTeams.find(t => t.id === user.team_id);
           return {
             ...user,
             team_name: team ? team.team_name : 'No team'
@@ -218,7 +235,8 @@ export default function TeamsPage() {
         .insert({ 
           team_name: newTeamData.teamName, 
           username: newTeamData.username,
-          password_hash: hashPassword(newTeamData.password) // Hash the password before storing
+          password_hash: hashPassword(newTeamData.password), // Hash the password before storing
+          created_at: new Date().toISOString()
         })
         .select();
       
@@ -253,6 +271,7 @@ export default function TeamsPage() {
             .from('users')
             .insert({
               name: participant.name,
+              gender: participant.gender || '',
               team_id: newTeam.id,
               created_at: new Date().toISOString()
             })
@@ -298,7 +317,7 @@ export default function TeamsPage() {
         teamName: '',
         username: '',
         password: '',
-        participants: [{ name: '' }]
+        participants: [{ name: '', gender: '' }]
       });
       
       // Close the form panel
@@ -357,7 +376,7 @@ export default function TeamsPage() {
   const addParticipantField = () => {
     setNewTeamData({
       ...newTeamData,
-      participants: [...newTeamData.participants, { name: '' }]
+      participants: [...newTeamData.participants, { name: '', gender: '' }]
     });
   };
   
@@ -366,11 +385,11 @@ export default function TeamsPage() {
     updatedParticipants.splice(index, 1);
     setNewTeamData({
       ...newTeamData,
-      participants: updatedParticipants.length ? updatedParticipants : [{ name: '' }]
+      participants: updatedParticipants.length ? updatedParticipants : [{ name: '', gender: '' }]
     });
   };
   
-  const updateParticipantField = (index: number, field: 'name', value: string) => {
+  const updateParticipantField = (index: number, field: 'name' | 'gender', value: string) => {
     const updatedParticipants = [...newTeamData.participants];
     updatedParticipants[index] = { ...updatedParticipants[index], [field]: value };
     setNewTeamData({
@@ -514,6 +533,20 @@ export default function TeamsPage() {
                             />
                           </div>
                           
+                          <div className="grid gap-2">
+                            <Label htmlFor={`participant-${index}-gender`}>Gender</Label>
+                            <select
+                              id={`participant-${index}-gender`}
+                              value={participant.gender}
+                              onChange={(e) => updateParticipantField(index, 'gender', e.target.value)}
+                              className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                            >
+                              <option value="">Select gender</option>
+                              <option value="Male">Male</option>
+                              <option value="Female">Female</option>
+                              <option value="Other">Other</option>
+                            </select>
+                          </div>
 
                         </div>
                       </div>
@@ -624,39 +657,204 @@ export default function TeamsPage() {
                                 variant="ghost" 
                                 className="text-red-500 hover:text-red-700"
                                 onClick={async () => {
-                                  if (window.confirm(`Are you sure you want to delete ${team.team_name}?`)) {
+                                  const teamMembers = participants.filter(p => p.team_id === team.id);
+                                  const memberCount = teamMembers.length;
+                                  const confirmMessage = memberCount > 0 
+                                    ? `Are you sure you want to delete ${team.team_name}? This will also delete:\n- ${memberCount} team member(s)\n- All messages\n- All submissions`
+                                    : `Are you sure you want to delete ${team.team_name}? This will also delete all related messages and submissions.`;
+                                  
+                                  if (window.confirm(confirmMessage)) {
                                     setIsSubmitting(true);
                                     try {
-                                      // First check if there are team members in this team
-                                      const teamMembers = participants.filter(p => p.team_id === team.id);
+                                      // Fetch related data before deleting for undo functionality
+                                      const { data: relatedMessages } = await supabase
+                                        .from('messages')
+                                        .select('*')
+                                        .or(`sender_team_id.eq.${team.id},receiver_id.eq.${team.id}`);
                                       
-                                      if (teamMembers.length > 0) {
-                                        toast({
-                                          title: 'Error',
-                                          description: `Cannot delete team with ${teamMembers.length} team members. Please reassign or remove team members first.`,
-                                          variant: 'destructive',
-                                        });
-                                        return;
+                                      const { data: relatedSubmissions } = await supabase
+                                        .from('submissions')
+                                        .select('*')
+                                        .eq('team_id', team.id);
+                                      
+                                      // Delete in order to avoid foreign key constraint violations:
+                                      
+                                      // 1. Delete messages where team is sender or receiver
+                                      const { error: messagesError } = await supabase
+                                        .from('messages')
+                                        .delete()
+                                        .or(`sender_team_id.eq.${team.id},receiver_id.eq.${team.id}`);
+                                      
+                                      if (messagesError) {
+                                        console.error('Error deleting messages:', messagesError);
+                                        throw new Error(`Failed to delete messages: ${messagesError.message}`);
                                       }
                                       
-                                      const { error } = await supabase
+                                      // 2. Delete submissions for this team
+                                      const { error: submissionsError } = await supabase
+                                        .from('submissions')
+                                        .delete()
+                                        .eq('team_id', team.id);
+                                      
+                                      if (submissionsError) {
+                                        console.error('Error deleting submissions:', submissionsError);
+                                        throw new Error(`Failed to delete submissions: ${submissionsError.message}`);
+                                      }
+                                      
+                                      // 3. Delete users (team members) associated with this team
+                                      if (memberCount > 0) {
+                                        const { error: usersError } = await supabase
+                                          .from('users')
+                                          .delete()
+                                          .eq('team_id', team.id);
+                                        
+                                        if (usersError) {
+                                          console.error('Error deleting users:', usersError);
+                                          throw new Error(`Failed to delete team members: ${usersError.message}`);
+                                        }
+                                      }
+                                      
+                                      // 4. Finally delete the team
+                                      const { error: teamError } = await supabase
                                         .from('teams')
                                         .delete()
                                         .eq('id', team.id);
                                       
-                                      if (error) throw error;
+                                      if (teamError) {
+                                        console.error('Error deleting team:', teamError);
+                                        throw new Error(`Failed to delete team: ${teamError.message}`);
+                                      }
                                       
+                                      // Store deleted data for undo - capture in a local variable
+                                      const deletedData = {
+                                        team: team,
+                                        members: teamMembers,
+                                        messages: relatedMessages || [],
+                                        submissions: relatedSubmissions || []
+                                      };
+                                      
+                                      setDeletedTeam(deletedData);
+                                      
+                                      // Update local state
                                       setTeams(teams.filter(t => t.id !== team.id));
+                                      setParticipants(participants.filter(p => p.team_id !== team.id));
                                       
                                       toast({
-                                        title: 'Success',
-                                        description: 'Team deleted successfully',
+                                        title: 'Team Deleted',
+                                        description: `Team "${team.team_name}" deleted successfully`,
+                                        action: (
+                                          <button
+                                            onClick={async () => {
+                                              try {
+                                                console.log('Starting team restoration...', deletedData);
+                                                
+                                                // Restore team without forcing the ID
+                                                const teamToInsert = {
+                                                  team_name: deletedData.team.team_name,
+                                                  username: deletedData.team.username,
+                                                  password_hash: deletedData.team.password_hash,
+                                                  role: deletedData.team.role,
+                                                  created_at: deletedData.team.created_at
+                                                };
+                                                
+                                                const { data: restoredTeam, error: teamError } = await supabase
+                                                  .from('teams')
+                                                  .insert([teamToInsert])
+                                                  .select();
+                                                
+                                                if (teamError) {
+                                                  console.error('Team restore error:', teamError);
+                                                  throw new Error(`Failed to restore team: ${teamError.message}`);
+                                                }
+                                                
+                                                console.log('Team restored:', restoredTeam);
+                                                const newTeamId = restoredTeam[0].id;
+                                                
+                                                // Restore members with new team_id
+                                                if (deletedData.members.length > 0) {
+                                                  const membersToInsert = deletedData.members.map(m => ({
+                                                    name: m.name,
+                                                    team_id: newTeamId,
+                                                    gender: (m as any).gender || '',
+                                                    created_at: m.created_at
+                                                  }));
+                                                  
+                                                  const { error: membersError } = await supabase
+                                                    .from('users')
+                                                    .insert(membersToInsert);
+                                                  
+                                                  if (membersError) {
+                                                    console.error('Error restoring members:', membersError);
+                                                  } else {
+                                                    console.log('Members restored successfully');
+                                                  }
+                                                }
+                                                
+                                                // Restore messages with new team_id
+                                                if (deletedData.messages.length > 0) {
+                                                  const messagesToInsert = deletedData.messages.map(m => ({
+                                                    sender_team_id: m.sender_team_id === deletedData.team.id ? newTeamId : m.sender_team_id,
+                                                    receiver_id: m.receiver_id === deletedData.team.id ? newTeamId : m.receiver_id,
+                                                    content: m.content,
+                                                    timestamp: m.timestamp,
+                                                    seen_timestamp: m.seen_timestamp
+                                                  }));
+                                                  
+                                                  const { error: messagesError } = await supabase
+                                                    .from('messages')
+                                                    .insert(messagesToInsert);
+                                                    
+                                                  if (messagesError) {
+                                                    console.error('Error restoring messages:', messagesError);
+                                                  }
+                                                }
+                                                
+                                                // Restore submissions with new team_id
+                                                if (deletedData.submissions.length > 0) {
+                                                  const submissionsToInsert = deletedData.submissions.map(s => ({
+                                                    team_id: newTeamId,
+                                                    checkpoint_id: s.checkpoint_id,
+                                                    file_url: s.file_url,
+                                                    submitted_at: s.submitted_at
+                                                  }));
+                                                  
+                                                  const { error: submissionsError } = await supabase
+                                                    .from('submissions')
+                                                    .insert(submissionsToInsert);
+                                                    
+                                                  if (submissionsError) {
+                                                    console.error('Error restoring submissions:', submissionsError);
+                                                  }
+                                                }
+                                                
+                                                // Refresh data
+                                                await fetchData(true);
+                                                setDeletedTeam(null);
+                                                
+                                                toast({
+                                                  title: 'Team Restored',
+                                                  description: `Team "${deletedData.team.team_name}" has been restored`,
+                                                });
+                                              } catch (error: any) {
+                                                console.error('Error restoring team:', error);
+                                                toast({
+                                                  title: 'Error',
+                                                  description: error.message || 'Failed to restore team',
+                                                  variant: 'destructive',
+                                                });
+                                              }
+                                            }}
+                                            className="px-3 py-1 bg-primary text-primary-foreground rounded-md text-sm hover:bg-primary/90"
+                                          >
+                                            Undo
+                                          </button>
+                                        ),
                                       });
-                                    } catch (error) {
+                                    } catch (error: any) {
                                       console.error('Error deleting team:', error);
                                       toast({
                                         title: 'Error',
-                                        description: 'Failed to delete team',
+                                        description: error.message || 'Failed to delete team',
                                         variant: 'destructive',
                                       });
                                     } finally {
@@ -733,6 +931,10 @@ export default function TeamsPage() {
                                     try {
                                       console.log(`Deleting team member: ${participant.name} (ID: ${participant.id})`);
                                       
+                                      // Store the participant for undo - capture in local variable
+                                      const deletedData = { ...participant };
+                                      setDeletedParticipant(deletedData);
+                                      
                                       // Delete from users table directly
                                       const { error } = await supabase
                                         .from('users')
@@ -759,8 +961,55 @@ export default function TeamsPage() {
                                       }
                                       
                                       toast({
-                                        title: 'Success',
-                                        description: 'Team member deleted successfully',
+                                        title: 'Participant Deleted',
+                                        description: `${participant.name} deleted successfully`,
+                                        action: (
+                                          <button
+                                            onClick={async () => {
+                                              try {
+                                                console.log('Restoring participant:', deletedData);
+                                                
+                                                // Restore participant without forcing the ID
+                                                const participantToInsert = {
+                                                  name: deletedData.name,
+                                                  team_id: deletedData.team_id,
+                                                  gender: (deletedData as any).gender || '',
+                                                  created_at: deletedData.created_at
+                                                };
+                                                
+                                                const { error: restoreError } = await supabase
+                                                  .from('users')
+                                                  .insert([participantToInsert]);
+                                                
+                                                if (restoreError) {
+                                                  console.error('Restore error:', restoreError);
+                                                  throw new Error(`Failed to restore: ${restoreError.message}`);
+                                                }
+                                                
+                                                console.log('Participant restored successfully');
+                                                
+                                                // Refresh data
+                                                await fetchData(true);
+                                                setDeletedParticipant(null);
+                                                
+                                                toast({
+                                                  title: 'Participant Restored',
+                                                  description: `${deletedData.name} has been restored`,
+                                                });
+                                              } catch (error: any) {
+                                                console.error('Error restoring participant:', error);
+                                                toast({
+                                                  title: 'Error',
+                                                  description: error.message || 'Failed to restore participant',
+                                                  variant: 'destructive',
+                                                });
+                                              }
+                                            }}
+                                            className="px-3 py-1 bg-primary text-primary-foreground rounded-md text-sm hover:bg-primary/90"
+                                          >
+                                            Undo
+                                          </button>
+                                        ),
                                       });
                                     } catch (error) {
                                       console.error('Error deleting team member:', error);

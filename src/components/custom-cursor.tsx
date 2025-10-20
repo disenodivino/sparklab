@@ -105,9 +105,15 @@ const CustomCursor = () => {
 
   // Animate particles
   useEffect(() => {
+    // Don't animate particles on event pages
+    if (isEventPage) return;
+    
     const animateParticles = () => {
-      setParticles((prev) =>
-        prev
+      setParticles((prev) => {
+        // If no particles, don't update state
+        if (prev.length === 0) return prev;
+        
+        const updated = prev
           .map((particle) => ({
             ...particle,
             x: particle.x + particle.vx,
@@ -116,13 +122,16 @@ const CustomCursor = () => {
             vy: particle.vy + 0.1, // gravity
             vx: particle.vx * 0.99, // air resistance
           }))
-          .filter((particle) => particle.life < particle.maxLife)
-      );
+          .filter((particle) => particle.life < particle.maxLife);
+        
+        // Only update if there are changes
+        return updated.length !== prev.length ? updated : prev;
+      });
     };
 
     const interval = setInterval(animateParticles, 16); // ~60fps
     return () => clearInterval(interval);
-  }, []);
+  }, [isEventPage]);
 
   // Don't render anything for event pages
   if (isEventPage) {

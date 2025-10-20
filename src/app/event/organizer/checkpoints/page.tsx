@@ -425,11 +425,9 @@ export default function CheckpointsPage() {
       } else if (hoursRemaining <= 1) {
         // Show minutes when less than 1 hour remains
         timeDisplay = `${minutesRemaining} minutes left`;
-      } else if (daysRemaining <= 1) {
-        // Show hours when within 24 hours
-        timeDisplay = `${hoursRemaining} hours left`;
       } else {
-        timeDisplay = `${daysRemaining} days left`;
+        // Always show hours
+        timeDisplay = `${hoursRemaining} hours left`;
       }
       
       return (
@@ -444,7 +442,7 @@ export default function CheckpointsPage() {
       return (
         <div className="inline-flex items-center bg-blue-500/10 text-blue-500 px-2 py-1 rounded text-xs font-medium">
           <CalendarDays className="mr-1 h-3 w-3" />
-          Upcoming ({daysRemaining} days)
+          Upcoming ({hoursRemaining} hours)
         </div>
       );
     }
