@@ -42,8 +42,6 @@ export default function LoginForm() {
     setIsLoading(true);
     
     try {
-      console.log("Attempting login with:", { username, password: password.replace(/./g, '*') }); // For debugging - masking password
-      
       const response = await fetch("/api/auth/login", {
         method: "POST",
         headers: {
@@ -53,8 +51,6 @@ export default function LoginForm() {
       });
       
       const data = await response.json();
-      console.log("Login response status:", response.status);
-      console.log("Login response:", data); // For debugging
       
       if (!response.ok) {
         throw new Error(data.error || `Login failed with status ${response.status}`);

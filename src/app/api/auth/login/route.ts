@@ -8,15 +8,12 @@ const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 export async function POST(request: Request) {
-  console.log('Login API called');
   try {
     const body = await request.json();
-    console.log('Request body received:', { ...body, password: body.password ? '******' : undefined });
     
     const { username, password } = body;
     
     if (!username || !password) {
-      console.log('Missing username or password');
       return NextResponse.json(
         { error: 'Username and password are required' }, 
         { status: 400 }
@@ -31,7 +28,6 @@ export async function POST(request: Request) {
       .single();
 
     if (teamError || !team) {
-      console.log('User not found:', username);
       return NextResponse.json(
         { error: 'Invalid username or password' },
         { status: 401 }
@@ -39,19 +35,13 @@ export async function POST(request: Request) {
     }
 
     // Verify password against stored hash
-    console.log(`Team input password: ${password}`);
-    console.log(`Stored password hash: ${team.password_hash || 'No password hash stored'}`);
-    
     // Verify the password hash
     if (!verifyPassword(password, team.password_hash)) {
-      console.error('Password does not match');
       return NextResponse.json(
         { error: 'Invalid username or password' },
         { status: 401 }
       );
     }
-    
-    console.log('Login successful via password verification');
     
     // Check if this is an organizer or team account
     const isOrganizer = team.role === 'organizer';
@@ -66,7 +56,6 @@ export async function POST(request: Request) {
         team_id: null
       };
       
-      console.log('Returning organizer user:', organizerUser);
       return NextResponse.json({ user: organizerUser });
     }
     
@@ -89,7 +78,6 @@ export async function POST(request: Request) {
 
     return NextResponse.json(session);
   } catch (error) {
-    console.error('Login error:', error);
     // Return more detailed error information
     return NextResponse.json(
       { 
