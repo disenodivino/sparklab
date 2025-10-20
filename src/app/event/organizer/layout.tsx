@@ -6,6 +6,7 @@ import Footer from '@/components/footer';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from '@/hooks/use-toast';
+import MovingGrid from '@/components/moving-grid';
 
 export default function OrganizerLayout({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
@@ -74,10 +75,14 @@ export default function OrganizerLayout({ children }: { children: React.ReactNod
   }
 
   return (
-    <div className="bg-background min-h-screen flex flex-col">
+    <div className="bg-background min-h-screen flex flex-col relative overflow-hidden">
+      {/* Animated background gradient */}
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_120%,rgba(59,130,246,0.15),rgba(0,0,0,0.2)_25%,rgba(0,0,0,0)_50%)]" />
+      {/* Moving grid animation */}
+      <MovingGrid />
       <OrganizerSidebar collapsed={sidebarCollapsed} onToggle={handleToggleSidebar} />
       <OrganizerHeader collapsed={sidebarCollapsed} />
-      <main className={`pt-24 px-6 py-6 transition-all duration-300 flex-grow ${sidebarCollapsed ? 'ml-20' : 'ml-64'}`}>
+      <main className={`pt-24 px-6 py-6 transition-all duration-300 flex-grow relative z-10 ${sidebarCollapsed ? 'ml-20' : 'ml-64'}`}>
         {children}
       </main>
       <Footer />

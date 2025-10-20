@@ -19,6 +19,7 @@ export default function AnnouncementsPage() {
   const [announcements, setAnnouncements] = useState<Message[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentTeamId, setCurrentTeamId] = useState<number | null>(null);
+  const [nonOrganizerTeamsCount, setNonOrganizerTeamsCount] = useState<number>(0);
 
   useEffect(() => {
     // Get current team ID from localStorage
@@ -36,36 +37,55 @@ export default function AnnouncementsPage() {
   useEffect(() => {
     if (!currentTeamId) return;
 
-    async function fetchAnnouncements() {
+    const fetchAnnouncements = async () => {
+      setLoading(true);
       try {
-        // Fetch broadcast messages sent to this team from organizer (team_id 1)
-        const { data: messagesData, error: messagesError } = await supabase
+        // Count all teams except the organizer (id 1)
+        const { data: teamsData, error: teamsError } = await supabase
+          .from('teams')
+          .select('id');
+        if (teamsError) throw teamsError;
+        const nonOrganizerTeams = (teamsData || []).filter(t => t.id !== 1);
+        const nonOrgCount = nonOrganizerTeams.length;
+        setNonOrganizerTeamsCount(nonOrgCount);
+
+        // Fetch all messages sent by organizer to teams
+        const { data: orgMessages, error: orgMsgError } = await supabase
           .from('messages')
-          .select('*')
-          .eq('sender_team_id', 1) // From organizer
-          .eq('receiver_id', currentTeamId) // To this team
+          .select('id, sender_team_id, receiver_id, content, timestamp')
+          .eq('sender_team_id', 1)
+          .not('receiver_id', 'is', null)
           .order('timestamp', { ascending: false });
+        if (orgMsgError) throw orgMsgError;
 
-        if (messagesError) throw messagesError;
-
-        // Group messages by content and timestamp to identify broadcasts
-        const groupedMessages = new Map<string, Message>();
-        
-        messagesData?.forEach((message) => {
-          const timestamp = new Date(message.timestamp);
-          const groupKey = `${message.content}_${timestamp.getFullYear()}-${timestamp.getMonth()}-${timestamp.getDate()}_${timestamp.getHours()}-${timestamp.getMinutes()}`;
-          
-          // Keep only one message per broadcast group
-          if (!groupedMessages.has(groupKey)) {
-            groupedMessages.set(groupKey, message);
+        // Group by content + minute and collect unique receivers
+        type Group = { key: string; messages: Message[]; receivers: Set<number> };
+        const groups = new Map<string, Group>();
+        (orgMessages || []).forEach((m) => {
+          const ts = new Date(m.timestamp);
+          const key = `${m.content.trim()}__${ts.getFullYear()}-${ts.getMonth()}-${ts.getDate()}_${ts.getHours()}-${ts.getMinutes()}`;
+          if (!groups.has(key)) {
+            groups.set(key, { key, messages: [m as Message], receivers: new Set<number>(m.receiver_id ? [m.receiver_id] : []) });
+          } else {
+            const g = groups.get(key)!;
+            g.messages.push(m as Message);
+            if (m.receiver_id) g.receivers.add(m.receiver_id);
           }
         });
 
-        // Convert to array and sort by timestamp
-        const uniqueAnnouncements = Array.from(groupedMessages.values())
-          .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+        // Keep only groups where the message was sent to ALL non-organizer teams
+        const broadcastGroups = Array.from(groups.values()).filter(g => g.receivers.size === nonOrgCount);
 
-        setAnnouncements(uniqueAnnouncements);
+        // For each group, pick the message that belongs to this current team
+        const result: Message[] = [];
+        broadcastGroups.forEach(g => {
+          const msgForTeam = g.messages.find(m => m.receiver_id === currentTeamId);
+          if (msgForTeam) result.push(msgForTeam);
+        });
+
+        // Sort descending by timestamp
+        result.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+        setAnnouncements(result);
       } catch (error) {
         console.error('Error fetching announcements:', error);
         toast({
@@ -76,40 +96,28 @@ export default function AnnouncementsPage() {
       } finally {
         setLoading(false);
       }
-    }
+    };
 
     fetchAnnouncements();
 
-    // Subscribe to new messages
+    // Subscribe to new messages and recompute (debounced) so we only keep true broadcasts
+    let debounceTimer: any;
     const channel = supabase
       .channel('announcements')
       .on(
         'postgres_changes',
         { event: 'INSERT', schema: 'public', table: 'messages' },
-        (payload) => {
-          const newMsg = payload.new as Message;
-          // Only add if it's from organizer to this team
-          if (newMsg.sender_team_id === 1 && newMsg.receiver_id === currentTeamId) {
-            setAnnouncements(prev => {
-              // Check if we already have this message (by content and time)
-              const timestamp = new Date(newMsg.timestamp);
-              const isDuplicate = prev.some(msg => {
-                const msgTimestamp = new Date(msg.timestamp);
-                return msg.content === newMsg.content && 
-                       Math.abs(msgTimestamp.getTime() - timestamp.getTime()) < 60000; // Within 1 minute
-              });
-              
-              if (!isDuplicate) {
-                return [newMsg, ...prev];
-              }
-              return prev;
-            });
-          }
+        () => {
+          clearTimeout(debounceTimer);
+          debounceTimer = setTimeout(() => {
+            fetchAnnouncements();
+          }, 500);
         }
       )
       .subscribe();
 
     return () => {
+      clearTimeout(debounceTimer);
       supabase.removeChannel(channel);
     };
   }, [currentTeamId]);
