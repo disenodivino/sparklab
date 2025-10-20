@@ -58,6 +58,37 @@ export default function MessagesPage() {
   // Fetch teams and messages
   useEffect(() => {
     fetchData();
+    
+    // Set up real-time subscription for new messages
+    const channel = supabase
+      .channel('organizer-messages')
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'messages' },
+        (payload) => {
+          const newMessage = payload.new as Message;
+          // Enrich with sender/receiver names for UI
+          const enriched: Message = {
+            ...newMessage,
+            sender: {
+              team_name: teams.find(t => t.id === newMessage.sender_team_id)?.team_name || 'Unknown Team',
+            },
+            receiver: {
+              team_name: teams.find(t => t.id === newMessage.receiver_id)?.team_name || 'Unknown Team',
+            },
+          };
+          setMessages((prev) => {
+            // Deduplicate by id if already present (e.g., optimistic add + realtime)
+            if (prev.some(m => m.id === enriched.id)) return prev;
+            return [...prev, enriched];
+          });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
   
   const fetchData = async () => {
@@ -234,19 +265,28 @@ export default function MessagesPage() {
       return;
     }
     
-    setIsLoading(true);
+    setIsSendingAnnouncement(true);
     
     try {
       if (selectedTeamId) {
         // Send to a specific team
-        const { error } = await supabase.from('messages').insert({
+        const { data, error } = await supabase.from('messages').insert({
           content: announcementMessage.trim(),
           sender_team_id: organizerTeamId,
           receiver_id: selectedTeamId,
           timestamp: new Date().toISOString()
-        });
+        }).select('*').single();
         
         if (error) throw error;
+        // Optimistically append sent message (enriched) so it appears immediately
+        if (data) {
+          const enriched: Message = {
+            ...data,
+            sender: { team_name: teams.find(t => t.id === organizerTeamId)?.team_name || 'Organizer Team' },
+            receiver: { team_name: teams.find(t => t.id === selectedTeamId)?.team_name || 'Unknown Team' },
+          };
+          setMessages(prev => prev.some(m => m.id === enriched.id) ? prev : [...prev, enriched]);
+        }
       } else {
         // Send to all teams (broadcast)
         // Get all teams except organizer
@@ -264,9 +304,6 @@ export default function MessagesPage() {
         
         await Promise.all(promises);
       }
-      
-      // Refresh data
-      await fetchData();
       
       // Reset form
       setAnnouncementMessage('');
@@ -286,8 +323,7 @@ export default function MessagesPage() {
         description: 'Failed to send message',
         variant: 'destructive',
       });
-    } finally {
-      setIsLoading(false);
+      setIsSendingAnnouncement(false);
     }
   };
   
@@ -296,31 +332,35 @@ export default function MessagesPage() {
       return;
     }
     
-    setIsLoading(true);
+    const messageCopy = replyMessage.trim();
+    setReplyMessage(''); // Clear input immediately for better UX
     
     try {
-      const { error } = await supabase.from('messages').insert({
-        content: replyMessage.trim(),
+      const { data, error } = await supabase.from('messages').insert({
+        content: messageCopy,
         sender_team_id: organizerTeamId,
         receiver_id: selectedConversation,
         timestamp: new Date().toISOString()
-      });
+      }).select('*').single();
       
       if (error) throw error;
-      
-      // Refresh data
-      await fetchData();
-      setReplyMessage('');
-      
+      // Optimistically append the new message so it shows instantly
+      if (data) {
+        const enriched: Message = {
+          ...data,
+          sender: { team_name: teams.find(t => t.id === organizerTeamId)?.team_name || 'Organizer Team' },
+          receiver: { team_name: teams.find(t => t.id === selectedConversation)?.team_name || 'Unknown Team' },
+        };
+        setMessages(prev => prev.some(m => m.id === enriched.id) ? prev : [...prev, enriched]);
+      }
     } catch (error) {
       console.error('Error sending message:', error);
+      setReplyMessage(messageCopy); // Restore message on error
       toast({
         title: 'Error',
         description: 'Failed to send message',
         variant: 'destructive',
       });
-    } finally {
-      setIsLoading(false);
     }
   };
   
@@ -377,7 +417,7 @@ export default function MessagesPage() {
                     className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                     value={selectedTeamId || ''}
                     onChange={(e) => setSelectedTeamId(e.target.value ? parseInt(e.target.value) : null)}
-                    disabled={isLoading}
+                    disabled={isSendingAnnouncement}
                   >
                     <option value="">All Participants (Broadcast)</option>
                     {teams
@@ -398,16 +438,16 @@ export default function MessagesPage() {
                     onChange={(e) => setAnnouncementMessage(e.target.value)}
                     placeholder="Enter your announcement message"
                     rows={4}
-                    disabled={isLoading}
+                    disabled={isSendingAnnouncement}
                   />
                 </div>
               </div>
               <DialogFooter>
-                <Button variant="outline" onClick={() => setIsSendingAnnouncement(false)} disabled={isLoading}>
+                <Button variant="outline" onClick={() => setIsSendingAnnouncement(false)} disabled={isSendingAnnouncement}>
                   Cancel
                 </Button>
-                <Button onClick={handleSendAnnouncement} disabled={isLoading || !announcementMessage.trim()}>
-                  {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                <Button onClick={handleSendAnnouncement} disabled={isSendingAnnouncement || !announcementMessage.trim()}>
+                  {isSendingAnnouncement && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                   Send Message
                 </Button>
               </DialogFooter>
@@ -519,7 +559,6 @@ export default function MessagesPage() {
                           placeholder="Type your message..."
                           value={replyMessage}
                           onChange={(e) => setReplyMessage(e.target.value)}
-                          disabled={isLoading}
                           onKeyDown={(e) => {
                             if (e.key === 'Enter' && !e.shiftKey) {
                               e.preventDefault();
@@ -530,13 +569,9 @@ export default function MessagesPage() {
                         <Button 
                           size="icon" 
                           onClick={handleSendReply}
-                          disabled={isLoading || !replyMessage.trim()}
+                          disabled={!replyMessage.trim()}
                         >
-                          {isLoading ? (
-                            <Loader2 className="h-4 w-4 animate-spin" />
-                          ) : (
-                            <Send className="h-4 w-4" />
-                          )}
+                          <Send className="h-4 w-4" />
                         </Button>
                       </div>
                     </div>
