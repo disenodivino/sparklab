@@ -4,6 +4,7 @@ import { ReactNode, useState } from 'react';
 import Footer from '@/components/footer';
 import UserSidebar from '@/components/user-sidebar';
 import UserHeader from '@/components/user-header';
+import MessagePopup from '@/components/message-popup';
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -19,6 +20,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
       <main className={`pt-24 px-6 py-6 transition-all duration-300 flex-grow ${sidebarCollapsed ? 'ml-20' : 'ml-64'}`}>
         {children}
       </main>
+      <MessagePopup />
       <Footer />
     </div>
   );

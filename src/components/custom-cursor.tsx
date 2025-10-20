@@ -41,21 +41,21 @@ const CustomCursor = () => {
       setPosition(newPos);
       setIsMoving(true);
 
-      // Create golden particles when moving
-      if (Math.random() < 0.3) {
-        // 30% chance to create particle
+      // Create golden particles when moving (reduced frequency)
+      if (Math.random() < 0.15) {
+        // Reduced to 15% chance to create particle
         const newParticle: Particle = {
           id: particleId.current++,
           x: newPos.x + (Math.random() - 0.5) * 20,
           y: newPos.y + (Math.random() - 0.5) * 20,
-          vx: (Math.random() - 0.5) * 4,
-          vy: (Math.random() - 0.5) * 4,
+          vx: (Math.random() - 0.5) * 3,
+          vy: (Math.random() - 0.5) * 3,
           life: 1,
-          maxLife: 60 + Math.random() * 40,
-          size: 2 + Math.random() * 4,
+          maxLife: 40 + Math.random() * 20, // Shorter life
+          size: 2 + Math.random() * 3,
         };
 
-        setParticles((prev) => [...prev.slice(-20), newParticle]); // Keep max 20 particles
+        setParticles((prev) => [...prev.slice(-15), newParticle]); // Keep max 15 particles
       }
 
       // Reset moving state after 100ms
@@ -105,15 +105,9 @@ const CustomCursor = () => {
 
   // Animate particles
   useEffect(() => {
-    // Don't animate particles on event pages
-    if (isEventPage) return;
-    
     const animateParticles = () => {
-      setParticles((prev) => {
-        // If no particles, don't update state
-        if (prev.length === 0) return prev;
-        
-        const updated = prev
+      setParticles((prev) =>
+        prev
           .map((particle) => ({
             ...particle,
             x: particle.x + particle.vx,
@@ -122,16 +116,13 @@ const CustomCursor = () => {
             vy: particle.vy + 0.1, // gravity
             vx: particle.vx * 0.99, // air resistance
           }))
-          .filter((particle) => particle.life < particle.maxLife);
-        
-        // Only update if there are changes
-        return updated.length !== prev.length ? updated : prev;
-      });
+          .filter((particle) => particle.life < particle.maxLife)
+      );
     };
 
     const interval = setInterval(animateParticles, 16); // ~60fps
     return () => clearInterval(interval);
-  }, [isEventPage]);
+  }, []);
 
   // Don't render anything for event pages
   if (isEventPage) {
@@ -142,18 +133,18 @@ const CustomCursor = () => {
     <>
       {/* Golden Particles */}
       {particles.map((particle) => {
-        const opacity = 1 - particle.life / particle.maxLife;
-        const scale = opacity * (particle.size / 4);
+        const opacity = Math.max(0, 1 - particle.life / particle.maxLife);
+        const scale = Math.max(0, opacity * (particle.size / 4));
 
         return (
           <div
             key={particle.id}
-            className="fixed pointer-events-none z-40"
+            className="fixed pointer-events-none z-40 will-change-transform"
             style={{
-              left: particle.x - particle.size / 2,
-              top: particle.y - particle.size / 2,
-              width: particle.size,
-              height: particle.size,
+              left: `${particle.x - particle.size / 2}px`,
+              top: `${particle.y - particle.size / 2}px`,
+              width: `${particle.size}px`,
+              height: `${particle.size}px`,
               backgroundColor: "#FFD700",
               borderRadius: "50%",
               opacity,
@@ -161,6 +152,7 @@ const CustomCursor = () => {
               boxShadow: `0 0 ${particle.size * 2}px rgba(255, 215, 0, ${
                 opacity * 0.8
               })`,
+              transition: "opacity 0.1s ease-out",
             }}
           />
         );
@@ -168,10 +160,10 @@ const CustomCursor = () => {
 
       {/* Main Cursor */}
       <div
-        className="fixed pointer-events-none z-50"
+        className="fixed pointer-events-none z-50 will-change-transform"
         style={{
-          left: position.x - 4,
-          top: position.y - 4,
+          left: `${position.x - 4}px`,
+          top: `${position.y - 4}px`,
           transform: `scale(${isHovering ? 1.8 : isMoving ? 1.3 : 1})`,
           transition: "transform 0.15s ease-out",
         }}
