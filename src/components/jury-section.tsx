@@ -52,46 +52,27 @@ export default function JurySection() {
         </div>
 
         {/* Jury Members Grid */}
-        <div
-          className={`grid gap-8 max-w-5xl mx-auto justify-items-center ${
-            juryMembers.length === 2
-              ? "grid-cols-1 md:grid-cols-2 md:max-w-3xl"
-              : "grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
-          }`}
-        >
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8 max-w-7xl mx-auto justify-items-center items-stretch">
           {juryMembers.map((member, index) => (
-            <div
-              key={member.name}
-              className={`jury-card-wrapper relative transform hover:scale-105 transition-all duration-300 ${
-                (juryMembers.length > 2 &&
-                  (juryMembers.length % 3 === 2 &&
-                  index >= juryMembers.length - 2
-                    ? index === juryMembers.length - 2
-                      ? "lg:col-start-2"
-                      : ""
-                    : juryMembers.length % 3 === 1 &&
-                      index === juryMembers.length - 1
-                    ? "lg:col-start-2"
-                    : "")) ||
-                ""
-              }`}
-            >
-              {/* Blue accent dot for jury distinction */}
-              <div className="absolute -top-2 -right-2 w-4 h-4 bg-blue-500 rounded-full opacity-70 z-10 shadow-lg shadow-blue-500/50"></div>
-              <div
-                className="jury-card-bg relative"
-                style={{
-                  background:
-                    "linear-gradient(135deg, rgba(59, 130, 246, 0.05) 0%, rgba(14, 165, 233, 0.08) 100%)",
-                  borderRadius: "12px",
-                  padding: "2px",
-                }}
-              >
-                <TeamCard
-                  member={member}
-                  size="medium"
-                  style={{ animationDelay: `${index * 0.2}s` }}
-                />
+            <div key={member.name} className="w-full max-w-xs flex justify-center">
+              <div className="w-full h-full jury-card-wrapper relative transform hover:scale-105 transition-all duration-300">
+                {/* Blue accent dot for jury distinction */}
+                <div className="absolute -top-2 -right-2 w-4 h-4 bg-blue-500 rounded-full opacity-70 z-10 shadow-lg shadow-blue-500/50"></div>
+                <div
+                  className="jury-card-bg relative h-full"
+                  style={{
+                    background:
+                      "linear-gradient(135deg, rgba(59, 130, 246, 0.05) 0%, rgba(14, 165, 233, 0.08) 100%)",
+                    borderRadius: "12px",
+                    padding: "2px",
+                  }}
+                >
+                  <TeamCard
+                    member={member}
+                    size="medium"
+                    style={{ animationDelay: `${index * 0.2}s` }}
+                  />
+                </div>
               </div>
             </div>
           ))}

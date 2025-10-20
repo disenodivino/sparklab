@@ -37,6 +37,12 @@ const organizers: TeamMember[] = [
     hint: "person portrait",
   },
   {
+    name: "Wilfred D'Souza",
+    role: "Technical Lead",
+    avatar: "/team_pics/Wilfred_D'Souza.jpg",
+    hint: "person portrait",
+  },
+  {
     name: "Aasiya Shariff",
     role: "Social Media Lead",
     avatar: "/team_pics/AASIYA SHARIFF.jpeg",
@@ -66,12 +72,7 @@ const organizers: TeamMember[] = [
     avatar: "/team_pics/BADARINARAYANA BR.jpg",
     hint: "person portrait",
   },
-  {
-    name: "Wilfred D'Souza",
-    role: "Technical Lead",
-    avatar: "/team_pics/Wilfred_D'Souza.jpg",
-    hint: "person portrait",
-  },
+  
   {
     name: "Yogesh Kumar Singh",
     role: "Event Coordinator",
@@ -105,14 +106,17 @@ export default function ExecutiveTeamSection() {
           <h3 className="text-3xl font-headline text-center mb-12 text-accent">
             Executive Team
           </h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-12 max-w-6xl mx-auto justify-items-center">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 lg:gap-12 max-w-6xl mx-auto justify-items-center items-stretch">
             {executiveTeam.map((member, index) => (
-              <TeamCard
-                key={member.name}
-                member={member}
-                size="large"
-                style={{ animationDelay: `${index * 0.2}s` }}
-              />
+              <div key={member.name} className="w-full max-w-sm flex justify-center">
+                <div className="w-full h-full">
+                  <TeamCard
+                    member={member}
+                    size="large"
+                    style={{ animationDelay: `${index * 0.2}s` }}
+                  />
+                </div>
+              </div>
             ))}
           </div>
         </div>
@@ -122,23 +126,16 @@ export default function ExecutiveTeamSection() {
           <h3 className="text-3xl font-headline text-center mb-12 text-accent">
             Organizers
           </h3>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-8 max-w-7xl mx-auto justify-items-center">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 lg:gap-8 max-w-7xl mx-auto justify-items-center items-stretch">
             {organizers.map((member, index) => (
-              <div
-                key={member.name}
-                className={
-                  index === 8
-                    ? "md:col-start-2"
-                    : index === 9
-                    ? "md:col-start-3"
-                    : ""
-                }
-              >
-                <TeamCard
-                  member={member}
-                  size="medium"
-                  style={{ animationDelay: `${(index + 3) * 0.1}s` }}
-                />
+              <div key={member.name} className="w-full max-w-xs flex justify-center">
+                <div className="w-full h-full">
+                  <TeamCard
+                    member={member}
+                    size="medium"
+                    style={{ animationDelay: `${(index + 3) * 0.1}s` }}
+                  />
+                </div>
               </div>
             ))}
           </div>

@@ -26,25 +26,25 @@ export const TeamCard = ({ member, size = "medium", style }: TeamCardProps) => {
 
   const sizeClasses = {
     large: {
-      container: "p-8",
+      container: "p-8 min-h-[420px]",
       image: "w-40 h-40 md:w-48 md:h-48",
       imageSize: { width: 192, height: 192 },
       name: "text-2xl md:text-3xl",
-      role: "text-lg md:text-xl",
+      role: "text-lg md:text-xl min-h-[3.5rem]",
     },
     medium: {
-      container: "p-6",
+      container: "p-6 min-h-[340px]",
       image: "w-32 h-32 md:w-36 md:h-36",
       imageSize: { width: 144, height: 144 },
       name: "text-xl md:text-2xl",
-      role: "text-base md:text-lg",
+      role: "text-base md:text-lg min-h-[3rem]",
     },
     small: {
-      container: "p-4",
+      container: "p-4 min-h-[280px]",
       image: "w-24 h-24 md:w-28 md:h-28",
       imageSize: { width: 112, height: 112 },
       name: "text-lg md:text-xl",
-      role: "text-sm md:text-base",
+      role: "text-sm md:text-base min-h-[2.5rem]",
     },
   };
 
@@ -55,12 +55,12 @@ export const TeamCard = ({ member, size = "medium", style }: TeamCardProps) => {
       ref={ref as React.RefObject<HTMLDivElement>}
       style={{ ...style, ...interactiveStyle }}
       className={cn(
-        "flex flex-col items-center animate-fade-in-up card-3d-interactive rounded-lg transition-all duration-300 hover:shadow-lg",
+        "flex flex-col items-center justify-between animate-fade-in-up card-3d-interactive rounded-lg transition-all duration-300 hover:shadow-lg h-full w-full",
         "bg-card/30 border border-border/40 hover:border-accent/50",
         currentSize.container
       )}
     >
-      <div className="relative mb-6 group">
+      <div className="relative mb-6 group flex-shrink-0">
         <div className="absolute inset-0 bg-gradient-to-br from-accent/20 to-primary/20 rounded-full blur-xl group-hover:blur-2xl transition-all duration-300 opacity-50 group-hover:opacity-70"></div>
         <Image
           src={member.avatar}
@@ -75,7 +75,7 @@ export const TeamCard = ({ member, size = "medium", style }: TeamCardProps) => {
         />
       </div>
 
-      <div className="text-center">
+      <div className="text-center flex-grow flex flex-col justify-center">
         <h3 className={cn("font-headline font-light mb-2", currentSize.name)}>
           {member.name}
         </h3>
