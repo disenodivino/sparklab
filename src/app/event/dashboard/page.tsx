@@ -57,7 +57,7 @@ export default function DashboardPage() {
         router.push('/event/organizer');
         return;
       }
-      
+
       setUser(userData);
       fetchDashboardStats(userData.id);
     } catch (error) {
@@ -73,7 +73,7 @@ export default function DashboardPage() {
       const now = new Date().toISOString();
       const { count: checkpointsCount, data: upcomingCheckpoints } = await supabase
         .from('checkpoints')
-        .select('*')
+        .select('*', { count: 'exact' })
         .gte('deadline', now)
         .order('deadline', { ascending: true })
         .limit(3);
@@ -89,7 +89,7 @@ export default function DashboardPage() {
       sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
       const { count: announcementsCount, data: recentAnnouncements } = await supabase
         .from('messages')
-        .select('*')
+        .select('*', { count: 'exact' })
         .eq('sender_team_id', 1)
         .is('receiver_id', null)
         .gte('timestamp', sevenDaysAgo.toISOString())
@@ -140,7 +140,7 @@ export default function DashboardPage() {
       // Sort by timestamp and take top 5
       activities.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
       setRecentActivity(activities.slice(0, 5));
-
+      
     } catch (error) {
       console.error('Error fetching dashboard stats:', error);
     } finally {
@@ -248,13 +248,13 @@ export default function DashboardPage() {
                   const Icon = activity.icon;
                   const isCheckpoint = activity.type === 'checkpoint';
                   const isAnnouncement = activity.type === 'announcement';
-                  
+  
                   return (
                     <div
                       key={activity.id}
                       className={`p-3 rounded-lg border transition-colors ${
-                        isCheckpoint 
-                          ? 'bg-blue-500/5 border-blue-500/20 hover:bg-blue-500/10' 
+                        isCheckpoint
+                          ? 'bg-blue-500/5 border-blue-500/20 hover:bg-blue-500/10'
                           : isAnnouncement
                           ? 'bg-yellow-500/5 border-yellow-500/20 hover:bg-yellow-500/10'
                           : 'bg-secondary/20 border-secondary/30 hover:bg-secondary/40'
@@ -262,15 +262,15 @@ export default function DashboardPage() {
                     >
                       <div className="flex items-start gap-3">
                         <div className={`p-2 rounded-lg ${
-                          isCheckpoint 
-                            ? 'bg-blue-500/10' 
+                          isCheckpoint
+                            ? 'bg-blue-500/10'
                             : isAnnouncement
                             ? 'bg-yellow-500/10'
                             : 'bg-primary/10'
                         }`}>
                           <Icon className={`h-4 w-4 ${
-                            isCheckpoint 
-                              ? 'text-blue-500' 
+                            isCheckpoint
+                              ? 'text-blue-500'
                               : isAnnouncement
                               ? 'text-yellow-500'
                               : 'text-primary'
@@ -303,7 +303,7 @@ export default function DashboardPage() {
             <CardDescription>Recent announcements and news</CardDescription>
           </CardHeader>
           <CardContent>
-            <Link 
+            <Link
               href="/event/dashboard/announcements"
               className="block p-4 rounded-lg bg-yellow-500/5 border border-yellow-500/20 hover:bg-yellow-500/10 transition-colors"
             >
@@ -333,7 +333,7 @@ export default function DashboardPage() {
               <p className="text-sm text-muted-foreground mb-3">
                 Contact organizers directly for any questions or assistance.
               </p>
-              <button 
+              <button
                 onClick={() => {
                   // Trigger click on the message popup button
                   const messageButton = document.querySelector('button[class*="fixed bottom-6 right-6"]') as HTMLButtonElement;
