@@ -118,8 +118,8 @@ export default function TeamInfoPage() {
           <CardHeader>
             <div className="flex items-center justify-between">
               <div>
-                <CardTitle className="text-2xl">{team.team_name}</CardTitle>
-                <CardDescription className="mt-2">Team ID: {team.id}</CardDescription>
+                <CardTitle className="text-2xl mb-2">Team Name: {team.team_name}</CardTitle>
+                <CardDescription>Team ID: {team.id}</CardDescription>
               </div>
               <div className="flex items-center gap-2 bg-primary/10 px-4 py-2 rounded-lg">
                 <Users className="h-5 w-5 text-primary" />
@@ -127,13 +127,6 @@ export default function TeamInfoPage() {
               </div>
             </div>
           </CardHeader>
-          <CardContent>
-            {team.created_at && (
-              <p className="text-sm text-muted-foreground">
-                Team created: {new Date(team.created_at).toLocaleDateString()}
-              </p>
-            )}
-          </CardContent>
         </Card>
       )}
 
@@ -194,6 +187,18 @@ export default function TeamInfoPage() {
               ))}
             </div>
           )}
+        </CardContent>
+      </Card>
+
+      <Card className="bg-blue-500/5 border-blue-500/20">
+        <CardHeader>
+          <CardTitle className="text-blue-500">Need Help?</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-sm text-muted-foreground">
+            If you need to make changes to your team members or have any questions, 
+            please contact the event organizers through the Messages page.
+          </p>
         </CardContent>
       </Card>
     </div>

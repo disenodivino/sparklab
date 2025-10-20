@@ -1,23 +1,25 @@
 'use client';
 
 import { ReactNode, useState } from 'react';
+import Footer from '@/components/footer';
 import UserSidebar from '@/components/user-sidebar';
 import UserHeader from '@/components/user-header';
-import MessagePopup from '@/components/message-popup';
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {
-  const [collapsed, setCollapsed] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+
+  const handleToggleSidebar = () => {
+    setSidebarCollapsed(!sidebarCollapsed);
+  };
 
   return (
-    <div className="min-h-screen w-full bg-background">
-      <UserSidebar collapsed={collapsed} onToggle={() => setCollapsed(!collapsed)} />
-      <UserHeader collapsed={collapsed} />
-      <main className={`pt-20 transition-all duration-300 ${collapsed ? 'ml-20' : 'ml-64'}`}>
-        <div className="container mx-auto py-6 px-6">
-          {children}
-        </div>
+    <div className="bg-background min-h-screen flex flex-col">
+      <UserSidebar collapsed={sidebarCollapsed} onToggle={handleToggleSidebar} />
+      <UserHeader collapsed={sidebarCollapsed} />
+      <main className={`pt-24 px-6 py-6 transition-all duration-300 flex-grow ${sidebarCollapsed ? 'ml-20' : 'ml-64'}`}>
+        {children}
       </main>
-      <MessagePopup />
+      <Footer />
     </div>
   );
 }

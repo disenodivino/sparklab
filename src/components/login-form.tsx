@@ -9,12 +9,22 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "@/hooks/use-toast";
 import { Eye, EyeOff } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 export default function LoginForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [showForgotPasswordDialog, setShowForgotPasswordDialog] = useState(false);
   const router = useRouter();
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -65,9 +75,8 @@ export default function LoginForm() {
       // Redirect based on user role
       if (data.user.role === 'organizer') {
         router.push("/event/organizer");
-      } else if (data.user.role === 'team') {
-        router.push("/event/dashboard");
       } else {
+        // All team users go to dashboard
         router.push("/event/dashboard");
       }
     } catch (error: any) {
@@ -85,14 +94,14 @@ export default function LoginForm() {
 
   return (
     <Card className="w-full border-secondary/30 glass-navbar-enhanced">
-      <CardHeader className="space-y-1 py-8">
-        <CardDescription className="text-center text-base">
+      <CardHeader className="space-y-1 pb-4">
+        <CardDescription className="text-center text-sm">
           Enter your credentials to access the event
         </CardDescription>
       </CardHeader>
       <form onSubmit={handleLogin}>
-        <CardContent className="space-y-6 py-6">
-          <div className="space-y-3">
+        <CardContent className="space-y-3 px-6 py-4">
+          <div className="space-y-1.5">
             <label htmlFor="username" className="text-sm font-medium leading-none">
               Username
             </label>
@@ -100,30 +109,31 @@ export default function LoginForm() {
               id="username"
               type="text"
               placeholder="Enter your username"
-              className="border-secondary/50"
+              className="border-secondary/50 h-9"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               required
             />
           </div>
-          <div className="space-y-3">
+          <div className="space-y-1.5">
             <div className="flex items-center justify-between">
               <label htmlFor="password" className="text-sm font-medium leading-none">
                 Password
               </label>
-              <Link 
-                href="#" 
+              <button
+                type="button"
+                onClick={() => setShowForgotPasswordDialog(true)}
                 className="text-xs text-primary hover:text-primary/80"
               >
                 Forgot password?
-              </Link>
+              </button>
             </div>
             <div className="relative">
               <Input
                 id="password"
                 type={showPassword ? "text" : "password"}
                 placeholder="Enter your password"
-                className="border-secondary/50 pr-10"
+                className="border-secondary/50 h-9 pr-10"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
@@ -132,6 +142,7 @@ export default function LoginForm() {
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                aria-label={showPassword ? "Hide password" : "Show password"}
               >
                 {showPassword ? (
                   <EyeOff className="h-4 w-4" />
@@ -142,15 +153,15 @@ export default function LoginForm() {
             </div>
           </div>
         </CardContent>
-        <CardFooter className="flex flex-col space-y-5 py-8">
+        <CardFooter className="flex flex-col space-y-3 px-6 pb-6 pt-2">
           <Button 
             type="submit" 
-            className="w-full animated-border-button h-12 text-base"
+            className="w-full animated-border-button h-9"
             disabled={isLoading}
           >
             {isLoading ? "Logging in..." : "Login"}
           </Button>
-          <div className="text-sm text-center text-muted-foreground">
+          <div className="text-xs text-center text-muted-foreground">
             Don&apos;t have an account?{" "}
             <Link 
               href="/" 
@@ -161,6 +172,21 @@ export default function LoginForm() {
           </div>
         </CardFooter>
       </form>
+
+      {/* Forgot Password Dialog */}
+      <AlertDialog open={showForgotPasswordDialog} onOpenChange={setShowForgotPasswordDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Forgot Password?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Please contact the event organizer to reset your password. You can reach out to them through the official event channels or contact information provided during registration.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction>Got it</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Card>
   );
 }

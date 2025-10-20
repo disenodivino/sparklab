@@ -34,6 +34,11 @@ export default function DashboardPage() {
     timestamp: string;
     icon: any;
   }>>([]);
+  const [recentAnnouncements, setRecentAnnouncements] = useState<Array<{
+    id: string;
+    content: string;
+    timestamp: string;
+  }>>([]);
   const router = useRouter();
 
   useEffect(() => {
@@ -87,23 +92,33 @@ export default function DashboardPage() {
       // Fetch announcements count (last 7 days)
       const sevenDaysAgo = new Date();
       sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-      const { count: announcementsCount, data: recentAnnouncements } = await supabase
+      const { data: recentAnnouncements } = await supabase
         .from('messages')
-        .select('*', { count: 'exact' })
+        .select('*')
         .eq('sender_team_id', 1)
-        .is('receiver_id', null)
+        .eq('receiver_id', teamId)
         .gte('timestamp', sevenDaysAgo.toISOString())
-        .order('timestamp', { ascending: false })
-        .limit(3);
+        .order('timestamp', { ascending: false });
+
+      // Deduplicate announcements by content and timestamp
+      const uniqueAnnouncements = new Map<string, any>();
+      recentAnnouncements?.forEach((msg: any) => {
+        const timestamp = new Date(msg.timestamp);
+        const groupKey = `${msg.content}_${timestamp.getFullYear()}-${timestamp.getMonth()}-${timestamp.getDate()}_${timestamp.getHours()}-${timestamp.getMinutes()}`;
+        if (!uniqueAnnouncements.has(groupKey)) {
+          uniqueAnnouncements.set(groupKey, msg);
+        }
+      });
+      const announcementsArray = Array.from(uniqueAnnouncements.values()).slice(0, 3);
 
       setStats({
         upcomingCheckpoints: checkpointsCount || 0,
         teamMembers: membersCount || 0,
-        unreadAnnouncements: announcementsCount || 0,
+        unreadAnnouncements: uniqueAnnouncements.size || 0,
         submissions: 0
       });
 
-      // Build recent activity from checkpoints and announcements
+      // Build recent activity from checkpoints only (not announcements)
       const activities: Array<{
         id: string;
         type: 'checkpoint' | 'announcement' | 'submission';
@@ -125,21 +140,18 @@ export default function DashboardPage() {
         });
       });
 
-      // Add announcements
-      recentAnnouncements?.forEach((announcement: any) => {
-        activities.push({
-          id: `announcement-${announcement.id}`,
-          type: 'announcement',
-          title: 'New Announcement',
-          description: announcement.content.substring(0, 60) + (announcement.content.length > 60 ? '...' : ''),
-          timestamp: announcement.timestamp,
-          icon: Bell
-        });
-      });
-
       // Sort by timestamp and take top 5
       activities.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
       setRecentActivity(activities.slice(0, 5));
+
+      // Set recent announcements for Latest Updates section
+      setRecentAnnouncements(
+        announcementsArray?.map((announcement: any) => ({
+          id: `announcement-${announcement.id}`,
+          content: announcement.content,
+          timestamp: announcement.timestamp
+        })) || []
+      );
       
     } catch (error) {
       console.error('Error fetching dashboard stats:', error);
@@ -303,20 +315,47 @@ export default function DashboardPage() {
             <CardDescription>Recent announcements and news</CardDescription>
           </CardHeader>
           <CardContent>
-            <Link
-              href="/event/dashboard/announcements"
-              className="block p-4 rounded-lg bg-yellow-500/5 border border-yellow-500/20 hover:bg-yellow-500/10 transition-colors"
-            >
-              <div className="flex items-start gap-3">
-                <MessageSquare className="h-5 w-5 text-yellow-500 mt-0.5" />
-                <div className="flex-1">
-                  <p className="font-medium mb-1">Check Announcements</p>
-                  <p className="text-sm text-muted-foreground">
-                    Stay updated with the latest news from organizers
-                  </p>
-                </div>
+            {recentAnnouncements.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">
+                <Bell className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                <p className="text-sm">No recent announcements</p>
+                <Link
+                  href="/event/dashboard/announcements"
+                  className="inline-block mt-3 text-xs text-primary hover:underline"
+                >
+                  View all announcements
+                </Link>
               </div>
-            </Link>
+            ) : (
+              <div className="space-y-3">
+                {recentAnnouncements.map((announcement) => (
+                  <div
+                    key={announcement.id}
+                    className="p-3 rounded-lg bg-yellow-500/5 border border-yellow-500/20 hover:bg-yellow-500/10 transition-colors"
+                  >
+                    <div className="flex items-start gap-3">
+                      <div className="p-2 rounded-lg bg-yellow-500/10">
+                        <Bell className="h-4 w-4 text-yellow-500" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm whitespace-pre-wrap line-clamp-2">
+                          {announcement.content}
+                        </p>
+                        <p className="text-[10px] text-muted-foreground mt-1">
+                          {formatDistanceToNow(new Date(announcement.timestamp), { addSuffix: true })}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+                <Link
+                  href="/event/dashboard/announcements"
+                  className="block text-center mt-3 text-xs text-primary hover:underline"
+                >
+                  View all announcements →
+                </Link>
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
