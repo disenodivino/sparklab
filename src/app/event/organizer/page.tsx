@@ -163,6 +163,76 @@ export default function OrganizerDashboardPage() {
     }
 
     fetchDashboardData();
+
+    // Set up real-time subscriptions
+    const teamsChannel = supabase
+      .channel('organizer_teams_changes')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'teams' },
+        () => {
+          console.log('Teams changed');
+          fetchDashboardData();
+        }
+      )
+      .subscribe();
+
+    const usersChannel = supabase
+      .channel('organizer_users_changes')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'users' },
+        () => {
+          console.log('Users changed');
+          fetchDashboardData();
+        }
+      )
+      .subscribe();
+
+    const checkpointsChannel = supabase
+      .channel('organizer_checkpoints_changes')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'checkpoints' },
+        () => {
+          console.log('Checkpoints changed');
+          fetchDashboardData();
+        }
+      )
+      .subscribe();
+
+    const messagesChannel = supabase
+      .channel('organizer_messages_changes')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'messages' },
+        () => {
+          console.log('Messages changed');
+          fetchDashboardData();
+        }
+      )
+      .subscribe();
+
+    const formsChannel = supabase
+      .channel('organizer_forms_changes')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'forms' },
+        () => {
+          console.log('Forms changed');
+          fetchDashboardData();
+        }
+      )
+      .subscribe();
+
+    // Cleanup subscriptions
+    return () => {
+      supabase.removeChannel(teamsChannel);
+      supabase.removeChannel(usersChannel);
+      supabase.removeChannel(checkpointsChannel);
+      supabase.removeChannel(messagesChannel);
+      supabase.removeChannel(formsChannel);
+    };
   }, []);
 
   const getActivityIcon = (type: string) => {

@@ -199,6 +199,37 @@ export default function TeamsPage() {
           variant: 'destructive',
         });
       });
+
+    // Set up real-time subscriptions
+    const teamsChannel = supabase
+      .channel('organizer-teams-page')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'teams' },
+        (payload) => {
+          console.log('Team changed:', payload);
+          fetchData(false);
+        }
+      )
+      .subscribe();
+
+    const usersChannel = supabase
+      .channel('organizer-users-page')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'users' },
+        (payload) => {
+          console.log('User changed:', payload);
+          fetchData(false);
+        }
+      )
+      .subscribe();
+
+    // Cleanup subscriptions
+    return () => {
+      supabase.removeChannel(teamsChannel);
+      supabase.removeChannel(usersChannel);
+    };
   }, []);
   
   // Add team with participants in a single operation
@@ -1318,9 +1349,9 @@ export default function TeamsPage() {
                   const oldParticipant = participants.find(p => p.id === editParticipantId);
                   const oldTeamId = oldParticipant?.team_id;
                   
-                  // Update participant in the database
+                  // Update user directly in the users table (not participants table)
                   const { error } = await supabase
-                    .from('participants')
+                    .from('users')
                     .update({ 
                       name: editParticipantName,
                       team_id: editParticipantTeamId
@@ -1328,33 +1359,6 @@ export default function TeamsPage() {
                     .eq('id', editParticipantId);
                   
                   if (error) throw error;
-                  
-                  // Update the corresponding user in the users table
-                  // First find matching user by name and team_id
-                  const { data: userData, error: userFindError } = await supabase
-                    .from('users')
-                    .select('id')
-                    .match({ 
-                      name: oldParticipant?.name, 
-                      team_id: oldParticipant?.team_id 
-                    });
-                    
-                  if (userFindError) {
-                    console.error('Error finding user record:', userFindError);
-                  } else if (userData && userData.length > 0) {
-                    // Update the user record
-                    const { error: userUpdateError } = await supabase
-                      .from('users')
-                      .update({ 
-                        name: editParticipantName,
-                        team_id: editParticipantTeamId
-                      })
-                      .eq('id', userData[0].id);
-                      
-                    if (userUpdateError) {
-                      console.error('Error updating user record:', userUpdateError);
-                    }
-                  }
                   
                   // Get the team name for display
                   const teamName = editParticipantTeamId 

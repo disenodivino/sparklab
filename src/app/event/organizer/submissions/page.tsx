@@ -35,6 +35,24 @@ export default function SubmissionsPage() {
 
   useEffect(() => {
     fetchForms();
+
+    // Set up real-time subscription for forms
+    const formsChannel = supabase
+      .channel('organizer-forms')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'forms' },
+        (payload) => {
+          console.log('Form changed:', payload);
+          fetchForms();
+        }
+      )
+      .subscribe();
+
+    // Cleanup subscription
+    return () => {
+      supabase.removeChannel(formsChannel);
+    };
   }, []);
 
   const fetchForms = async () => {

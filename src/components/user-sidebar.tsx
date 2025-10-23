@@ -9,7 +9,8 @@ import {
   FileText, 
   Menu, 
   X,
-  Home
+  Home,
+  Lightbulb
 } from 'lucide-react';
 
 const navItems = [
@@ -17,6 +18,11 @@ const navItems = [
     name: 'Dashboard',
     href: '/event/dashboard',
     icon: <Home className="w-5 h-5" />
+  },
+  {
+    name: 'Problem Statements',
+    href: '/event/dashboard/problem-statements',
+    icon: <Lightbulb className="w-5 h-5" />
   },
   {
     name: 'Team Info',

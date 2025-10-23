@@ -154,9 +154,25 @@ export default function CheckpointsPage() {
       // Silent refresh (no error toasts)
       fetchCheckpoints(false);
     }, 60000); // Every minute
+
+    // Set up real-time subscription for checkpoints
+    const checkpointsChannel = supabase
+      .channel('organizer-checkpoints')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'checkpoints' },
+        (payload) => {
+          console.log('Checkpoint changed:', payload);
+          fetchCheckpoints();
+        }
+      )
+      .subscribe();
     
-    // Clean up interval on component unmount
-    return () => clearInterval(intervalId);
+    // Clean up interval and subscription on component unmount
+    return () => {
+      clearInterval(intervalId);
+      supabase.removeChannel(checkpointsChannel);
+    };
   }, []);
   
   // Re-evaluate statuses whenever the component renders to ensure accuracy

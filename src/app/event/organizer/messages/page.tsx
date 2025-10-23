@@ -23,6 +23,7 @@ interface Message {
   receiver_id: number;
   content: string;
   timestamp: string;
+  seen_timestamp: string | null;
   is_broadcast?: boolean; // Added for the UI to identify broadcasts
   sender?: {
     team_name: string;
@@ -38,6 +39,7 @@ interface Conversation {
   team_name: string;
   last_message: string;
   timestamp: string;
+  unread_count?: number;
 }
 
 export default function MessagesPage() {
@@ -60,35 +62,35 @@ export default function MessagesPage() {
   useEffect(() => {
     fetchData();
     
-    // Set up real-time subscription for new messages
-    const channel = supabase
+    // Set up real-time subscription for messages (all events)
+    const messagesChannel = supabase
       .channel('organizer-messages')
       .on(
         'postgres_changes',
-        { event: 'INSERT', schema: 'public', table: 'messages' },
+        { event: '*', schema: 'public', table: 'messages' },
         (payload) => {
-          const newMessage = payload.new as Message;
-          // Enrich with sender/receiver names for UI
-          const enriched: Message = {
-            ...newMessage,
-            sender: {
-              team_name: teams.find(t => t.id === newMessage.sender_team_id)?.team_name || 'Unknown Team',
-            },
-            receiver: {
-              team_name: teams.find(t => t.id === newMessage.receiver_id)?.team_name || 'Unknown Team',
-            },
-          };
-          setMessages((prev) => {
-            // Deduplicate by id if already present (e.g., optimistic add + realtime)
-            if (prev.some(m => m.id === enriched.id)) return prev;
-            return [...prev, enriched];
-          });
+          console.log('Message changed:', payload);
+          fetchData();
+        }
+      )
+      .subscribe();
+
+    // Set up real-time subscription for teams
+    const teamsChannel = supabase
+      .channel('organizer-messages-teams')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'teams' },
+        (payload) => {
+          console.log('Team changed:', payload);
+          fetchData();
         }
       )
       .subscribe();
 
     return () => {
-      supabase.removeChannel(channel);
+      supabase.removeChannel(messagesChannel);
+      supabase.removeChannel(teamsChannel);
     };
   }, []);
   
@@ -145,6 +147,7 @@ export default function MessagesPage() {
     if (!organizerTeamId) return [];
     
     const conversations: {[key: number]: Conversation} = {};
+    const unreadCounts: {[key: number]: number} = {};
     
     messages.forEach(message => {
       // If message is from another team to organizer
@@ -152,6 +155,11 @@ export default function MessagesPage() {
         const teamId = message.sender_team_id;
         // Skip if sender is organizer itself (safety check)
         if (teamId === organizerTeamId) return;
+        
+        // Count unseen messages (messages sent to organizer that haven't been seen)
+        if (!message.seen_timestamp) {
+          unreadCounts[teamId] = (unreadCounts[teamId] || 0) + 1;
+        }
         
         if (!conversations[teamId]) {
           conversations[teamId] = {
@@ -192,12 +200,53 @@ export default function MessagesPage() {
       }
     });
     
+    // Add unread counts to conversations
+    Object.keys(unreadCounts).forEach(teamIdStr => {
+      const teamId = parseInt(teamIdStr);
+      if (conversations[teamId]) {
+        conversations[teamId].unread_count = unreadCounts[teamId];
+      }
+    });
+    
     return Object.values(conversations).sort((a, b) => 
       new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
     );
   };
   
   const conversations = getUniqueConversations();
+  
+  // Function to mark messages as seen when conversation is opened
+  const markMessagesAsSeen = async (teamId: number) => {
+    if (!organizerTeamId) return;
+    
+    try {
+      // Find all unseen messages from this team to organizer
+      const unseenMessages = messages.filter(
+        m => m.sender_team_id === teamId && 
+             m.receiver_id === organizerTeamId && 
+             !m.seen_timestamp
+      );
+      
+      if (unseenMessages.length === 0) return;
+      
+      // Mark all unseen messages as seen
+      const messageIds = unseenMessages.map(m => m.id);
+      const { error } = await supabase
+        .from('messages')
+        .update({ seen_timestamp: new Date().toISOString() })
+        .in('id', messageIds);
+      
+      if (error) {
+        console.error('Error marking messages as seen:', error);
+      } else {
+        console.log(`Marked ${messageIds.length} messages as seen for team ${teamId}`);
+        // Refresh data to update UI
+        fetchData();
+      }
+    } catch (error) {
+      console.error('Error in markMessagesAsSeen:', error);
+    }
+  };
   
   // Filter messages for selected conversation
   const conversationMessages = selectedConversation && organizerTeamId
@@ -474,11 +523,19 @@ export default function MessagesPage() {
                         <div 
                           key={conversation.id}
                           className={`p-4 cursor-pointer hover:bg-secondary/10 ${selectedConversation === conversation.id ? 'bg-secondary/20' : ''}`}
-                          onClick={() => setSelectedConversation(conversation.id)}
+                          onClick={() => {
+                            setSelectedConversation(conversation.id);
+                            markMessagesAsSeen(conversation.id);
+                          }}
                         >
                           <div className="flex items-start gap-3">
-                            <div className="bg-primary/10 rounded-full p-2">
+                            <div className="bg-primary/10 rounded-full p-2 relative">
                               <UserCircle className="h-6 w-6" />
+                              {conversation.unread_count && conversation.unread_count > 0 && (
+                                <div className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-semibold">
+                                  {conversation.unread_count > 9 ? '9+' : conversation.unread_count}
+                                </div>
+                              )}
                             </div>
                             <div className="flex-1">
                               <div className="flex items-center justify-between">
@@ -488,7 +545,9 @@ export default function MessagesPage() {
                                 </p>
                               </div>
                               <p className="text-xs text-muted-foreground">{conversation.team_name}</p>
-                              <p className="text-sm truncate mt-1">{conversation.last_message}</p>
+                              <p className={`text-sm truncate mt-1 ${conversation.unread_count && conversation.unread_count > 0 ? 'font-semibold' : ''}`}>
+                                {conversation.last_message}
+                              </p>
                             </div>
                           </div>
                         </div>
