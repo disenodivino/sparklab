@@ -79,6 +79,41 @@ export default function TeamInfoPage() {
     }
 
     fetchTeamData();
+
+    // Get team ID for subscription filter
+    const userString = localStorage.getItem('user');
+    if (userString) {
+      const userData = JSON.parse(userString);
+      const teamId = userData.id;
+
+      // Set up real-time subscription for team and users updates
+      const teamsChannel = supabase
+        .channel('team_info_teams')
+        .on(
+          'postgres_changes',
+          { event: '*', schema: 'public', table: 'teams', filter: `id=eq.${teamId}` },
+          () => {
+            fetchTeamData();
+          }
+        )
+        .subscribe();
+
+      const usersChannel = supabase
+        .channel('team_info_users')
+        .on(
+          'postgres_changes',
+          { event: '*', schema: 'public', table: 'users', filter: `team_id=eq.${teamId}` },
+          () => {
+            fetchTeamData();
+          }
+        )
+        .subscribe();
+
+      return () => {
+        supabase.removeChannel(teamsChannel);
+        supabase.removeChannel(usersChannel);
+      };
+    }
   }, []);
 
   const getRoleColor = (role?: string) => {

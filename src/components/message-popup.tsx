@@ -24,6 +24,7 @@ export default function MessagePopup() {
   const [newMessage, setNewMessage] = useState('');
   const [sending, setSending] = useState(false);
   const [currentTeamId, setCurrentTeamId] = useState<number | null>(null);
+  const [organizerTeamId, setOrganizerTeamId] = useState<number | null>(null);
   const [unreadCount, setUnreadCount] = useState(0);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -34,6 +35,23 @@ export default function MessagePopup() {
       const userData = JSON.parse(userString);
       setCurrentTeamId(userData.id);
     }
+    // Fetch organizer team id (by role)
+    const fetchOrganizer = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('teams')
+          .select('id')
+          .eq('role', 'organizer')
+          .order('id', { ascending: true })
+          .limit(1);
+        if (!error && data && data.length > 0) {
+          setOrganizerTeamId(data[0].id as number);
+        }
+      } catch (e) {
+        console.error('Error fetching organizer team:', e);
+      }
+    };
+    fetchOrganizer();
   }, []);
 
   useEffect(() => {
@@ -47,7 +65,8 @@ export default function MessagePopup() {
           .or(`sender_team_id.eq.${currentTeamId},receiver_id.eq.${currentTeamId}`)
           .order('timestamp', { ascending: true });
 
-        const regularMessages = messagesData?.filter(m => !(m.sender_team_id === 1 && m.receiver_id === null)) || [];
+  // Keep only direct messages (receiver_id should be set)
+  const regularMessages = messagesData?.filter(m => m.receiver_id !== null) || [];
         setMessages(regularMessages);
         
         // Calculate unread count based on seen_timestamp
@@ -154,6 +173,22 @@ export default function MessagePopup() {
 
   const handleSendMessage = async () => {
     if (!newMessage.trim() || !currentTeamId) return;
+    // Require organizer id to send; if not loaded, try to fetch once more
+    if (!organizerTeamId) {
+      try {
+        const { data } = await supabase
+          .from('teams')
+          .select('id')
+          .eq('role', 'organizer')
+          .order('id', { ascending: true })
+          .limit(1);
+        if (data && data.length > 0) setOrganizerTeamId(data[0].id as number);
+      } catch {}
+    }
+    if (!organizerTeamId) {
+      toast({ title: 'Error', description: 'Organizer not found. Please try again later.', variant: 'destructive' });
+      return;
+    }
 
     setSending(true);
     const messageContent = newMessage;
@@ -162,7 +197,7 @@ export default function MessagePopup() {
     try {
       const { data, error } = await supabase.from('messages').insert([{
         sender_team_id: currentTeamId,
-        receiver_id: 1,
+        receiver_id: organizerTeamId,
         content: messageContent,
         timestamp: timestamp
       }]).select();

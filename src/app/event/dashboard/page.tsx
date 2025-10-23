@@ -65,6 +65,46 @@ export default function DashboardPage() {
 
       setUser(userData);
       fetchDashboardStats(userData.id);
+
+      // Set up real-time subscriptions
+      const checkpointsChannel = supabase
+        .channel('dashboard_checkpoints')
+        .on(
+          'postgres_changes',
+          { event: '*', schema: 'public', table: 'checkpoints' },
+          () => {
+            fetchDashboardStats(userData.id);
+          }
+        )
+        .subscribe();
+
+      const announcementsChannel = supabase
+        .channel('dashboard_announcements')
+        .on(
+          'postgres_changes',
+          { event: '*', schema: 'public', table: 'announcements' },
+          () => {
+            fetchDashboardStats(userData.id);
+          }
+        )
+        .subscribe();
+
+      const usersChannel = supabase
+        .channel('dashboard_users')
+        .on(
+          'postgres_changes',
+          { event: '*', schema: 'public', table: 'users', filter: `team_id=eq.${userData.id}` },
+          () => {
+            fetchDashboardStats(userData.id);
+          }
+        )
+        .subscribe();
+
+      return () => {
+        supabase.removeChannel(checkpointsChannel);
+        supabase.removeChannel(announcementsChannel);
+        supabase.removeChannel(usersChannel);
+      };
     } catch (error) {
       console.error('Error parsing user data:', error);
       localStorage.removeItem('user');

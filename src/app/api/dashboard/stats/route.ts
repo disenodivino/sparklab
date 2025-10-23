@@ -62,8 +62,7 @@ export async function GET() {
       nextCheckpointDays,
       messagesCount: messagesResult.count || 0,
       unreadMessagesCount: Math.floor((messagesResult.count || 0) * 0.25), // For demo: 25% of messages are unread
-      submissionsCount: submissionsResult.count || 0,
-      pendingSubmissionsCount: Math.floor((submissionsResult.count || 0) * 0.4) // For demo: 40% of submissions need review
+      submissionsCount: submissionsResult.count || 0
     };
     
     return NextResponse.json({ stats });

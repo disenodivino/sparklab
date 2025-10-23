@@ -10,7 +10,7 @@ import { Label } from '@/components/ui/label';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/lib/supabase';
 import { hashPassword } from '@/lib/crypto';
-import { PlusCircle, Users, UserPlus, Trash2, Edit, Search, RefreshCw, Loader2 } from 'lucide-react';
+import { PlusCircle, Users, UserPlus, Trash2, Edit, Search, RefreshCw, Loader2, Eye, EyeOff, Lock } from 'lucide-react';
 import { format } from 'date-fns';
 
 interface Team {
@@ -19,6 +19,7 @@ interface Team {
   created_at: string;
   members?: number;
   username?: string;
+  password?: string;
   password_hash?: string;
   role?: string;
 }
@@ -40,6 +41,18 @@ export default function TeamsPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  // Store plain text passwords for newly created teams (in-memory only)
+  const [teamPasswords, setTeamPasswords] = useState<Record<number, string>>({});
+  
+  // Master password state
+  const [showPasswordDialog, setShowPasswordDialog] = useState(false);
+  const [masterPassword, setMasterPassword] = useState('');
+  const [isPasswordUnlocked, setIsPasswordUnlocked] = useState(false);
+  const [selectedTeamForPassword, setSelectedTeamForPassword] = useState<number | null>(null);
+  
+  // Master password (you can change this)
+  const MASTER_PASSWORD = 'admin@sparklab2025';
   
   // Undo states
   const [deletedTeam, setDeletedTeam] = useState<{
@@ -124,6 +137,16 @@ export default function TeamsPage() {
         const memberCount = (usersData || []).filter(p => p.team_id === team.id).length;
         return { ...team, members: memberCount };
       });
+      
+      // Extract passwords from teams data and store in state
+      const passwordsMap: Record<number, string> = {};
+      participantTeams.forEach(team => {
+        if (team.password) {
+          passwordsMap[team.id] = team.password;
+        }
+      });
+      setTeamPasswords(passwordsMap);
+      console.log('Loaded passwords for teams:', Object.keys(passwordsMap).length);
       
       // Process users as participants if we have them
       let participantsWithTeamNames = [];
@@ -235,7 +258,8 @@ export default function TeamsPage() {
         .insert({ 
           team_name: newTeamData.teamName, 
           username: newTeamData.username,
-          password_hash: hashPassword(newTeamData.password), // Hash the password before storing
+          password: newTeamData.password, // Store plain password in database
+          password_hash: hashPassword(newTeamData.password), // Hash the password for authentication
           created_at: new Date().toISOString()
         })
         .select();
@@ -255,6 +279,13 @@ export default function TeamsPage() {
       const newTeam = teamData[0];
       const createdUsers: TeamMember[] = [];
       let userErrors = 0;
+      
+      // No need to store in localStorage anymore since it's in the database
+      // Just update the local state for immediate display
+      setTeamPasswords(prev => ({
+        ...prev,
+        [newTeam.id]: newTeamData.password
+      }));
       
       // Step 2: Create users for the team
       console.log(`Creating ${validParticipants.length} users for team ${newTeam.team_name} (ID: ${newTeam.id})`);
@@ -374,6 +405,14 @@ export default function TeamsPage() {
   
   // Helper functions for managing participants in the new team form
   const addParticipantField = () => {
+    if (newTeamData.participants.length >= 4) {
+      toast({
+        title: 'Maximum Reached',
+        description: 'A team can have a maximum of 4 participants',
+        variant: 'destructive',
+      });
+      return;
+    }
     setNewTeamData({
       ...newTeamData,
       participants: [...newTeamData.participants, { name: '', gender: '' }]
@@ -447,6 +486,32 @@ export default function TeamsPage() {
             Refresh
           </Button>
           
+          <Button
+            variant={isPasswordUnlocked ? "destructive" : "outline"}
+            onClick={() => {
+              if (!isPasswordUnlocked) {
+                setShowPasswordDialog(true);
+              } else {
+                setIsPasswordUnlocked(false);
+                toast({
+                  title: 'Passwords Hidden',
+                  description: 'All passwords are now hidden',
+                });
+              }
+            }}
+          >
+            {isPasswordUnlocked ? (
+              <>
+                <EyeOff className="mr-2 h-4 w-4" />
+                Hide Passwords
+              </>
+            ) : (
+              <>
+                <Eye className="mr-2 h-4 w-4" />
+                Show Passwords
+              </>
+            )}
+          </Button>
 
           
           <Dialog open={isAddingTeamWithParticipants} onOpenChange={setIsAddingTeamWithParticipants}>
@@ -503,7 +568,12 @@ export default function TeamsPage() {
                 
                 {/* Participants Section */}
                 <div className="space-y-4">
-                  <Label className="text-lg font-medium">Participants</Label>
+                  <div className="flex items-center justify-between">
+                    <Label className="text-lg font-medium">Participants</Label>
+                    <span className="text-sm text-muted-foreground">
+                      {newTeamData.participants.length} / 4 participants
+                    </span>
+                  </div>
                   <div className="space-y-6">
                     {newTeamData.participants.map((participant, index) => (
                       <div key={index} className="pl-2 border-l-2 border-primary/50 pt-2 pb-4 space-y-4">
@@ -557,9 +627,12 @@ export default function TeamsPage() {
                       variant="outline" 
                       className="w-full"
                       onClick={addParticipantField}
+                      disabled={newTeamData.participants.length >= 4}
                     >
                       <PlusCircle className="mr-2 h-4 w-4" />
-                      Add Another Participant
+                      {newTeamData.participants.length >= 4 
+                        ? 'Maximum 4 Participants Reached' 
+                        : 'Add Another Participant'}
                     </Button>
                   </div>
                 </div>
@@ -620,6 +693,8 @@ export default function TeamsPage() {
                     <tr className="border-b bg-secondary/20">
                       <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">ID</th>
                       <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Name</th>
+                      <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Username</th>
+                      <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Password</th>
                       <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Created</th>
                       <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Members</th>
                       <th className="h-12 px-4 text-right align-middle font-medium text-muted-foreground">Actions</th>
@@ -628,7 +703,7 @@ export default function TeamsPage() {
                   <tbody>
                     {filteredTeams.length === 0 ? (
                       <tr>
-                        <td colSpan={5} className="p-4 text-center text-muted-foreground">
+                        <td colSpan={7} className="p-4 text-center text-muted-foreground">
                           No teams found
                         </td>
                       </tr>
@@ -637,6 +712,53 @@ export default function TeamsPage() {
                         <tr key={team.id} className="border-b">
                           <td className="p-4 align-middle">{team.id}</td>
                           <td className="p-4 align-middle font-medium">{team.team_name}</td>
+                          <td className="p-4 align-middle">
+                            <code className="px-2 py-1 bg-secondary/50 rounded text-sm">
+                              {team.username || 'N/A'}
+                            </code>
+                          </td>
+                          <td className="p-4 align-middle">
+                            <div className="flex items-center gap-2">
+                              {isPasswordUnlocked ? (
+                                teamPasswords[team.id] ? (
+                                  <code className="px-2 py-1 bg-green-500/10 border border-green-500/20 rounded text-sm text-green-700">
+                                    {teamPasswords[team.id]}
+                                  </code>
+                                ) : (
+                                  <code className="px-2 py-1 bg-amber-500/10 border border-amber-500/20 rounded text-sm text-amber-700">
+                                    Not stored
+                                  </code>
+                                )
+                              ) : (
+                                <code className="px-2 py-1 bg-secondary/50 rounded text-sm">
+                                  ••••••••
+                                </code>
+                              )}
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                className="h-7 w-7 p-0"
+                                onClick={() => {
+                                  if (!isPasswordUnlocked) {
+                                    setSelectedTeamForPassword(team.id);
+                                    setShowPasswordDialog(true);
+                                  } else {
+                                    setIsPasswordUnlocked(false);
+                                    toast({
+                                      title: 'Passwords Hidden',
+                                      description: 'All passwords are now hidden',
+                                    });
+                                  }
+                                }}
+                              >
+                                {isPasswordUnlocked ? (
+                                  <EyeOff className="h-4 w-4" />
+                                ) : (
+                                  <Eye className="h-4 w-4" />
+                                )}
+                              </Button>
+                            </div>
+                          </td>
                           <td className="p-4 align-middle">{team.created_at}</td>
                           <td className="p-4 align-middle">{team.members}</td>
                           <td className="p-4 align-middle text-right">
@@ -752,6 +874,7 @@ export default function TeamsPage() {
                                                 const teamToInsert = {
                                                   team_name: deletedData.team.team_name,
                                                   username: deletedData.team.username,
+                                                  password: deletedData.team.password,
                                                   password_hash: deletedData.team.password_hash,
                                                   role: deletedData.team.role,
                                                   created_at: deletedData.team.created_at
@@ -1290,6 +1413,88 @@ export default function TeamsPage() {
               ) : (
                 'Save Changes'
               )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Master Password Dialog */}
+      <Dialog open={showPasswordDialog} onOpenChange={setShowPasswordDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Lock className="h-5 w-5" />
+              Enter Master Password
+            </DialogTitle>
+            <DialogDescription>
+              Enter the organizer master password to view all team passwords
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="masterPassword">Master Password</Label>
+              <Input
+                id="masterPassword"
+                type="password"
+                value={masterPassword}
+                onChange={(e) => setMasterPassword(e.target.value)}
+                placeholder="Enter master password"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    if (masterPassword === MASTER_PASSWORD) {
+                      setIsPasswordUnlocked(true);
+                      setShowPasswordDialog(false);
+                      setMasterPassword('');
+                      const storedCount = Object.keys(teamPasswords).length;
+                      toast({
+                        title: 'Success',
+                        description: `Passwords unlocked! ${storedCount} team password(s) available to view.`,
+                      });
+                    } else {
+                      toast({
+                        title: 'Error',
+                        description: 'Incorrect master password',
+                        variant: 'destructive',
+                      });
+                    }
+                  }
+                }}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button 
+              variant="outline" 
+              onClick={() => {
+                setShowPasswordDialog(false);
+                setMasterPassword('');
+              }}
+            >
+              Cancel
+            </Button>
+            <Button 
+              onClick={() => {
+                if (masterPassword === MASTER_PASSWORD) {
+                  setIsPasswordUnlocked(true);
+                  setShowPasswordDialog(false);
+                  setMasterPassword('');
+                  const storedCount = Object.keys(teamPasswords).length;
+                  console.log('Passwords unlocked. Stored passwords:', teamPasswords);
+                  console.log('Number of stored passwords:', storedCount);
+                  toast({
+                    title: 'Success',
+                    description: `Passwords unlocked! ${storedCount} team password(s) available to view.`,
+                  });
+                } else {
+                  toast({
+                    title: 'Error',
+                    description: 'Incorrect master password',
+                    variant: 'destructive',
+                  });
+                }
+              }}
+            >
+              Unlock
             </Button>
           </DialogFooter>
         </DialogContent>

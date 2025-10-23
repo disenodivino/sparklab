@@ -95,17 +95,17 @@ export default function MessagesPage() {
   const fetchData = async () => {
     setIsLoading(true);
     try {
-      // Find the organizer team
-      const { data: organizerData, error: organizerError } = await supabase
+      // Find the organizer team by role
+      const { data: organizerList, error: organizerError } = await supabase
         .from('teams')
         .select('id')
-        .eq('team_name', 'Organizer Team')
-        .single();
+        .eq('role', 'organizer')
+        .order('id', { ascending: true })
+        .limit(1);
 
       if (organizerError) throw organizerError;
-      
-      if (organizerData) {
-        setOrganizerTeamId(organizerData.id);
+      if (organizerList && organizerList.length > 0) {
+        setOrganizerTeamId(organizerList[0].id);
       }
 
       // Fetch all teams

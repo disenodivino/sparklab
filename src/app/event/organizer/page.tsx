@@ -14,7 +14,6 @@ interface Stats {
   messagesCount: number;
   unreadMessagesCount: number;
   submissionsCount: number;
-  pendingSubmissionsCount: number;
 }
 
 interface Activity {
@@ -139,6 +138,9 @@ export default function OrganizerDashboardPage() {
         mockActivities.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
         
         // Create stats object
+        // Get forms count (organizer-created submission forms)
+        const { count: formsCount } = await supabase.from('forms').select('*', { count: 'exact', head: true });
+
         const mockStats: Stats = {
           teamsCount: teamsCount || 0,
           participantsCount: participantsCount || 0,
@@ -146,8 +148,7 @@ export default function OrganizerDashboardPage() {
           nextCheckpointHours,
           messagesCount: messagesData?.length || 0,
           unreadMessagesCount: 0, // We don't track read status yet
-          submissionsCount: 2, // Mock data
-          pendingSubmissionsCount: 1 // Mock data
+          submissionsCount: formsCount || 0
         };
         
         // Update state with fetched data
@@ -246,7 +247,6 @@ export default function OrganizerDashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats?.submissionsCount || 0}</div>
-            <p className="text-xs text-muted-foreground">{stats?.pendingSubmissionsCount || 0} need review</p>
           </CardContent>
         </Card>
       </div>

@@ -8,23 +8,42 @@ import { toast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 
 // Countdown Timer Component
-function CountdownTimer({ deadline }: { deadline: string }) {
-  const [timeLeft, setTimeLeft] = useState({ hours: 0, minutes: 0, seconds: 0 });
+function CountdownTimer({ deadline, isNextDeadline }: { deadline: string; isNextDeadline?: boolean }) {
+  const [timeLeft, setTimeLeft] = useState<string>('');
+  const [colorClass, setColorClass] = useState<string>('text-primary');
 
   useEffect(() => {
     const calculateTimeLeft = () => {
       const now = new Date().getTime();
       const target = new Date(deadline).getTime();
-      const difference = target - now;
+      const diff = target - now;
 
-      if (difference > 0) {
-        const hours = Math.floor(difference / (1000 * 60 * 60));
-        const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
-        const seconds = Math.floor((difference % (1000 * 60)) / 1000);
-        
-        setTimeLeft({ hours, minutes, seconds });
+      if (diff <= 0) {
+        setTimeLeft('Overdue');
+        setColorClass('text-red-500');
+        return;
+      }
+
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+      // Color coding: green for next deadline, orange for other upcoming
+      if (isNextDeadline) {
+        setColorClass('text-green-500');
       } else {
-        setTimeLeft({ hours: 0, minutes: 0, seconds: 0 });
+        setColorClass('text-orange-500');
+      }
+
+      if (days > 0) {
+        setTimeLeft(`${days}d ${hours}h ${minutes}m`);
+      } else if (hours > 0) {
+        setTimeLeft(`${hours}h ${minutes}m ${seconds}s`);
+      } else if (minutes > 0) {
+        setTimeLeft(`${minutes}m ${seconds}s`);
+      } else {
+        setTimeLeft(`${seconds}s`);
       }
     };
 
@@ -32,13 +51,11 @@ function CountdownTimer({ deadline }: { deadline: string }) {
     const timer = setInterval(calculateTimeLeft, 1000);
 
     return () => clearInterval(timer);
-  }, [deadline]);
+  }, [deadline, isNextDeadline]);
 
   return (
-    <span className="font-mono text-lg font-bold">
-      {String(timeLeft.hours).padStart(2, '0')}:
-      {String(timeLeft.minutes).padStart(2, '0')}:
-      {String(timeLeft.seconds).padStart(2, '0')}
+    <span className={`${colorClass} font-semibold font-mono`}>
+      {timeLeft}
     </span>
   );
 }
@@ -56,6 +73,8 @@ interface Checkpoint {
 export default function CheckpointsPage() {
   const [checkpoints, setCheckpoints] = useState<Checkpoint[]>([]);
   const [loading, setLoading] = useState(true);
+  const [nextCheckpoint, setNextCheckpoint] = useState<Checkpoint | null>(null);
+  const [nextCheckpointId, setNextCheckpointId] = useState<number | null>(null);
 
   useEffect(() => {
     async function fetchData() {
@@ -92,6 +111,12 @@ export default function CheckpointsPage() {
         }) || [];
 
         setCheckpoints(processedCheckpoints);
+        
+        // Find the next upcoming checkpoint (not past, not today)
+        const nowTime = new Date().getTime();
+        const upcoming = processedCheckpoints.find(cp => !cp.isPast && new Date(cp.deadline).getTime() > nowTime);
+        setNextCheckpoint(upcoming || null);
+        setNextCheckpointId(upcoming?.id || null);
       } catch (error) {
         console.error('Error fetching checkpoints:', error);
         toast({
@@ -105,21 +130,44 @@ export default function CheckpointsPage() {
     }
 
     fetchData();
+
+    // Set up real-time subscription for checkpoints updates
+    const checkpointsChannel = supabase
+      .channel('checkpoints_page')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'checkpoints' },
+        () => {
+          fetchData();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(checkpointsChannel);
+    };
   }, []);
 
+  const getDeadlineStatus = (checkpoint: Checkpoint) => {
+    if (checkpoint.isPast) {
+      return { label: 'Overdue', color: 'red' };
+    } else if (checkpoint.id === nextCheckpointId) {
+      return { label: 'Next Deadline', color: 'green' };
+    } else {
+      return { label: 'Upcoming', color: 'orange' };
+    }
+  };
+
   const getStatusColor = (checkpoint: Checkpoint) => {
-    if (checkpoint.isPast) return 'text-gray-400';
-    if (checkpoint.isToday) return 'text-orange-500';
-    if (checkpoint.daysRemaining <= 3) return 'text-red-500';
-    if (checkpoint.daysRemaining <= 7) return 'text-yellow-500';
-    return 'text-green-500';
+    if (checkpoint.isPast) return 'text-red-500';
+    if (checkpoint.id === nextCheckpointId) return 'text-green-500';
+    return 'text-orange-500';
   };
 
   const getTimeRemainingText = (checkpoint: Checkpoint) => {
-    if (checkpoint.isPast) return 'Completed';
-    if (checkpoint.isToday) return 'Due Today';
-    if (checkpoint.daysRemaining === 1) return '1 day left';
-    return `${checkpoint.daysRemaining} days left`;
+    if (checkpoint.isPast) return 'Overdue';
+    if (checkpoint.id === nextCheckpointId) return 'Next Deadline';
+    return 'Upcoming';
   };
 
   if (loading) {
@@ -142,6 +190,41 @@ export default function CheckpointsPage() {
         <h1 className="text-3xl font-bold">Event Timeline</h1>
         <p className="text-muted-foreground mt-2">Track all checkpoints and deadlines</p>
       </div>
+
+      {/* Highlighted Next Checkpoint */}
+      {nextCheckpoint && (
+        <Card className="border-2 border-green-500 bg-green-500/5">
+          <CardHeader>
+            <div className="flex items-center gap-2">
+              <Clock className="h-5 w-5 text-green-500" />
+              <CardTitle className="text-lg text-green-500">Next Checkpoint</CardTitle>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              <div>
+                <h3 className="font-semibold text-xl">{nextCheckpoint.title}</h3>
+                {nextCheckpoint.description && (
+                  <p className="text-sm text-muted-foreground mt-1">{nextCheckpoint.description}</p>
+                )}
+              </div>
+              <div className="flex items-center gap-4 flex-wrap">
+                <div className="flex items-center gap-2">
+                  <Clock className="h-4 w-4 text-green-500" />
+                  <span className="text-sm font-medium">Time Remaining:</span>
+                  <CountdownTimer deadline={nextCheckpoint.deadline} isNextDeadline={true} />
+                </div>
+                <div className="flex items-center gap-2">
+                  <Calendar className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-sm text-muted-foreground">
+                    Due: {format(new Date(nextCheckpoint.deadline), 'EEEE, MMMM d, yyyy')}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {checkpoints.length === 0 ? (
         <Card>
@@ -166,13 +249,13 @@ export default function CheckpointsPage() {
                   <div className="absolute left-0 top-0 flex items-center justify-center">
                     <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
                       checkpoint.isPast 
-                        ? 'bg-gray-500/20 border-2 border-gray-400' 
-                        : checkpoint.isToday
-                        ? 'bg-orange-500/20 border-2 border-orange-500 animate-pulse'
-                        : 'bg-primary/20 border-2 border-primary'
+                        ? 'bg-red-500/20 border-2 border-red-500' 
+                        : checkpoint.id === nextCheckpointId
+                        ? 'bg-green-500/20 border-2 border-green-500 animate-pulse'
+                        : 'bg-orange-500/20 border-2 border-orange-500'
                     }`}>
                       {checkpoint.isPast ? (
-                        <CheckCircle2 className="h-5 w-5 text-gray-400" />
+                        <CheckCircle2 className="h-5 w-5 text-red-500" />
                       ) : (
                         <Circle className={`h-5 w-5 ${getStatusColor(checkpoint)}`} fill="currentColor" />
                       )}
@@ -181,9 +264,9 @@ export default function CheckpointsPage() {
 
                   {/* Content card */}
                   <Card className={`${
-                    checkpoint.isToday ? 'border-orange-500 border-2 shadow-lg' :
-                    checkpoint.isPast ? 'opacity-60' : 
-                    'border-primary/30'
+                    checkpoint.isPast ? 'opacity-60 border-red-500/30' :
+                    checkpoint.id === nextCheckpointId ? 'border-2 border-green-500/50' :
+                    'border-2 border-orange-500/50'
                   }`}>
                     <CardHeader>
                       <div className="flex items-start justify-between gap-4">
@@ -202,14 +285,10 @@ export default function CheckpointsPage() {
                         <div className={`
                           px-4 py-2 rounded-lg text-sm font-semibold whitespace-nowrap flex items-center gap-2
                           ${checkpoint.isPast 
-                            ? 'bg-gray-500/10 text-gray-500' 
-                            : checkpoint.isToday
-                            ? 'bg-orange-500/10 text-orange-500'
-                            : checkpoint.daysRemaining <= 3 
-                            ? 'bg-red-500/10 text-red-500' 
-                            : checkpoint.daysRemaining <= 7
-                            ? 'bg-yellow-500/10 text-yellow-500'
-                            : 'bg-green-500/10 text-green-500'}
+                            ? 'bg-red-500/10 text-red-500 border-red-500/20 border' 
+                            : checkpoint.id === nextCheckpointId
+                            ? 'bg-green-500/10 text-green-500 border-green-500/20 border'
+                            : 'bg-orange-500/10 text-orange-500 border-orange-500/20 border'}
                         `}>
                           <Clock className="h-4 w-4" />
                           {getTimeRemainingText(checkpoint)}
@@ -226,23 +305,12 @@ export default function CheckpointsPage() {
                           </span>
                         </div>
                         
-                        {!checkpoint.isPast && (
-                          <div className={`flex items-center gap-2 font-semibold ${getStatusColor(checkpoint)}`}>
-                            <Clock className="h-4 w-4" />
-                            {isNextCheckpoint ? (
-                              <CountdownTimer deadline={checkpoint.deadline} />
-                            ) : (
-                              <span>
-                                {checkpoint.isToday 
-                                  ? 'Due Today!' 
-                                  : checkpoint.daysRemaining < 0 
-                                  ? 'Overdue' 
-                                  : `${Math.abs(checkpoint.daysRemaining)} day${Math.abs(checkpoint.daysRemaining) !== 1 ? 's' : ''} remaining`
-                                }
-                              </span>
-                            )}
-                          </div>
-                        )}
+                        <div className={`flex items-center gap-2 text-sm ${getStatusColor(checkpoint)}`}>
+                          <Clock className="h-4 w-4" />
+                          <span className="font-medium">
+                            {format(new Date(checkpoint.deadline), 'h:mm a')}
+                          </span>
+                        </div>
                       </div>
                     </CardContent>
                   </Card>
