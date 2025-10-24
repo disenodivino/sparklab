@@ -23,6 +23,7 @@ interface Team {
   id: number;
   team_name: string;
   problem_id: number | null;
+  problem_statements?: ProblemStatement | null;
 }
 
 export default function ProblemStatementsPage() {
@@ -45,15 +46,38 @@ export default function ProblemStatementsPage() {
 
   async function fetchData(teamId: number) {
     try {
-      // Fetch team's current problem statement
+      // Fetch team's current problem statement (including the problem statement details via JOIN)
       const { data: teamData, error: teamError } = await supabase
         .from('teams')
-        .select('id, team_name, problem_id')
+        .select(`
+          id, 
+          team_name, 
+          problem_id,
+          problem_statements (
+            id,
+            title,
+            description,
+            max_teams,
+            active,
+            created_at
+          )
+        `)
         .eq('id', teamId)
         .single();
 
       if (teamError) throw teamError;
-      setCurrentTeam(teamData);
+      
+      // Process the team data - problem_statements comes as array or null
+      const processedTeamData: Team = {
+        id: teamData.id,
+        team_name: teamData.team_name,
+        problem_id: teamData.problem_id,
+        problem_statements: Array.isArray(teamData.problem_statements) 
+          ? teamData.problem_statements[0] || null 
+          : teamData.problem_statements
+      };
+      
+      setCurrentTeam(processedTeamData);
 
       // Fetch all active problem statements
       const { data: problemsData, error: problemsError } = await supabase
@@ -91,7 +115,31 @@ export default function ProblemStatementsPage() {
         })
       );
 
-      setProblemStatements(problemsWithCounts);
+      // If team has selected a problem, include it in the list (even if inactive)
+      let allProblems = problemsWithCounts;
+      if (processedTeamData.problem_id && processedTeamData.problem_statements) {
+        const selectedProblem = processedTeamData.problem_statements;
+        const isInActiveList = problemsWithCounts.some(p => p.id === selectedProblem.id);
+        
+        if (!isInActiveList) {
+          // Get team count for the selected problem
+          const { count } = await supabase
+            .from('teams')
+            .select('*', { count: 'exact', head: true })
+            .eq('problem_id', selectedProblem.id)
+            .is('role', null);
+
+          allProblems = [
+            {
+              ...selectedProblem,
+              team_count: count || 0
+            },
+            ...problemsWithCounts
+          ];
+        }
+      }
+
+      setProblemStatements(allProblems);
     } catch (error) {
       console.error('Error fetching data:', error);
       toast({
@@ -240,10 +288,6 @@ export default function ProblemStatementsPage() {
           <CardContent>
             <h3 className="font-semibold text-xl mb-2">{currentProblem.title}</h3>
             <p className="text-muted-foreground whitespace-pre-wrap">{currentProblem.description}</p>
-            <div className="mt-4 flex items-center gap-2 text-sm text-muted-foreground">
-              <Users className="h-4 w-4" />
-              <span>Teams selected: {currentProblem.team_count} / {currentProblem.max_teams}</span>
-            </div>
           </CardContent>
         </Card>
       ) : (
