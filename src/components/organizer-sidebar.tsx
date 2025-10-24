@@ -10,7 +10,8 @@ import {
   Menu, 
   X, 
   Home,
-  Lightbulb
+  Lightbulb,
+  Trophy
 } from 'lucide-react';
 
 const navItems = [
@@ -43,6 +44,11 @@ const navItems = [
     name: 'Submissions',
     href: '/event/organizer/submissions',
     icon: <FileText className="w-5 h-5" />
+  },
+  {
+    name: 'Results',
+    href: '/event/organizer/results',
+    icon: <Trophy className="w-5 h-5" />
   }
 ];
 

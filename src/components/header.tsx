@@ -78,6 +78,12 @@ const Header = () => {
               Sponsors
             </a>
             <a
+              href="/results"
+              className="text-sm font-medium text-foreground/80 hover:text-primary transition-colors"
+            >
+              Results
+            </a>
+            <a
               href="/#contact"
               className="text-sm font-medium text-foreground/80 hover:text-primary transition-colors"
             >
@@ -157,6 +163,13 @@ const Header = () => {
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Sponsors
+              </a>
+              <a
+                href="/results"
+                className="text-base font-medium text-foreground hover:text-primary transition-colors py-3 px-2 rounded-lg hover:bg-white/10"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Results
               </a>
               <a
                 href="/#contact"
