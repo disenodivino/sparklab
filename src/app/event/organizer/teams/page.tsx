@@ -56,10 +56,9 @@ export default function TeamsPage() {
   
   // Undo states
   const [deletedTeam, setDeletedTeam] = useState<{
-    team: Team;
-    members: TeamMember[];
-    messages: any[];
-    submissions: any[];
+  team: Team;
+  members: TeamMember[];
+  messages: any[];
   } | null>(null);
   const [deletedParticipant, setDeletedParticipant] = useState<TeamMember | null>(null);
   
@@ -813,8 +812,8 @@ export default function TeamsPage() {
                                   const teamMembers = participants.filter(p => p.team_id === team.id);
                                   const memberCount = teamMembers.length;
                                   const confirmMessage = memberCount > 0 
-                                    ? `Are you sure you want to delete ${team.team_name}? This will also delete:\n- ${memberCount} team member(s)\n- All messages\n- All submissions`
-                                    : `Are you sure you want to delete ${team.team_name}? This will also delete all related messages and submissions.`;
+                                    ? `Are you sure you want to delete ${team.team_name}? This will also delete:\n- ${memberCount} team member(s)\n- All messages`
+                                    : `Are you sure you want to delete ${team.team_name}? This will also delete all related messages.`;
                                   
                                   if (window.confirm(confirmMessage)) {
                                     setIsSubmitting(true);
@@ -824,11 +823,6 @@ export default function TeamsPage() {
                                         .from('messages')
                                         .select('*')
                                         .or(`sender_team_id.eq.${team.id},receiver_id.eq.${team.id}`);
-                                      
-                                      const { data: relatedSubmissions } = await supabase
-                                        .from('submissions')
-                                        .select('*')
-                                        .eq('team_id', team.id);
                                       
                                       // Delete in order to avoid foreign key constraint violations:
                                       
@@ -841,17 +835,6 @@ export default function TeamsPage() {
                                       if (messagesError) {
                                         console.error('Error deleting messages:', messagesError);
                                         throw new Error(`Failed to delete messages: ${messagesError.message}`);
-                                      }
-                                      
-                                      // 2. Delete submissions for this team
-                                      const { error: submissionsError } = await supabase
-                                        .from('submissions')
-                                        .delete()
-                                        .eq('team_id', team.id);
-                                      
-                                      if (submissionsError) {
-                                        console.error('Error deleting submissions:', submissionsError);
-                                        throw new Error(`Failed to delete submissions: ${submissionsError.message}`);
                                       }
                                       
                                       // 3. Delete users (team members) associated with this team
@@ -882,8 +865,7 @@ export default function TeamsPage() {
                                       const deletedData = {
                                         team: team,
                                         members: teamMembers,
-                                        messages: relatedMessages || [],
-                                        submissions: relatedSubmissions || []
+                                        messages: relatedMessages || []
                                       };
                                       
                                       setDeletedTeam(deletedData);
@@ -963,23 +945,7 @@ export default function TeamsPage() {
                                                   }
                                                 }
                                                 
-                                                // Restore submissions with new team_id
-                                                if (deletedData.submissions.length > 0) {
-                                                  const submissionsToInsert = deletedData.submissions.map(s => ({
-                                                    team_id: newTeamId,
-                                                    checkpoint_id: s.checkpoint_id,
-                                                    file_url: s.file_url,
-                                                    submitted_at: s.submitted_at
-                                                  }));
-                                                  
-                                                  const { error: submissionsError } = await supabase
-                                                    .from('submissions')
-                                                    .insert(submissionsToInsert);
-                                                    
-                                                  if (submissionsError) {
-                                                    console.error('Error restoring submissions:', submissionsError);
-                                                  }
-                                                }
+                                                // ...existing code...
                                                 
                                                 // Refresh data
                                                 await fetchData(true);
