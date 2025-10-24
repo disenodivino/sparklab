@@ -182,6 +182,11 @@ export default function TeamDashboardPage() {
     const diffHours = Math.ceil(diffMs / (1000 * 60 * 60));
     const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
 
+    // Return "Overdue" for past deadlines
+    if (diffMs < 0) {
+      return 'Overdue';
+    }
+
     if (diffHours < 1) {
       return 'Due soon';
     } else if (diffHours < 24) {
@@ -283,20 +288,24 @@ export default function TeamDashboardPage() {
                   </div>
                 ) : (
                   <div className="space-y-4">
-                    {checkpoints.slice(0, 3).map((checkpoint) => (
-                      <div key={checkpoint.id} className="flex items-start justify-between p-4 border border-secondary/30 rounded-lg hover:bg-secondary/5 transition-colors">
-                        <div className="flex-1">
-                          <h4 className="font-medium">{checkpoint.title}</h4>
-                          <div className="flex items-center gap-2 mt-2 text-sm text-muted-foreground">
-                            <Clock className="h-4 w-4" />
-                            <span>Due: {format(new Date(checkpoint.deadline), 'M/d/yyyy')}</span>
+                    {checkpoints.slice(0, 3).map((checkpoint) => {
+                      const timeRemaining = getTimeRemaining(checkpoint.deadline);
+                      const isOverdue = timeRemaining === 'Overdue';
+                      return (
+                        <div key={checkpoint.id} className="flex items-start justify-between p-4 border border-secondary/30 rounded-lg hover:bg-secondary/5 transition-colors">
+                          <div className="flex-1">
+                            <h4 className="font-medium">{checkpoint.title}</h4>
+                            <div className="flex items-center gap-2 mt-2 text-sm text-muted-foreground">
+                              <Clock className="h-4 w-4" />
+                              <span>Due: {format(new Date(checkpoint.deadline), 'M/d/yyyy')}</span>
+                            </div>
                           </div>
+                          <Badge variant={isOverdue ? 'destructive' : 'outline'}>
+                            {timeRemaining}
+                          </Badge>
                         </div>
-                        <Badge variant="outline">
-                          {getTimeRemaining(checkpoint.deadline)}
-                        </Badge>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 )}
               </CardContent>

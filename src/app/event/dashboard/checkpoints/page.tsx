@@ -89,14 +89,21 @@ export default function CheckpointsPage() {
 
         // Process checkpoints
         const now = new Date();
-        now.setHours(0, 0, 0, 0); // Reset to start of day for accurate comparison
+        const nowTime = now.getTime();
         
         const processedCheckpoints = checkpointsData?.map(checkpoint => {
           const deadlineDate = new Date(checkpoint.deadline);
-          deadlineDate.setHours(0, 0, 0, 0);
+          const deadlineTime = deadlineDate.getTime();
           
-          const daysRemaining = Math.ceil((deadlineDate.getTime() - now.getTime()) / (1000 * 3600 * 24));
-          const isPast = daysRemaining < 0;
+          // Check if deadline has passed (using actual time, not just date)
+          const isPast = deadlineTime < nowTime;
+          
+          // For display purposes, calculate days remaining using start of day
+          const nowStartOfDay = new Date(now);
+          nowStartOfDay.setHours(0, 0, 0, 0);
+          const deadlineStartOfDay = new Date(deadlineDate);
+          deadlineStartOfDay.setHours(0, 0, 0, 0);
+          const daysRemaining = Math.ceil((deadlineStartOfDay.getTime() - nowStartOfDay.getTime()) / (1000 * 3600 * 24));
           const isToday = daysRemaining === 0;
 
           return {
@@ -113,7 +120,6 @@ export default function CheckpointsPage() {
         setCheckpoints(processedCheckpoints);
         
         // Find the next upcoming checkpoint (not past, not today)
-        const nowTime = new Date().getTime();
         const upcoming = processedCheckpoints.find(cp => !cp.isPast && new Date(cp.deadline).getTime() > nowTime);
         setNextCheckpoint(upcoming || null);
         setNextCheckpointId(upcoming?.id || null);
